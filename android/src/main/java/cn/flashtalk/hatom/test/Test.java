@@ -1,4 +1,4 @@
-package cn.flashtalk.hatom;
+package cn.flashtalk.hatom.test;
 
 public class Test {
     public String test = "123";

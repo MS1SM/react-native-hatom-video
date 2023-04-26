@@ -1,5 +1,5 @@
 
-package cn.flashtalk.hatom;
+package cn.flashtalk.hatom.test;
 
 import android.util.Log;
 
@@ -7,9 +7,6 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
-import cn.flashtalk.hatom.Test;
-
-import java.util.Map;
 
 public class RNHatomVideoModule extends ReactContextBaseJavaModule {
   private static final String TAG = "RNHatomVideoModule";

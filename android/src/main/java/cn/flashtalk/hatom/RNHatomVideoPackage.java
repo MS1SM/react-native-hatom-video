@@ -11,10 +11,14 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
 import com.facebook.react.bridge.JavaScriptModule;
 
+import cn.flashtalk.hatom.test.RNHatomVideoModule;
+
 public class RNHatomVideoPackage implements ReactPackage {
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-      return Arrays.<NativeModule>asList(new RNHatomVideoModule(reactContext));
+      return Arrays.<NativeModule>asList(
+              new RNHatomVideoModule(reactContext)
+      );
     }
 
     // Deprecated from RN 0.47
@@ -24,6 +28,8 @@ public class RNHatomVideoPackage implements ReactPackage {
 
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-      return Arrays.<ViewManager>asList(new RNHatomVideoManager());
+      return Arrays.<ViewManager>asList(
+              new cn.flashtalk.hatom.hik_2_1_0.RNHikVideoManager()
+      );
     }
 }

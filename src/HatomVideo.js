@@ -1,58 +1,52 @@
 import React, { Component } from 'react';
 import {
     requireNativeComponent,
-    NativeModules,
-    View,
     ViewPropTypes
 } from 'react-native';
 import PropTypes from 'prop-types';
+import { SdkVersionEnum } from './common';
 
-const CLASS_NAME = 'HatomVideo';
+const TAG = 'HatomVideo';
+
+export const SdkVersion = new SdkVersionEnum()
 
 export default class HatomVideo extends Component {
 
     constructor(props) {
         super(props)
-        this.HatomVideoModule = NativeModules.RNHatomVideo
+        // sdk 类型版本
+        this.sdkVersion = props.sdkVersion
     }
 
+    // 获取组件进行保存
     _assignRoot = (component) => {
         this._root = component
     }
 
+    // 调用这个组件的setNativeProps方法，设置android原生定义个props
     setNativeProps(nativeProps) {
-        //调用这个组件的setNativeProps方法，设置android原生定义个props
         this._root.setNativeProps(nativeProps);
     };
 
     componentDidMount() {
-        // 对象持有修改测试
-        this.HatomVideoModule.initTest(
-            "ms1007", 
-            (test) => {
-                console.log(CLASS_NAME + " initTest: " + test)
-
-                this.HatomVideoModule.changeTest("lb1996")
-                console.log(CLASS_NAME + " changeTest: " + test)
-            }
-        )
-    }
-
-    setDataSource(path) {
-        console.log(CLASS_NAME + " setDataSource: " + path)
-        this.HatomVideoModule.setDataSource(path)
     }
 
     test(path) {
-        console.log(CLASS_NAME + " test: " + path)
+        console.log(TAG + " test: " + path)
         this.setNativeProps({test: path})
     }
 
     render() {
+        // 参数复制
         const nativeProps = Object.assign({}, this.props);
         Object.assign(nativeProps, {});
+
+        // 获取RN播放器
+        const RnHatonVideo = getRnHatonVideo(this.sdkVersion)
+
+        // 页面
         return (
-          <RNHatomVideo
+          <RnHatonVideo
             ref={this._assignRoot}
             {...nativeProps}
             />
@@ -61,6 +55,9 @@ export default class HatomVideo extends Component {
 }
 
 HatomVideo.propTypes = {
+    // sdk 版本，应从 SdkVersion 枚举中获取
+    sdkVersion: PropTypes.oneOf(SdkVersion.enums),
+    // 继承页面
     scaleX: PropTypes.number,
     scaleY: PropTypes.number,
     translateX: PropTypes.number,
@@ -69,4 +66,7 @@ HatomVideo.propTypes = {
     ...ViewPropTypes
 }
 
-const RNHatomVideo = requireNativeComponent('RNHatomVideoView', HatomVideo)
+const getRnHatonVideo = (sdkVersion) => {
+    console.info(TAG, sdkVersion)
+    return requireNativeComponent(sdkVersion, HatomVideo)
+}
