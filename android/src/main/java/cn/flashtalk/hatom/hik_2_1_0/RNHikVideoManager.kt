@@ -1,9 +1,12 @@
 package cn.flashtalk.hatom.hik_2_1_0
 
-import com.facebook.react.uimanager.SimpleViewManager
+import cn.flashtalk.hatom.base.RNBaseVideoManager
 import com.facebook.react.uimanager.ThemedReactContext
 
-class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
+/**
+ * 支持海康 SDK V2.1.0
+ */
+class RNHikVideoManager : RNBaseVideoManager<HikVideoView>() {
     override fun getName(): String {
         return NAME
     }

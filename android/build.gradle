@@ -1,5 +1,6 @@
 
 buildscript {
+    apply from: 'versions-basic.gradle'
     ext {
         kotlin_version = '1.5.30'
     }

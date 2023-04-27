@@ -1,0 +1,17 @@
+/**
+ * Shared file between builds so that they can all use the same dependencies and
+ * maven repositories.
+ **/
+def build_versions = [:]
+build_versions.min_sdk = 16
+build_versions.target_sdk = 29
+ext.build_versions = build_versions
+
+
+def addRepos(RepositoryHandler handler) {
+  
+    handler.google()
+    handler.jcenter()
+}
+
+ext.addRepos = this.&addRepos
