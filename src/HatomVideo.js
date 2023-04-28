@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import {
     requireNativeComponent,
-    ViewPropTypes
+    ViewPropTypes,
+    NativeModules
 } from 'react-native';
 import PropTypes from 'prop-types';
 import { SdkVersionEnum } from './common';
@@ -18,17 +19,22 @@ export default class HatomVideo extends Component {
         this.sdkVersion = props.sdkVersion
     }
 
+    componentDidMount() {
+    }
+
     // 获取组件进行保存
     _assignRoot = (component) => {
         this._root = component
     }
 
-    // 调用这个组件的setNativeProps方法，设置android原生定义个props
+    // 调用这个组件的setNativeProps方法
     setNativeProps(nativeProps) {
         this._root.setNativeProps(nativeProps);
     };
 
-    componentDidMount() {
+    // 初始化SDK
+    _initSdk(appKey, pringLog) {
+        NativeModules.RNHatomVideo.initSdk(this.sdkVersion, appKey, pringLog)
     }
 
     test(path) {

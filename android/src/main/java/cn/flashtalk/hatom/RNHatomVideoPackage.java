@@ -11,7 +11,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
 import com.facebook.react.bridge.JavaScriptModule;
 
-import cn.flashtalk.hatom.test.RNHatomVideoModule;
+import cn.flashtalk.hatom.module.RNHatomVideoModule;
 
 public class RNHatomVideoPackage implements ReactPackage {
     @Override
@@ -28,8 +28,8 @@ public class RNHatomVideoPackage implements ReactPackage {
 
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-      return Arrays.<ViewManager>asList(
-              new cn.flashtalk.hatom.hik_2_1_0.RNHikVideoManager()
-      );
+        return Arrays.<ViewManager>asList(
+                new cn.flashtalk.hatom.hik_2_1_0.RNHikVideoManager()
+        );
     }
 }

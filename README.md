@@ -28,10 +28,15 @@
   	```
   	include ':react-native-hatom-video'
   	project(':react-native-hatom-video').projectDir = new File(rootProject.projectDir, 	'../node_modules/react-native-hatom-video/android')
+	
+	include ':hatom-video-player-2_1_0_nm'
+	project(':hatom-video-player-2_1_0_nm').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-hatom-video/android/hatom-video-player-2_1_0_nm')
   	```
+	hatom-video-player-2_1_0_nm 为需要用到的所有sdk
+
 3. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
   	```
-      compile project(':react-native-hatom-video')
+      implementation project(':react-native-hatom-video')
   	```
 
 
