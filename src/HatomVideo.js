@@ -89,7 +89,27 @@ HatomVideo.propTypes = {
     ...ViewPropTypes
 }
 
+// 存储所有已经注册的组件，避免重复注册问题
+let RnHatonVideoList = []
+
 const getRnHatonVideo = (sdkVersion) => {
     console.info(TAG, sdkVersion)
-    return requireNativeComponent(sdkVersion, HatomVideo)
+    
+    // 寻找已注册组件
+    for (let i=0; i<RnHatonVideoList.length; i++) {
+        let item = RnHatonVideoList[i]
+        if (item.version == sdkVersion) {
+            console.log(TAG, "已注册")
+            return item.video
+        }
+    }
+
+    let video = requireNativeComponent(sdkVersion, HatomVideo)
+
+    // 尚未注册，需要注册并添加
+    RnHatonVideoList.push({
+        version: sdkVersion,
+        video: video
+    })
+    return video
 }
