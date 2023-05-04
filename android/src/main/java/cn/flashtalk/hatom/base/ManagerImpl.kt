@@ -47,5 +47,5 @@ interface ManagerImpl<T: VideoImpl> {
      * 开始播放
      * 开启视频预览或回放
      */
-    fun start(videoImpl: T, phString: String)
+    fun start(videoImpl: T, phString: String?)
 }

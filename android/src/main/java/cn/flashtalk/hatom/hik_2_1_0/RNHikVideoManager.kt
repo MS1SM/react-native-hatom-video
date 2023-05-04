@@ -67,12 +67,14 @@ class RNHikVideoManager : RNBaseVideoManager<HikVideoView>() {
     @ReactProp(name = "setDataSource")
     override fun setDataSource(videoImpl: HikVideoView, configMap: ReadableMap) {
         // 数据转换
-        val headers = configMap.getMap("headers")
         val headerMap = HashMap<String, String>()
-        headers?.let { header ->
-            header.getString("TOKEN")?.         let { headerMap.put("TOKEN", it) }
-            header.getString("START_TIME")?.    let { headerMap.put("START_TIME", it) }
-            header.getString("END_TIME")?.      let { headerMap.put("END_TIME", it) }
+        if (configMap.hasKey("headers")) {
+            val headers = configMap.getMap("headers")
+            headers?.let { header ->
+                header.getString("TOKEN")?.         let { headerMap.put("TOKEN", it) }
+                header.getString("START_TIME")?.    let { headerMap.put("START_TIME", it) }
+                header.getString("END_TIME")?.      let { headerMap.put("END_TIME", it) }
+            }
         }
 
         // 设置

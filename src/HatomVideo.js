@@ -37,6 +37,23 @@ export default class HatomVideo extends Component {
         NativeModules.RNHatomVideo.initSdk(this.sdkVersion, appKey, pringLog)
     }
 
+    // 初始化播放器
+    _initPlayer() {
+        this.setNativeProps({initPlayer: "phString"})
+    }
+
+    // 设置播放参数
+    _setDataSource(path) {
+        this.setNativeProps({setDataSource: {
+            path: path
+        }})
+    }
+
+    // 开始播放
+    _start() {
+        this.setNativeProps({startPlay: "phString"})
+    }
+
     test(path) {
         console.log(TAG + " test: " + path)
         this.setNativeProps({test: path})

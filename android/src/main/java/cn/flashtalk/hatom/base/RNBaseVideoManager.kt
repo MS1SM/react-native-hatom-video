@@ -61,9 +61,10 @@ abstract class RNBaseVideoManager<T: BaseVideoView> : SimpleViewManager<T>(), Ma
     /**
      * 开始播放
      * 开启视频预览或回放
+     * name = "start" 将产生冲突异常，name 改为 startPlay
      */
-    @ReactProp(name = "start")
-    override fun start(videoImpl: T, phString: String) {
+    @ReactProp(name = "startPlay")
+    override fun start(videoImpl: T, phString: String?) {
         videoImpl.start()
     }
 }
