@@ -21,6 +21,10 @@
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRNHatomVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNHatomVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		4E8DF13A2A05ECFB0002AF21 /* RNHatomVideo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RNHatomVideo-Bridging-Header.h"; sourceTree = "<group>"; };
+		4E9C8B392A08DB2C005670D3 /* RNHatomVideoPackage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNHatomVideoPackage.m; sourceTree = "<group>"; };
+		4E9C8B3A2A08DD0E005670D3 /* RNPrimordialVideo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNPrimordialVideo.swift; sourceTree = "<group>"; };
+		4E9C8B3D2A09EE59005670D3 /* RNHatomVideoModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNHatomVideoModule.swift; sourceTree = "<group>"; };
+		4E9C8B3F2A0A2BB5005670D3 /* MsTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MsTextView.swift; sourceTree = "<group>"; };
 		4EAE66182A05FA8100EA5E7E /* RNPrimordialVideoManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNPrimordialVideoManager.m; sourceTree = "<group>"; };
 		4EAE661A2A06222200EA5E7E /* RNPrimordialVideoManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNPrimordialVideoManager.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -47,6 +51,10 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				4E9C8B3F2A0A2BB5005670D3 /* MsTextView.swift */,
+				4E9C8B3D2A09EE59005670D3 /* RNHatomVideoModule.swift */,
+				4E9C8B3A2A08DD0E005670D3 /* RNPrimordialVideo.swift */,
+				4E9C8B392A08DB2C005670D3 /* RNHatomVideoPackage.m */,
 				4EAE661A2A06222200EA5E7E /* RNPrimordialVideoManager.h */,
 				4EAE66182A05FA8100EA5E7E /* RNPrimordialVideoManager.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
@@ -203,6 +211,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				DEFINES_MODULE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
@@ -225,6 +234,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				DEFINES_MODULE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,

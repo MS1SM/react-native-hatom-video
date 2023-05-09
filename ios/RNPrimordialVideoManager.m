@@ -13,7 +13,7 @@
 
 @implementation RNPrimordialVideoManager
 
-RCT_EXPORT_MODULE(PrimordialVideo);
+RCT_EXPORT_MODULE(HikVideo_V2.1.0);
 
 - (UIView *)view
 {

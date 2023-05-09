@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.author             = { "ms" => "2623237650@qq.com" }
   s.platform     = :ios, "7.0"
   s.source       = { :git => "https://github.com/MS1SM/react-native-hatom-video.git", :tag => "master" }
-  s.source_files  = "ios/**/*.{h,m}"
+  s.source_files  = "ios/**/*.{h,m,swift}"
   s.requires_arc = true
 
   s.dependency "React"
