@@ -12,7 +12,7 @@ import com.hikvision.hatomplayer.PlayConfig
  */
 class RNHikVideoManager : RNBaseVideoManager<HikVideoView>() {
     companion object {
-        const val NAME = "HikVideo_V2.1.0"
+        const val NAME = "HikVideo_V2_1_0"
         private const val TAG = "$NAME RNHikVideoManager"
     }
 

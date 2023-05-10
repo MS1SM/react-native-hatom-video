@@ -8,11 +8,12 @@
 
 import Foundation
 
-@objc(PrimordialVideo)
-class RNPrimordialVideo: RCTViewManager {
+/**
+ * 支持原生播放器
+ */
+@objc(HikVideo_V2_1_0)
+class RNHikVideoManager: RCTViewManager {
     override func view() -> UIView! {
-        var textView = MsTextView()
-        textView.text = "9897"
-        return textView
+        return HikVideoView()
     }
 }

@@ -6,6 +6,12 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		4E9C8B482A0B2ECB005670D3 /* VideoImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9C8B472A0B2ECB005670D3 /* VideoImpl.swift */; };
+		4E9C8B4A2A0B786D005670D3 /* HikVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9C8B492A0B786D005670D3 /* HikVideoView.swift */; };
+		4E9C8B4C2A0B7885005670D3 /* RNHikVideoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9C8B4B2A0B7885005670D3 /* RNHikVideoManager.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		58B511D91A9E6C8500147676 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -22,11 +28,12 @@
 		134814201AA4EA6300B7C361 /* libRNHatomVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNHatomVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		4E8DF13A2A05ECFB0002AF21 /* RNHatomVideo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RNHatomVideo-Bridging-Header.h"; sourceTree = "<group>"; };
 		4E9C8B392A08DB2C005670D3 /* RNHatomVideoPackage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNHatomVideoPackage.m; sourceTree = "<group>"; };
-		4E9C8B3A2A08DD0E005670D3 /* RNPrimordialVideo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNPrimordialVideo.swift; sourceTree = "<group>"; };
+		4E9C8B3A2A08DD0E005670D3 /* RNPrimordialVideoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNPrimordialVideoManager.swift; sourceTree = "<group>"; };
 		4E9C8B3D2A09EE59005670D3 /* RNHatomVideoModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNHatomVideoModule.swift; sourceTree = "<group>"; };
-		4E9C8B3F2A0A2BB5005670D3 /* MsTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MsTextView.swift; sourceTree = "<group>"; };
-		4EAE66182A05FA8100EA5E7E /* RNPrimordialVideoManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNPrimordialVideoManager.m; sourceTree = "<group>"; };
-		4EAE661A2A06222200EA5E7E /* RNPrimordialVideoManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNPrimordialVideoManager.h; sourceTree = "<group>"; };
+		4E9C8B3F2A0A2BB5005670D3 /* PrimordialVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimordialVideoView.swift; sourceTree = "<group>"; };
+		4E9C8B472A0B2ECB005670D3 /* VideoImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoImpl.swift; sourceTree = "<group>"; };
+		4E9C8B492A0B786D005670D3 /* HikVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HikVideoView.swift; sourceTree = "<group>"; };
+		4E9C8B4B2A0B7885005670D3 /* RNHikVideoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNHikVideoManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,15 +55,48 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		4E9C8B402A0B2BD8005670D3 /* base */ = {
+			isa = PBXGroup;
+			children = (
+				4E9C8B472A0B2ECB005670D3 /* VideoImpl.swift */,
+			);
+			path = base;
+			sourceTree = "<group>";
+		};
+		4E9C8B412A0B2BE6005670D3 /* hik_2_1_0 */ = {
+			isa = PBXGroup;
+			children = (
+				4E9C8B492A0B786D005670D3 /* HikVideoView.swift */,
+				4E9C8B4B2A0B7885005670D3 /* RNHikVideoManager.swift */,
+			);
+			path = hik_2_1_0;
+			sourceTree = "<group>";
+		};
+		4E9C8B422A0B2BF6005670D3 /* module */ = {
+			isa = PBXGroup;
+			children = (
+				4E9C8B3D2A09EE59005670D3 /* RNHatomVideoModule.swift */,
+			);
+			path = module;
+			sourceTree = "<group>";
+		};
+		4E9C8B432A0B2BFF005670D3 /* primordial */ = {
+			isa = PBXGroup;
+			children = (
+				4E9C8B3F2A0A2BB5005670D3 /* PrimordialVideoView.swift */,
+				4E9C8B3A2A08DD0E005670D3 /* RNPrimordialVideoManager.swift */,
+			);
+			path = primordial;
+			sourceTree = "<group>";
+		};
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				4E9C8B3F2A0A2BB5005670D3 /* MsTextView.swift */,
-				4E9C8B3D2A09EE59005670D3 /* RNHatomVideoModule.swift */,
-				4E9C8B3A2A08DD0E005670D3 /* RNPrimordialVideo.swift */,
+				4E9C8B432A0B2BFF005670D3 /* primordial */,
+				4E9C8B422A0B2BF6005670D3 /* module */,
+				4E9C8B412A0B2BE6005670D3 /* hik_2_1_0 */,
+				4E9C8B402A0B2BD8005670D3 /* base */,
 				4E9C8B392A08DB2C005670D3 /* RNHatomVideoPackage.m */,
-				4EAE661A2A06222200EA5E7E /* RNPrimordialVideoManager.h */,
-				4EAE66182A05FA8100EA5E7E /* RNPrimordialVideoManager.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
 				4E8DF13A2A05ECFB0002AF21 /* RNHatomVideo-Bridging-Header.h */,
 			);
@@ -120,6 +160,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4E9C8B4C2A0B7885005670D3 /* RNHikVideoManager.swift in Sources */,
+				4E9C8B482A0B2ECB005670D3 /* VideoImpl.swift in Sources */,
+				4E9C8B4A2A0B786D005670D3 /* HikVideoView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -9,8 +9,10 @@ import Foundation
 
 @objc(RNHatomVideo)
 class RNHatomVideoModule: NSObject {
+    let TAG = "RNHatomVideoModule"
+    
     @objc(initSdk:::)
     func initSdk(sdkVsrsion: String, appKey: String, pringLog: Bool) {
-        print("RNHatomVideoModule", pringLog)
+        print(TAG, sdkVsrsion, appKey, pringLog)
     }
 }
