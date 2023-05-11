@@ -8,13 +8,20 @@
 
 import Foundation
 import UIKit
+import AVKit
 
 /**
  使用原生播放器的控件
  */
+@available(iOS 8.0, *)
 @objc(PrimordialVideoView)
-class PrimordialVideoView: UITextView, VideoImpl {
+class PrimordialVideoView: UIView, VideoImpl {
     let TAG = "PrimordialVideoView"
+    
+    lazy var playerVc: AVPlayerViewController = {
+        let playerVc = AVPlayerViewController()
+        return playerVc
+    }()
     
     // 初始化SDK
     @objc var initSdk: NSDictionary? {
@@ -39,13 +46,14 @@ class PrimordialVideoView: UITextView, VideoImpl {
         didSet {
             print(TAG, "setDataSource", setDataSource!)
             let sourceDic = setDataSource as! Dictionary<String, Any>
-            text = sourceDic["path"] as? String
+            _setDataSource(path: (sourceDic["path"] as? String)!)
         }
     }
     // 开始播放，"start" 将产生冲突异常，改为 startPlay
     @objc var startPlay: NSString? {
         didSet {
             print(TAG, "startPlay", startPlay!)
+            _start()
         }
     }
     
@@ -73,7 +81,11 @@ class PrimordialVideoView: UITextView, VideoImpl {
     /// 设置视频播放参数
     /// - Parameter path: 播放url
     func _setDataSource(path: String) {
-        
+        print(TAG, "_setDataSource", path)
+        playerVc.player = AVPlayer(url: URL(string: path)!)
+        addSubview(playerVc.view)
+        playerVc.videoGravity = .resizeAspectFill
+        playerVc.view.frame = self.bounds
     }
 
     /**
@@ -81,6 +93,7 @@ class PrimordialVideoView: UITextView, VideoImpl {
      * 开启视频预览或回放
      */
     func _start() {
-
+        print(TAG, "_start")
+        playerVc.player?.play()
     }
 }

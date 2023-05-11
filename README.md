@@ -25,26 +25,34 @@
   - Add `import com.reactlibrary.RNHatomVideoPackage;` to the imports at the top of the file
   - Add `new RNHatomVideoPackage()` to the list returned by the `getPackages()` method
 2. Append the following lines to `android/settings.gradle`:
+
   	```
   	include ':react-native-hatom-video'
   	project(':react-native-hatom-video').projectDir = new File(rootProject.projectDir, 	'../node_modules/react-native-hatom-video/android')
-	
-	include ':hatom-video-player-2_1_0_nm'
-	project(':hatom-video-player-2_1_0_nm').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-hatom-video/android/hatom-video-player-2_1_0_nm')
+  	
+  	include ':hatom-video-player-2_1_0_nm'
+  	project(':hatom-video-player-2_1_0_nm').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-hatom-video/android/hatom-video-player-2_1_0_nm')
   	```
-	hatom-video-player-2_1_0_nm 为需要用到的所有sdk
+  	hatom-video-player-2_1_0_nm 为需要用到的所有sdk
 
 3. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
+
   	```
-      implementation project(':react-native-hatom-video')
+  	  implementation project(':react-native-hatom-video')
   	```
 
 
 ## Usage
 ```javascript
-import RNHatomVideo from 'react-native-hatom-video';
+import { HatomVideo, SdkVersion } from 'react-native-hatom-video';
 
-// TODO: What to do with the module?
-RNHatomVideo;
+render() {
+        return (
+          <HatomVideo
+            ref={(view) => this.hatomVideo = view}
+            style={{height:200, width: 500}}
+            sdkVersion={SdkVersion.PrimordialVideo}
+          ></HatomVideo>
+          );
+    }
 ```
-  

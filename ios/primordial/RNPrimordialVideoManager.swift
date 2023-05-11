@@ -11,6 +11,7 @@ import Foundation
 /**
  * 支持原生播放器
  */
+@available(iOS 8.0, *)
 @objc(PrimordialVideo)
 class RNPrimordialVideoManager: RCTViewManager {
     override func view() -> UIView! {
