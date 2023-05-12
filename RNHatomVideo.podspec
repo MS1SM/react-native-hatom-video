@@ -17,6 +17,10 @@ Pod::Spec.new do |s|
 
   s.dependency "React"
   #s.dependency "others"
+  
+  s.pod_target_xcconfig  = {
+      'FRAMEWORK_SEARCH_PATHS'                => '$(PROJECT_DIR)/../../node_modules/react-native-hatom-video/Frameworks/hatom-player-2_1_0',
+    }
 
 end
 

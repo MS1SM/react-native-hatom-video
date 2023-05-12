@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import hatomplayer_core
 
 @objc(RNHatomVideo)
 class RNHatomVideoModule: NSObject {
@@ -14,5 +15,6 @@ class RNHatomVideoModule: NSObject {
     @objc(initSdk:::)
     func initSdk(sdkVsrsion: String, appKey: String, pringLog: Bool) {
         print(TAG, sdkVsrsion, appKey, pringLog)
+        let _ = HatomPlayerSDK.init("", printLog: true)
     }
 }

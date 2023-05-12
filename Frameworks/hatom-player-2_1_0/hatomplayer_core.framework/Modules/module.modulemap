@@ -1,0 +1,6 @@
+framework module hatomplayer_core {
+    umbrella header "HatomplayerCore.h"
+
+    export *
+    module * { export * }
+}
