@@ -54,18 +54,15 @@ export default class HatomVideo extends Component {
         this.setNativeProps({startPlay: "phString"})
     }
 
-    test(path) {
-        console.log(TAG + " test: " + path)
-        this.setNativeProps({test: path})
-    }
-
     render() {
         // 参数复制
         const nativeProps = Object.assign({}, this.props);
-        Object.assign(nativeProps, {});
+        Object.assign(nativeProps, {
+            initSdkVersion: this.sdkVersion
+        });
 
         // 获取RN播放器
-        const RnHatonVideo = getRnHatonVideo(this.sdkVersion)
+        const RnHatonVideo = getRnHatonVideo("HikVideo")
 
         // 页面
         return (

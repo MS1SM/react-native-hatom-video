@@ -1,8 +1,7 @@
 package cn.flashtalk.hatom.module
 
 import android.util.Log
-import cn.flashtalk.hatom.hik_2_1_0.RNHikVideoManager
-import cn.flashtalk.hatom.primordial.RNPrimordialVideoManager
+import cn.flashtalk.hatom.base.SdkVersion
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
@@ -22,12 +21,12 @@ class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : Re
     @ReactMethod
     fun initSdk(sdkVersion: String, appKey: String?, printLog: Boolean) {
         when(sdkVersion) {
-            RNHikVideoManager.NAME -> {
+            SdkVersion.HikVideo_V2_1_0.name -> {
                 currentActivity?.application?.let { HatomPlayerSDK.init(it, appKey, printLog) }
             }
 
-            RNPrimordialVideoManager.NAME -> {
-                Log.d(TAG, "initSdk: ${RNPrimordialVideoManager.NAME}")
+            SdkVersion.PrimordialVideo.name -> {
+                Log.d(TAG, "initSdk: ${SdkVersion.PrimordialVideo.name}")
             }
 
             else -> {
