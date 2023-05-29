@@ -12,9 +12,9 @@ import Foundation
  * 支持原生播放器
  */
 @available(iOS 8.0, *)
-@objc(PrimordialVideo)
-class RNPrimordialVideoManager: RCTViewManager {
+@objc(HikVideo)
+class RNHikVideoManager: RCTViewManager {
     override func view() -> UIView! {
-        return PrimordialVideoView()
+        return HikVideoView()
     }
 }
