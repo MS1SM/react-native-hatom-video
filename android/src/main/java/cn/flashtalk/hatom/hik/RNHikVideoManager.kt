@@ -46,19 +46,67 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     }
 
     /**
+     * 初始化播放器
+     *
+     ***************************************************
+     * HikVideo
+     *
+     ***************************************************
+     * Primordial
+     *
+     ***************************************************
+     * Ezviz
+     *
+     * @param  configMap.deviceSerial     (String) 设备序列号
+     * @param  configMap.cameraNo         (int)    通道号
+     */
+    @ReactProp(name = "initPlayer")
+    fun initPlayer(hikVideoView: HikVideoView, configMap: ReadableMap?) {
+        when (hikVideoView.getSdkVersion()) {
+            SdkVersion.HikVideo_V2_1_0 -> {
+                hikVideoView.initPlayerHatom()
+            }
+
+            SdkVersion.PrimordialVideo -> {
+                hikVideoView.initPlayerPrimordial()
+            }
+
+            SdkVersion.EzvizVideo -> {
+                // 数据转换
+                configMap?.let {
+                    val deviceSerial    = it.getString   ("deviceSerial")
+                    val cameraNo        = it.getInt      ("cameraNo")
+                    // 未配置
+                    if (deviceSerial == null) {
+                        Log.e(TAG, "initPlayer: EzvizVideo 需配置正确的：deviceSerial 和 cameraNo")
+                        return
+                    }
+                    // 配置
+                    hikVideoView.initPlayerEzviz(deviceSerial, cameraNo)
+                }
+            }
+
+            SdkVersion.Unknown -> {
+                Log.e(TAG, "未 initSdkVersion")
+            }
+        }
+    }
+
+
+    /**
      * 设置视频配置
      * 设置视频配置。在开始播放前设置。
      *
-     * 海康 SDK V2.1.0
-     * 重写，不使用默认配置
+     ***************************************************
+     * HikVideo
      *
      * @Nullable PlayConfig.hardDecode  (Boolean)   是否使用硬解码，默认false
      * @Nullable PlayConfig.privateData (Boolean)   是否显示智能信息,默认false
      * @Nullable PlayConfig.timeout     (int)       取流超时时间，单位秒，默认20s
      * @Nullable PlayConfig.secretKey   (String)    解码秘钥。如果码流进行了加密，需要设置解码秘钥
      *
+     ***************************************************
      * Primordial
-     * 使用默认配置
      */
     @ReactProp(name = "setPlayConfig")
     fun setPlayConfig(hikVideoView: HikVideoView, configMap: ReadableMap?) {
@@ -80,7 +128,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
             }
             
             SdkVersion.Unknown -> {
-                Log.e(TAG, "setPlayConfig: 未 initSdkVersion")
+                Log.e(TAG, "未 initSdkVersion")
             }
         }
     }
@@ -89,14 +137,18 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
      * 设置视频播放参数
      * 设置视频参数，开启播放前设置。实时预览、录像回放开启播放时，需要用到的取流url及其他请求参数。
      *
-     * 重写，不使用默认参数
-     *
+     ***************************************************
+     * HikVideo
      * @param configMap.path    (String)                播放url
      * @param configMap.headers (ReadableNativeMap)     其他请求参数
      *
      * headers.TOKEN      (String)  用于headers中传递token的key
      * headers.START_TIME (String)  用于headers中传递回放开始时间的key
      * headers.END_TIME   (String)  用于headers中传递回放结束时间的key
+     *
+     ***************************************************
+     * Primordial
+     * @param configMap.path    (String)                播放文件名
      */
     @ReactProp(name = "setDataSource")
     fun setDataSource(hikVideoView: HikVideoView, configMap: ReadableMap) {
@@ -122,7 +174,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
             }
 
             SdkVersion.Unknown -> {
-                Log.e(TAG, "setDataSource: 未 initSdkVersion")
+                Log.e(TAG, "未 initSdkVersion")
             }
         }
     }
@@ -142,8 +194,12 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
                 hikVideoView.startPrimordial()
             }
 
+            SdkVersion.EzvizVideo -> {
+                hikVideoView.startRealEzviz()
+            }
+
             SdkVersion.Unknown -> {
-                Log.e(TAG, "start: 未 initSdkVersion")
+                Log.e(TAG, "未 initSdkVersion")
             }
         }
     }

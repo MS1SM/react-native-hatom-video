@@ -27,6 +27,13 @@ android {
         }
     }
 
+    packagingOptions {
+        exclude 'lib/arm64-v8a/libPlayCtrl.so'
+        exclude 'lib/arm64-v8a/libSystemTransform.so'
+
+        exclude 'lib/armeabi-v7a/libPlayCtrl.so'
+        exclude 'lib/armeabi-v7a/libSystemTransform.so'
+    }
 }
 
 dependencies {

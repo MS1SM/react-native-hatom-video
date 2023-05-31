@@ -73,10 +73,10 @@
   	include ':react-native-hatom-video'
   	project(':react-native-hatom-video').projectDir = new File(rootProject.projectDir, 	'../node_modules/react-native-hatom-video/android')
   	
-  	include ':hatom-video-player-2_1_0_nm'
-  	project(':hatom-video-player-2_1_0_nm').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-hatom-video/android/hatom-video-player-2_1_0_nm')
+  	include ':hatom-video-player-2_1_0_np'
+  	project(':hatom-video-player-2_1_0_np').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-hatom-video/android/hatom-video-player-2_1_0_np')
   	```
-  	hatom-video-player-2_1_0_nm 为需要用到的sdk
+  	hatom-video-player-2_1_0_np 为需要用到的sdk
 
 3. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
 
@@ -84,8 +84,23 @@
   	  implementation project(':react-native-hatom-video')
   	```
 
+4. 需要在应用的  `android/app/build.gradle` 加入如下代码，避免重复引入库
+
+```
+android {
+    packagingOptions {
+        pickFirst 'lib/arm64-v8a/libc++_shared.so'
+        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+    }
+}
+```
+
+
+
+
 
 ## Usage
+
 ```javascript
 import { HatomVideo, SdkVersion } from 'react-native-hatom-video';
 

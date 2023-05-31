@@ -6,6 +6,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.hikvision.hatomplayer.HatomPlayerSDK
+import com.videogo.openapi.EZOpenSDK
 
 class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule( reactContext) {
 
@@ -27,6 +28,15 @@ class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : Re
 
             SdkVersion.PrimordialVideo.name -> {
                 Log.d(TAG, "initSdk: ${SdkVersion.PrimordialVideo.name}")
+            }
+
+            SdkVersion.EzvizVideo.name -> {
+                // sdk日志开关，正式发布需要去掉
+                EZOpenSDK.showSDKLog(printLog)
+                // 设置是否支持P2P取流,详见api
+                EZOpenSDK.enableP2P(false)
+                // 初始化
+                currentActivity?.application?.let { EZOpenSDK.initLib(it, appKey) }
             }
 
             else -> {

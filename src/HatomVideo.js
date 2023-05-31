@@ -37,9 +37,20 @@ export default class HatomVideo extends Component {
         NativeModules.RNHatomVideo.initSdk(this.sdkVersion, appKey, pringLog)
     }
 
-    // 初始化播放器
-    _initPlayer() {
-        this.setNativeProps({initPlayer: "phString"})
+    /**
+     * 初始化播放器
+     * **************************************************
+     * HikVideo and Primordial
+     * configk 可为空对象{}
+     * 
+     * **************************************************
+     * Ezviz
+     * @param {object} config
+     * @param {string} config.deviceSerial  设备序列号
+     * @param {number} config.cameraNo      通道号
+     */
+    _initPlayer(config) {
+        this.setNativeProps(config)
     }
 
     // 设置播放参数

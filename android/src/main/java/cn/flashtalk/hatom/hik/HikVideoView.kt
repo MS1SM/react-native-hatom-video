@@ -3,12 +3,15 @@ package cn.flashtalk.hatom.hik
 import android.content.Context
 import android.content.res.AssetFileDescriptor
 import android.media.MediaPlayer
+import android.text.TextUtils
 import android.util.Log
 import android.view.SurfaceView
 import cn.flashtalk.hatom.base.SdkVersion
 import com.hikvision.hatomplayer.DefaultHatomPlayer
 import com.hikvision.hatomplayer.HatomPlayer
 import com.hikvision.hatomplayer.PlayConfig
+import com.videogo.openapi.EZOpenSDK
+import com.videogo.openapi.EZPlayer
 
 /**
  * 集成版 View
@@ -56,15 +59,6 @@ class HikVideoView(context: Context) : SurfaceView(context) {
     }
 
     /**
-     * 初始化SDK
-     * 文档要求：初始化方法必须在工程的自定义 Application 类的 onCreate() 方法中调用
-     * 实际测试不需要在 onCreate 中调用，但需要用到 Application 初始化，因此由 Module 提供初始化
-     */
-    fun initSdkHatom() {
-        Log.w(TAG, "initSdk: 请使用 NativeModules 提供的方法进行初始化")
-    }
-
-    /**
      * 初始化播放器
      */
     fun initPlayerHatom() {
@@ -104,11 +98,17 @@ class HikVideoView(context: Context) : SurfaceView(context) {
     }
 
     /**
+     * 初始化播放器
+     */
+    fun initPlayerPrimordial() {
+        mediaPlayer.setDisplay(this.holder)
+    }
+
+    /**
      * 设置视频播放参数
      * @param path      播放url，用于测试，所以仅支持 assets 文件夹下的视频
      */
     fun setDataSourcePrimordial(path: String) {
-        mediaPlayer.setDisplay(this.holder)
         val fd: AssetFileDescriptor = this.context.assets.openFd(path)
         mediaPlayer.setDataSource(fd.fileDescriptor, fd.startOffset, fd.length)
         mediaPlayer.prepareAsync()
@@ -122,5 +122,35 @@ class HikVideoView(context: Context) : SurfaceView(context) {
         if (!mediaPlayer.isPlaying) {
             mediaPlayer.start()
         }
+    }
+
+    /************************* 使用 萤石 播放器 *************************/
+    // 设备序列号
+    private var deviceSerial = ""
+    // 通道号
+    private var cameraNo = -1
+    private val ezPlayer: EZPlayer by lazy {
+        if (TextUtils.isEmpty(deviceSerial) || cameraNo == -1) {
+            Log.e(TAG, "ezPlayer: 必须先使用正确参数调用initPlayer，初始化播放器，才可以调用其他方法")
+        }
+        EZOpenSDK.getInstance().createPlayer(deviceSerial, cameraNo)
+    }
+
+    /**
+     * 初始化播放器
+     * @param deviceSerial  设备序列号
+     * @param cameraNo      通道号
+     */
+    fun initPlayerEzviz(deviceSerial: String, cameraNo: Int) {
+        this.deviceSerial = deviceSerial
+        this.cameraNo = cameraNo
+        ezPlayer.setSurfaceHold(this.holder)
+    }
+
+    /**
+     * 开始直播
+     */
+    fun startRealEzviz() {
+        ezPlayer.startRealPlay()
     }
 }
