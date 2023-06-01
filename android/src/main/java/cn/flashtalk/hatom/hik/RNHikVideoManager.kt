@@ -1,12 +1,15 @@
 package cn.flashtalk.hatom.hik
 
+import android.os.Environment
 import android.util.Log
+import cn.flashtalk.hatom.base.EzPtzSpeed
 import cn.flashtalk.hatom.base.SdkVersion
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.hikvision.hatomplayer.PlayConfig
+import com.videogo.openapi.EZConstants
 
 /**
  * 集成版播放器 manager
@@ -57,6 +60,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
      ***************************************************
      * Ezviz
      *
+     * @param  configMap.accessToken      (String) token
      * @param  configMap.deviceSerial     (String) 设备序列号
      * @param  configMap.cameraNo         (int)    通道号
      */
@@ -74,15 +78,16 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
             SdkVersion.EzvizVideo -> {
                 // 数据转换
                 configMap?.let {
+                    val accessToken     = it.getString   ("accessToken")
                     val deviceSerial    = it.getString   ("deviceSerial")
                     val cameraNo        = it.getInt      ("cameraNo")
                     // 未配置
-                    if (deviceSerial == null) {
-                        Log.e(TAG, "initPlayer: EzvizVideo 需配置正确的：deviceSerial 和 cameraNo")
+                    if (deviceSerial == null || accessToken == null) {
+                        Log.e(TAG, "initPlayer: EzvizVideo 需配置正确的：accessToken、deviceSerial 和 cameraNo")
                         return
                     }
                     // 配置
-                    hikVideoView.initPlayerEzviz(deviceSerial, cameraNo)
+                    hikVideoView.initPlayerEzviz(accessToken, deviceSerial, cameraNo)
                 }
             }
 
@@ -196,6 +201,168 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
 
             SdkVersion.EzvizVideo -> {
                 hikVideoView.startRealEzviz()
+            }
+
+            SdkVersion.Unknown -> {
+                Log.e(TAG, "未 initSdkVersion")
+            }
+        }
+    }
+
+    /**
+     * 停止播放
+     */
+    @ReactProp(name = "stopPlay")
+    fun stop(hikVideoView: HikVideoView, phString: String?) {
+        when (hikVideoView.getSdkVersion()) {
+            SdkVersion.HikVideo_V2_1_0 -> {
+            }
+
+            SdkVersion.PrimordialVideo -> {
+            }
+
+            SdkVersion.EzvizVideo -> {
+                hikVideoView.stopRealEzviz()
+            }
+
+            SdkVersion.Unknown -> {
+                Log.e(TAG, "未 initSdkVersion")
+            }
+        }
+    }
+
+    /**
+     * 释放资源
+     */
+    @ReactProp(name = "release")
+    fun release(hikVideoView: HikVideoView, phString: String?) {
+        when (hikVideoView.getSdkVersion()) {
+            SdkVersion.HikVideo_V2_1_0 -> {
+            }
+
+            SdkVersion.PrimordialVideo -> {
+            }
+
+            SdkVersion.EzvizVideo -> {
+                hikVideoView.releaseEzviz()
+            }
+
+            SdkVersion.Unknown -> {
+                Log.e(TAG, "未 initSdkVersion")
+            }
+        }
+    }
+
+    /**
+     * 开启录像
+     *
+     ***************************************************
+     * Ezviz
+     *
+     * @param  configMap.recordFile      (String) 录制本地路径
+     * 可为空，默认使用 Environment.getExternalStorageDirectory().getPath() + "/record"
+     */
+    @ReactProp(name = "startLocalRecord")
+    fun startLocalRecord(hikVideoView: HikVideoView, configMap: ReadableMap) {
+        when (hikVideoView.getSdkVersion()) {
+            SdkVersion.HikVideo_V2_1_0 -> {
+            }
+
+            SdkVersion.PrimordialVideo -> {
+            }
+
+            SdkVersion.EzvizVideo -> {
+                var recordFile = Environment.getExternalStorageDirectory().path + "/EzvizRecord"
+                if (configMap.hasKey("recordFile")) {
+                    recordFile = configMap.getString("recordFile").toString()
+                }
+                hikVideoView.startLocalRecordEzviz(recordFile)
+            }
+
+            SdkVersion.Unknown -> {
+                Log.e(TAG, "未 initSdkVersion")
+            }
+        }
+    }
+
+    /**
+     * 结束本地直播流录像
+     * 与 startLocalRecord 成对使用
+     */
+    @ReactProp(name = "stopLocalRecord")
+    fun stopLocalRecord(hikVideoView: HikVideoView, phString: String?) {
+        when (hikVideoView.getSdkVersion()) {
+            SdkVersion.HikVideo_V2_1_0 -> {
+            }
+
+            SdkVersion.PrimordialVideo -> {
+            }
+
+            SdkVersion.EzvizVideo -> {
+                hikVideoView.stopLocalRecordEzviz()
+            }
+
+            SdkVersion.Unknown -> {
+                Log.e(TAG, "未 initSdkVersion")
+            }
+        }
+    }
+
+    /**
+     * 声音控制
+     * @param isOpen 是否打开
+     */
+    @ReactProp(name = "sound")
+    fun sound(hikVideoView: HikVideoView, isOpen: Boolean) {
+        when (hikVideoView.getSdkVersion()) {
+            SdkVersion.HikVideo_V2_1_0 -> {
+            }
+
+            SdkVersion.PrimordialVideo -> {
+            }
+
+            SdkVersion.EzvizVideo -> {
+                hikVideoView.soundEzviz(isOpen)
+            }
+
+            SdkVersion.Unknown -> {
+                Log.e(TAG, "未 initSdkVersion")
+            }
+        }
+    }
+
+    /**
+     * 云台 PTZ 控制接口
+     *
+     ***************************************************
+     * Ezviz
+     *
+     * @param  configMap.command    (String)    参考 enum EZConstants.EZPTZCommand
+     * @param  configMap.action     (String)    参考 enum EZConstants.EZPTZAction
+     * @param  configMap.speed      (String)    可为空，EzPtzSpeed, 默认：PTZ_SPEED_DEFAULT
+     */
+    @ReactProp(name = "controlPtz")
+    fun controlPtz(hikVideoView: HikVideoView, configMap: ReadableMap) {
+        when (hikVideoView.getSdkVersion()) {
+            SdkVersion.HikVideo_V2_1_0 -> {
+            }
+
+            SdkVersion.PrimordialVideo -> {
+            }
+
+            SdkVersion.EzvizVideo -> {
+                try {
+                    val command = EZConstants.EZPTZCommand.valueOf(configMap.getString("command")!!)
+                    val action  = EZConstants.EZPTZAction.valueOf(configMap.getString("action")!!)
+                    var speed   = EzPtzSpeed.PTZ_SPEED_DEFAULT
+                    if (configMap.hasKey("speed")) {
+                        speed = EzPtzSpeed.valueOf(configMap.getString("speed")!!)
+                    }
+
+                    hikVideoView.controlPtzEzviz(command, action, speed)
+                } catch (e: Exception) {
+                    Log.e(TAG, "controlPtz: EzvizVideo 参数配置异常，请核对")
+                }
             }
 
             SdkVersion.Unknown -> {

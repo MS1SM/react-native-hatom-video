@@ -67,6 +67,10 @@ dependencies {
 
     /*码流获取模块，按需使用*/
     implementation ('io.github.ezviz-open:streamctrl:1.2.6')
+
+    // 协程库
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0'
 }
 
 // 禁止生成BuildConfig文件，避免编译异常

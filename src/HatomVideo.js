@@ -46,11 +46,12 @@ export default class HatomVideo extends Component {
      * **************************************************
      * Ezviz
      * @param {object} config
+     * @param {string} config.accessToken   token
      * @param {string} config.deviceSerial  设备序列号
      * @param {number} config.cameraNo      通道号
      */
     _initPlayer(config) {
-        this.setNativeProps(config)
+        this.setNativeProps({initPlayer: config})
     }
 
     // 设置播放参数
@@ -63,6 +64,64 @@ export default class HatomVideo extends Component {
     // 开始播放
     _start() {
         this.setNativeProps({startPlay: "phString"})
+    }
+
+    // 停止播放
+    _stop() {
+        this.setNativeProps({stopPlay: "phString"})
+    }
+
+    // 释放资源
+    _release() {
+        this.setNativeProps({release: "phString"})
+    }
+
+    /**
+     * 开启录像
+     *
+     ***************************************************
+     * Ezviz
+     *
+     * @param  recordFile      (String) 录制本地路径
+     * 可为空，将使用默认存储地址: Environment.getExternalStorageDirectory().getPath() + "/record"
+     */
+    _startLocalRecord(recordFile) {
+        let config = {}
+        if (recordFile) {
+            config.recordFile = recordFile
+        }
+        this.setNativeProps({startLocalRecord: config})
+    }
+
+    /**
+     * 结束本地直播流录像
+     * 与 _startLocalRecord 成对使用
+     */
+    _stopLocalRecord() {
+        this.setNativeProps({stopLocalRecord: "phString"})
+    }
+
+    /**
+     * 声音控制
+     * @param isOpen 是否打开
+     */
+    _sound(isOpen) {
+        this.setNativeProps({sound: isOpen})
+    }
+
+    /**
+     * 云台 PTZ 控制接口
+     *
+     ***************************************************
+     * Ezviz
+     *
+     * 参数皆为枚举，使用 common 中的定义
+     * @param  config.command    (EZPTZCommand)    方向
+     * @param  config.action     (EZPTZAction)     动作
+     * @param  config.speed      (EzPtzSpeed)      速度，可为空，默认为 PTZ_SPEED_DEFAULT
+     */
+     _controlPtz(config) {
+        this.setNativeProps({controlPtz: config})
     }
 
     render() {

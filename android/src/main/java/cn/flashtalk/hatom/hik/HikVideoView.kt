@@ -6,12 +6,20 @@ import android.media.MediaPlayer
 import android.text.TextUtils
 import android.util.Log
 import android.view.SurfaceView
+import cn.flashtalk.hatom.base.EzPtzSpeed
 import cn.flashtalk.hatom.base.SdkVersion
 import com.hikvision.hatomplayer.DefaultHatomPlayer
 import com.hikvision.hatomplayer.HatomPlayer
 import com.hikvision.hatomplayer.PlayConfig
+import com.videogo.openapi.EZConstants
 import com.videogo.openapi.EZOpenSDK
 import com.videogo.openapi.EZPlayer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.runBlocking
 
 /**
  * 集成版 View
@@ -138,10 +146,12 @@ class HikVideoView(context: Context) : SurfaceView(context) {
 
     /**
      * 初始化播放器
+     * @param accessToken   token
      * @param deviceSerial  设备序列号
      * @param cameraNo      通道号
      */
-    fun initPlayerEzviz(deviceSerial: String, cameraNo: Int) {
+    fun initPlayerEzviz(accessToken: String, deviceSerial: String, cameraNo: Int) {
+        EZOpenSDK.getInstance().setAccessToken(accessToken)
         this.deviceSerial = deviceSerial
         this.cameraNo = cameraNo
         ezPlayer.setSurfaceHold(this.holder)
@@ -149,8 +159,104 @@ class HikVideoView(context: Context) : SurfaceView(context) {
 
     /**
      * 开始直播
+     * @return 操作是否成功
      */
-    fun startRealEzviz() {
-        ezPlayer.startRealPlay()
+    fun startRealEzviz(): Boolean {
+        return ezPlayer.startRealPlay()
+    }
+
+    /**
+     * 停止直播
+     * @return 操作是否成功
+     */
+    fun stopRealEzviz(): Boolean {
+        return ezPlayer.stopRealPlay()
+    }
+
+    /**
+     * 释放资源
+     */
+    fun releaseEzviz() {
+        ezPlayer.release()
+    }
+
+    /**
+     * 开启录像
+     * @param recordFile 录制本地路径
+     * @return 操作是否成功
+     */
+    fun startLocalRecordEzviz(recordFile: String): Boolean {
+        return ezPlayer.startLocalRecordWithFile(recordFile)
+    }
+
+    /**
+     * 结束本地直播流录像
+     * 与 startLocalRecordEzviz 成对使用
+     */
+    fun stopLocalRecordEzviz(): Boolean {
+        return ezPlayer.stopLocalRecord()
+    }
+
+    /**
+     * 截图
+     * TODO MS 23.6.1 需要存储 bitmap 并返回存储地址
+     */
+    fun capturePictureEzviz() {
+        ezPlayer.capturePicture()
+    }
+
+    /**
+     * 声音控制
+     * @param isOpen 是否打开
+     * @return 操作是否成功
+     */
+    fun soundEzviz(isOpen: Boolean): Boolean {
+        return if (isOpen) {
+            ezPlayer.openSound()
+        } else {
+            ezPlayer.closeSound()
+        }
+    }
+
+    /**
+     * 云台 PTZ 控制接口
+     * 该接口为耗时操作，必须在线程中调用
+     *
+     * @param command   ptz控制命令
+     * @param action    控制启动/停止
+     * @param speed     速度（0-2）
+     *
+     * @return 操作成功或者失败(返回失败错误码) TODO MS 23.6.1
+     */
+    fun controlPtzEzviz(command: EZConstants.EZPTZCommand, action: EZConstants.EZPTZAction, speed: EzPtzSpeed = EzPtzSpeed.PTZ_SPEED_DEFAULT) {
+        runBlocking {
+            flow<Int> {
+                EZOpenSDK.getInstance().controlPTZ(
+                    deviceSerial,
+                    cameraNo,
+                    command,
+                    action,
+                    speed.value
+                )
+            }.flowOn(Dispatchers.IO).catch {
+                Log.e(TAG, "controlPtzEzviz: 操作异常", it)
+            }.collect {
+
+            }
+        }
+    }
+
+    /**
+     * 设置视频清晰度
+     *
+     * 此调节可以在视频播放前设置也可以在视频播放成功后设置
+     * 视频播放成功后设置了清晰度需要先停止播放 stopRealPlay 然后重新开启播放 startRealPlay 才能生效
+     */
+    fun setVideoLevelEzviz(videoLevel: EZConstants.EZVideoLevel) {
+        EZOpenSDK.getInstance().setVideoLevel(
+            deviceSerial,
+            cameraNo,
+            videoLevel.videoLevel
+        )
     }
 }
