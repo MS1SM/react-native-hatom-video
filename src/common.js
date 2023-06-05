@@ -76,3 +76,24 @@ export function EzPtzSpeed() {
         this.PTZ_SPEED_FAST
     ]
 }
+
+// 萤石视频画质
+export function EZVideoLevel() {
+    /**
+     * 枚举
+     */
+    this.VIDEO_LEVEL_SUPERCLEAR = "VIDEO_LEVEL_SUPERCLEAR"
+    this.VIDEO_LEVEL_HD         = "VIDEO_LEVEL_HD"
+    this.VIDEO_LEVEL_BALANCED   = "VIDEO_LEVEL_BALANCED"
+    this.VIDEO_LEVEL_FLUNET     = "VIDEO_LEVEL_FLUNET"
+
+    /**
+     * 枚举数组
+     */
+    this.enums = [
+        this.VIDEO_LEVEL_SUPERCLEAR,
+        this.VIDEO_LEVEL_HD,
+        this.VIDEO_LEVEL_BALANCED,
+        this.VIDEO_LEVEL_FLUNET
+    ]
+}

@@ -26,16 +26,20 @@ export default class HatomVideo extends Component {
     _assignRoot = (component) => {
         this._root = component
     }
-
     // 调用这个组件的setNativeProps方法
     setNativeProps(nativeProps) {
         this._root.setNativeProps(nativeProps);
     };
 
+
+    /************************* NativeModules *************************/
+
     // 初始化SDK
     _initSdk(appKey, pringLog) {
         NativeModules.RNHatomVideo.initSdk(this.sdkVersion, appKey, pringLog)
     }
+
+    /************************* setNativeProps *************************/
 
     /**
      * 初始化播放器
@@ -124,11 +128,60 @@ export default class HatomVideo extends Component {
         this.setNativeProps({controlPtz: config})
     }
 
+    /**
+     * 对讲控制
+     *
+     ***************************************************
+     * Ezviz
+     * 
+     * @param  config.isStart           (Boolean)    是否开启对讲
+     * @param  config.isDeviceTalkBack  (Boolean)    可为空，默认true。用于判断对讲的设备，true表示与当前设备对讲，false表示与NVR设备下的IPC通道对讲。
+     */
+    _voiceTalk(config) {
+        this.setNativeProps({voiceTalk: config})
+    }
+
+    /**
+     * 截图
+     * 通过 onCapturePicture 回调结果
+     */
+    _capturePicture() {
+        this.setNativeProps({capturePicture: "phString"})
+    }
+
+    /**
+     * 设置视频清晰度
+     *
+     ***************************************************
+     * Ezviz
+     * 
+     * @param  config.videoLevel     (EZVideoLevel)   清晰度
+     */
+     _setVideoLevel(config) {
+        this.setNativeProps({setVideoLevel: config})
+    }
+
+    /************************* event *************************/
+
+    /**
+     * 截图回调
+     * nativeEvent.success： (Boolean)   是否成功，成功保存到系统相册
+     */
+    _onCapturePicture = (event) => {
+        if (this.props.onCapturePicture) {
+            this.props.onCapturePicture(event.nativeEvent)
+        }
+    }
+
     render() {
         // 参数复制
         const nativeProps = Object.assign({}, this.props);
         Object.assign(nativeProps, {
-            initSdkVersion: this.sdkVersion
+            // 属性
+            initSdkVersion: this.sdkVersion,
+
+            // 回调事件
+            OnCapturePicture: this._onCapturePicture
         });
 
         // 获取RN播放器
@@ -147,6 +200,10 @@ export default class HatomVideo extends Component {
 HatomVideo.propTypes = {
     // sdk 版本，应从 SdkVersion 枚举中获取
     sdkVersion: PropTypes.oneOf(SdkVersion.enums),
+
+    // 截图回调
+    onCapturePicture: PropTypes.func,
+
     // 继承页面
     scaleX: PropTypes.number,
     scaleY: PropTypes.number,

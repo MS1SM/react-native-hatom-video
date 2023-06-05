@@ -2,9 +2,11 @@ package cn.flashtalk.hatom.hik
 
 import android.os.Environment
 import android.util.Log
+import cn.flashtalk.hatom.base.Events
 import cn.flashtalk.hatom.base.EzPtzSpeed
 import cn.flashtalk.hatom.base.SdkVersion
 import com.facebook.react.bridge.ReadableMap
+import com.facebook.react.common.MapBuilder
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
@@ -30,6 +32,14 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
 
     override fun createViewInstance(reactContext: ThemedReactContext): HikVideoView {
         return HikVideoView(reactContext)
+    }
+
+    override fun getExportedCustomDirectEventTypeConstants(): Map<String, Map<String, String>> {
+        val builder: MapBuilder.Builder<String, Map<String, String>> = MapBuilder.builder()
+        for (event in Events.values()) {
+            builder.put(event.name, MapBuilder.of("registrationName", event.name))
+        }
+        return builder.build()
     }
 
     /**
@@ -347,6 +357,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
             SdkVersion.HikVideo_V2_1_0 -> {
             }
 
+
             SdkVersion.PrimordialVideo -> {
             }
 
@@ -362,6 +373,98 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
                     hikVideoView.controlPtzEzviz(command, action, speed)
                 } catch (e: Exception) {
                     Log.e(TAG, "controlPtz: EzvizVideo 参数配置异常，请核对")
+                }
+            }
+
+            SdkVersion.Unknown -> {
+                Log.e(TAG, "未 initSdkVersion")
+            }
+        }
+    }
+
+    /**
+     * 对讲控制
+     *
+     ***************************************************
+     * Ezviz
+     *
+     * @param  configMap.isStart            (Boolean)    是否开启对讲
+     * @param  configMap.isDeviceTalkBack   (Boolean)    可为空，默认true。用于判断对讲的设备，true表示与当前设备对讲，false表示与NVR设备下的IPC通道对讲。
+     */
+    @ReactProp(name = "voiceTalk")
+    fun voiceTalk(hikVideoView: HikVideoView, configMap: ReadableMap) {
+        when (hikVideoView.getSdkVersion()) {
+            SdkVersion.HikVideo_V2_1_0 -> {
+            }
+
+
+            SdkVersion.PrimordialVideo -> {
+            }
+
+            SdkVersion.EzvizVideo -> {
+                val isStart = configMap.getBoolean("isStart")
+                var isDeviceTalkBack = true
+                if (configMap.hasKey("isDeviceTalkBack")) {
+                    isDeviceTalkBack = configMap.getBoolean("isDeviceTalkBack")
+                }
+
+                hikVideoView.voiceTalkEzviz(isStart, isDeviceTalkBack)
+            }
+
+            SdkVersion.Unknown -> {
+                Log.e(TAG, "未 initSdkVersion")
+            }
+        }
+    }
+
+    /**
+     * 截图
+     * 通过 Events.OnCapturePicture 通知结果
+     */
+    @ReactProp(name = "capturePicture")
+    fun capturePicture(hikVideoView: HikVideoView, phString: String?) {
+        when (hikVideoView.getSdkVersion()) {
+            SdkVersion.HikVideo_V2_1_0 -> {
+            }
+
+
+            SdkVersion.PrimordialVideo -> {
+            }
+
+            SdkVersion.EzvizVideo -> {
+                hikVideoView.capturePictureEzviz()
+            }
+
+            SdkVersion.Unknown -> {
+                Log.e(TAG, "未 initSdkVersion")
+            }
+        }
+    }
+
+    /**
+     * 设置视频清晰度
+     *
+     ***************************************************
+     * Ezviz
+     *
+     * @param  configMap.videoLevel     (String)    参考 enum EZConstants.EZVideoLevel
+     */
+    @ReactProp(name = "setVideoLevel")
+    fun setVideoLevel(hikVideoView: HikVideoView, configMap: ReadableMap) {
+        when (hikVideoView.getSdkVersion()) {
+            SdkVersion.HikVideo_V2_1_0 -> {
+            }
+
+
+            SdkVersion.PrimordialVideo -> {
+            }
+
+            SdkVersion.EzvizVideo -> {
+                try {
+                    val videoLevel = EZConstants.EZVideoLevel.valueOf(configMap.getString("videoLevel")!!)
+                    hikVideoView.setVideoLevelEzviz(videoLevel)
+                } catch (e: Exception) {
+                    Log.e(TAG, "setVideoLevel: EzvizVideo 参数配置异常，请核对")
                 }
             }
 

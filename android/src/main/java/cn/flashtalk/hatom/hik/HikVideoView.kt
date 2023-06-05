@@ -1,13 +1,18 @@
 package cn.flashtalk.hatom.hik
 
-import android.content.Context
 import android.content.res.AssetFileDescriptor
 import android.media.MediaPlayer
 import android.text.TextUtils
 import android.util.Log
 import android.view.SurfaceView
+import cn.flashtalk.hatom.base.EventProp
+import cn.flashtalk.hatom.base.Events
 import cn.flashtalk.hatom.base.EzPtzSpeed
 import cn.flashtalk.hatom.base.SdkVersion
+import cn.flashtalk.hatom.utils.SaveUtils
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.uimanager.ThemedReactContext
+import com.facebook.react.uimanager.events.RCTEventEmitter
 import com.hikvision.hatomplayer.DefaultHatomPlayer
 import com.hikvision.hatomplayer.HatomPlayer
 import com.hikvision.hatomplayer.PlayConfig
@@ -37,12 +42,19 @@ import kotlinx.coroutines.runBlocking
  * **************************************************
  * 使用 Android MediaPlayer 播放器的控件
  */
-class HikVideoView(context: Context) : SurfaceView(context) {
+class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(reactContext) {
 
     private var sdkVersion: SdkVersion = SdkVersion.Unknown
 
     companion object {
         private const val TAG = "HikVideoView"
+    }
+
+    /**
+     * 事件发射器
+     */
+    private val eventEmitter: RCTEventEmitter by lazy {
+        reactContext.getJSModule(RCTEventEmitter::class.java)
     }
 
     /**
@@ -137,7 +149,15 @@ class HikVideoView(context: Context) : SurfaceView(context) {
     private var deviceSerial = ""
     // 通道号
     private var cameraNo = -1
+    // 萤石视频播放
     private val ezPlayer: EZPlayer by lazy {
+        if (TextUtils.isEmpty(deviceSerial) || cameraNo == -1) {
+            Log.e(TAG, "ezPlayer: 必须先使用正确参数调用initPlayer，初始化播放器，才可以调用其他方法")
+        }
+        EZOpenSDK.getInstance().createPlayer(deviceSerial, cameraNo)
+    }
+    // 萤石对讲播放器
+    private val talkEzPlayer: EZPlayer by lazy {
         if (TextUtils.isEmpty(deviceSerial) || cameraNo == -1) {
             Log.e(TAG, "ezPlayer: 必须先使用正确参数调用initPlayer，初始化播放器，才可以调用其他方法")
         }
@@ -199,10 +219,13 @@ class HikVideoView(context: Context) : SurfaceView(context) {
 
     /**
      * 截图
-     * TODO MS 23.6.1 需要存储 bitmap 并返回存储地址
+     * 通过 Events.OnCapturePicture 通知结果
      */
     fun capturePictureEzviz() {
-        ezPlayer.capturePicture()
+        // 回调截图保存结果
+        val propMap = Arguments.createMap()
+        propMap.putBoolean(EventProp.success.name, SaveUtils.saveBitmapToAlbum(context, ezPlayer.capturePicture()))
+        eventEmitter.receiveEvent(id, Events.OnCapturePicture.name, propMap)
     }
 
     /**
@@ -258,5 +281,27 @@ class HikVideoView(context: Context) : SurfaceView(context) {
             cameraNo,
             videoLevel.videoLevel
         )
+    }
+
+    /**
+     * 对讲控制
+     * @param isStart           是否开启对讲
+     * @param isDeviceTalkBack  用于判断对讲的设备，true表示与当前设备对讲，false表示与NVR设备下的IPC通道对讲。
+     */
+    fun voiceTalkEzviz(isStart: Boolean, isDeviceTalkBack: Boolean = true) {
+        if (isStart) {
+            talkEzPlayer.startVoiceTalk(isDeviceTalkBack)
+        } else {
+            talkEzPlayer.stopVoiceTalk()
+        }
+    }
+
+    /**
+     * 半双工对讲时，设置对讲状态
+     *
+     * @param pressed 按下true：手机端说，设备端听；按下false：手机端听，设备端说
+     */
+    fun voiceTalkStatusEzviz(pressed: Boolean) {
+        talkEzPlayer.setVoiceTalkStatus(pressed)
     }
 }
