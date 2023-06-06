@@ -6,9 +6,24 @@ package cn.flashtalk.hatom.base
 enum class Events() {
     /**
      * 截图回调
-     * success： (Boolean)   是否成功，成功保存到系统相册
+     * success： (Boolean)   是否成功，只有保存到系统相册才算成功
      */
-    OnCapturePicture
+    OnCapturePicture,
+
+    /**
+     * 录像结果回调
+     * success： (Boolean)   是否成功，不保存到系统相册
+     * message： (String?)   信息，失败时的信息
+     * path：    (String?)   文件路径，成功时
+     */
+    OnLocalRecord,
+
+    /**
+     * 云台控制回调
+     * success： (Boolean)   操作是否成功
+     * message： (String?)   信息，失败时的信息
+     */
+    OnPtzControl
 }
 
 /**
@@ -19,5 +34,17 @@ enum class EventProp() {
      * 是否成功
      * Boolean
      */
-    success
+    success,
+
+    /**
+     * 信息
+     * String
+     */
+    message,
+
+    /**
+     * 文件路径
+     * String
+     */
+    path
 }

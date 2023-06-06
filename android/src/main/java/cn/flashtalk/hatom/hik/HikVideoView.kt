@@ -10,6 +10,7 @@ import cn.flashtalk.hatom.base.Events
 import cn.flashtalk.hatom.base.EzPtzSpeed
 import cn.flashtalk.hatom.base.SdkVersion
 import cn.flashtalk.hatom.utils.SaveUtils
+import cn.flashtalk.hatom.utils.Utils
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.events.RCTEventEmitter
@@ -18,6 +19,7 @@ import com.hikvision.hatomplayer.HatomPlayer
 import com.hikvision.hatomplayer.PlayConfig
 import com.videogo.openapi.EZConstants
 import com.videogo.openapi.EZOpenSDK
+import com.videogo.openapi.EZOpenSDKListener
 import com.videogo.openapi.EZPlayer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
@@ -25,9 +27,11 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.runBlocking
+import java.io.File
 
 /**
  * 集成版 View
+ * 本 View 负责所有具体操作流程与功能
  *
  * **************************************************
  * 支持海康 SDK V2.1.0 Normal 版本的播放器
@@ -41,6 +45,9 @@ import kotlinx.coroutines.runBlocking
  *
  * **************************************************
  * 使用 Android MediaPlayer 播放器的控件
+ *
+ * **************************************************
+ * 支持 萤石 SDK
  */
 class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(reactContext) {
 
@@ -179,18 +186,16 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
 
     /**
      * 开始直播
-     * @return 操作是否成功
      */
-    fun startRealEzviz(): Boolean {
-        return ezPlayer.startRealPlay()
+    fun startRealEzviz() {
+        ezPlayer.startRealPlay()
     }
 
     /**
      * 停止直播
-     * @return 操作是否成功
      */
-    fun stopRealEzviz(): Boolean {
-        return ezPlayer.stopRealPlay()
+    fun stopRealEzviz() {
+        ezPlayer.stopRealPlay()
     }
 
     /**
@@ -202,19 +207,41 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
 
     /**
      * 开启录像
-     * @param recordFile 录制本地路径
-     * @return 操作是否成功
      */
-    fun startLocalRecordEzviz(recordFile: String): Boolean {
-        return ezPlayer.startLocalRecordWithFile(recordFile)
+    fun startLocalRecordEzviz() {
+        /**
+         * 录像结果回调接口
+         * 通过 Events.OnLocalRecord 通知 js
+         */
+        ezPlayer.setStreamDownloadCallback(object: EZOpenSDKListener.EZStreamDownloadCallback {
+            override fun onSuccess(path: String?) {
+                // 回调结果
+                val propMap = Arguments.createMap()
+                propMap.putBoolean(EventProp.success.name, true)
+                propMap.putString(EventProp.path.name, path)
+                eventEmitter.receiveEvent(id, Events.OnLocalRecord.name, propMap)
+            }
+
+            override fun onError(error: EZOpenSDKListener.EZStreamDownloadError?) {
+                // 失败回调
+                val propMap = Arguments.createMap()
+                propMap.putBoolean(EventProp.success.name, false)
+                error?.let { propMap.putString(EventProp.message.name, error.name) }
+                eventEmitter.receiveEvent(id, Events.OnLocalRecord.name, propMap)
+            }
+        })
+
+        val recordFile = Utils.generateRecordPath(context)
+        ezPlayer.startLocalRecordWithFile(recordFile)
     }
 
     /**
      * 结束本地直播流录像
      * 与 startLocalRecordEzviz 成对使用
+     * EZStreamDownloadCallback 回调结果
      */
-    fun stopLocalRecordEzviz(): Boolean {
-        return ezPlayer.stopLocalRecord()
+    fun stopLocalRecordEzviz() {
+        ezPlayer.stopLocalRecord()
     }
 
     /**
@@ -231,10 +258,9 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
     /**
      * 声音控制
      * @param isOpen 是否打开
-     * @return 操作是否成功
      */
-    fun soundEzviz(isOpen: Boolean): Boolean {
-        return if (isOpen) {
+    fun soundEzviz(isOpen: Boolean) {
+        if (isOpen) {
             ezPlayer.openSound()
         } else {
             ezPlayer.closeSound()
@@ -249,7 +275,7 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
      * @param action    控制启动/停止
      * @param speed     速度（0-2）
      *
-     * @return 操作成功或者失败(返回失败错误码) TODO MS 23.6.1
+     * 操作失败将抛出异常
      */
     fun controlPtzEzviz(command: EZConstants.EZPTZCommand, action: EZConstants.EZPTZAction, speed: EzPtzSpeed = EzPtzSpeed.PTZ_SPEED_DEFAULT) {
         runBlocking {
@@ -263,6 +289,11 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
                 )
             }.flowOn(Dispatchers.IO).catch {
                 Log.e(TAG, "controlPtzEzviz: 操作异常", it)
+                // 失败回调
+                val propMap = Arguments.createMap()
+                propMap.putBoolean(EventProp.success.name, false)
+                propMap.putString(EventProp.message.name, it.message)
+                eventEmitter.receiveEvent(id, Events.OnPtzControl.name, propMap)
             }.collect {
 
             }

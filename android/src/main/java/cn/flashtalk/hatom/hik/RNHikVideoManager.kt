@@ -15,10 +15,12 @@ import com.videogo.openapi.EZConstants
 
 /**
  * 集成版播放器 manager
+ * 本 Manager 只做数据处理和功能分发，不处理具体功能和操作流程
  *
  * **************************************************
  * 支持海康 SDK V2.1.0
  * 支持 Android MediaPlayer 播放器
+ * 支持 萤石 SDK
  */
 class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     companion object {
@@ -268,9 +270,6 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
      *
      ***************************************************
      * Ezviz
-     *
-     * @param  configMap.recordFile      (String) 录制本地路径
-     * 可为空，默认使用 Environment.getExternalStorageDirectory().getPath() + "/record"
      */
     @ReactProp(name = "startLocalRecord")
     fun startLocalRecord(hikVideoView: HikVideoView, configMap: ReadableMap) {
@@ -282,11 +281,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
             }
 
             SdkVersion.EzvizVideo -> {
-                var recordFile = Environment.getExternalStorageDirectory().path + "/EzvizRecord"
-                if (configMap.hasKey("recordFile")) {
-                    recordFile = configMap.getString("recordFile").toString()
-                }
-                hikVideoView.startLocalRecordEzviz(recordFile)
+                hikVideoView.startLocalRecordEzviz()
             }
 
             SdkVersion.Unknown -> {
@@ -298,6 +293,8 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     /**
      * 结束本地直播流录像
      * 与 startLocalRecord 成对使用
+     *
+     * 通过 Events.OnLocalRecord 通知结果
      */
     @ReactProp(name = "stopLocalRecord")
     fun stopLocalRecord(hikVideoView: HikVideoView, phString: String?) {

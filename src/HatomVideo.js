@@ -85,21 +85,17 @@ export default class HatomVideo extends Component {
      *
      ***************************************************
      * Ezviz
-     *
-     * @param  recordFile      (String) 录制本地路径
-     * 可为空，将使用默认存储地址: Environment.getExternalStorageDirectory().getPath() + "/record"
      */
-    _startLocalRecord(recordFile) {
+    _startLocalRecord() {
         let config = {}
-        if (recordFile) {
-            config.recordFile = recordFile
-        }
         this.setNativeProps({startLocalRecord: config})
     }
 
     /**
      * 结束本地直播流录像
      * 与 _startLocalRecord 成对使用
+     * 
+     * 通过 onLocalRecord 回调结果
      */
     _stopLocalRecord() {
         this.setNativeProps({stopLocalRecord: "phString"})
@@ -165,11 +161,34 @@ export default class HatomVideo extends Component {
 
     /**
      * 截图回调
-     * nativeEvent.success： (Boolean)   是否成功，成功保存到系统相册
+     * nativeEvent.success： (Boolean)   是否成功，只有保存到系统相册才算成功
      */
     _onCapturePicture = (event) => {
         if (this.props.onCapturePicture) {
             this.props.onCapturePicture(event.nativeEvent)
+        }
+    }
+
+    /**
+     * 录像结果回调
+     * nativeEvent.success： (Boolean)   是否成功，只有保存到系统相册才算成功
+     * nativeEvent.message： (String?)   信息，失败时的信息
+     * nativeEvent.path      (String?)   文件路径，成功时
+     */
+    _onLocalRecord = (event) => {
+        if (this.props.onLocalRecord) {
+            this.props.onLocalRecord(event.nativeEvent)
+        }
+    }
+
+    /**
+     * 云台控制回调
+     * nativeEvent.success： (Boolean)   操作是否成功
+     * nativeEvent.message： (String?)   信息，失败时的信息
+     */
+    _onPtzControl = (event) => {
+        if (this.props.onPtzControl) {
+            this.props.onPtzControl(event.nativeEvent)
         }
     }
 
@@ -181,7 +200,9 @@ export default class HatomVideo extends Component {
             initSdkVersion: this.sdkVersion,
 
             // 回调事件
-            OnCapturePicture: this._onCapturePicture
+            OnCapturePicture:   this._onCapturePicture,
+            OnLocalRecord:      this._onLocalRecord,
+            OnPtzControl:       this._onPtzControl
         });
 
         // 获取RN播放器
@@ -202,14 +223,18 @@ HatomVideo.propTypes = {
     sdkVersion: PropTypes.oneOf(SdkVersion.enums),
 
     // 截图回调
-    onCapturePicture: PropTypes.func,
+    onCapturePicture:   PropTypes.func,
+    // 录像结果回调
+    onLocalRecord:      PropTypes.func,
+    // 云台控制回调
+    onPtzControl:       PropTypes.func,
 
     // 继承页面
-    scaleX: PropTypes.number,
-    scaleY: PropTypes.number,
-    translateX: PropTypes.number,
-    translateY: PropTypes.number,
-    rotation: PropTypes.number,
+    scaleX:         PropTypes.number,
+    scaleY:         PropTypes.number,
+    translateX:     PropTypes.number,
+    translateY:     PropTypes.number,
+    rotation:       PropTypes.number,
     ...ViewPropTypes
 }
 

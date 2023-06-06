@@ -152,6 +152,7 @@ public class SaveUtils {
 
     /**
      * 将视频保存到系统相册
+     * TODO MS 23.6.6 高版本在系统相册生成无效文件，低版本无法倒入相册
      */
     public static boolean saveVideoToAlbum(Context context, String videoFile) {
         Log.i(TAG, "saveVideoToAlbum() videoFile = [" + videoFile + "]");
