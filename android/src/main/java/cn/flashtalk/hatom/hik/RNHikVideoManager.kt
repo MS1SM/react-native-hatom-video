@@ -470,4 +470,28 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
             }
         }
     }
+
+    /**
+     * 获取总流量值
+     * 通过 Events.OnStreamFlow 通知结果
+     */
+    @ReactProp(name = "getStreamFlow")
+    fun getStreamFlow(hikVideoView: HikVideoView, phString: String?) {
+        when (hikVideoView.getSdkVersion()) {
+            SdkVersion.HikVideo_V2_1_0 -> {
+            }
+
+
+            SdkVersion.PrimordialVideo -> {
+            }
+
+            SdkVersion.EzvizVideo -> {
+                hikVideoView.getStreamFlowEzviz()
+            }
+
+            SdkVersion.Unknown -> {
+                Log.e(TAG, "未 initSdkVersion")
+            }
+        }
+    }
 }

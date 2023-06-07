@@ -16,10 +16,13 @@ export default class HatomVideo extends Component {
     constructor(props) {
         super(props)
         // sdk 类型版本
-        this.sdkVersion = props.sdkVersion
-    }
+        this._sdkVersion = props.sdkVersion
 
-    componentDidMount() {
+        // 当前使用的总流量，单位：B，每秒更新
+        this._streamFlow = 0
+
+        // 流量监听定时器
+        this._streamFlowTimer = null
     }
 
     // 获取组件进行保存
@@ -31,18 +34,39 @@ export default class HatomVideo extends Component {
         this._root.setNativeProps(nativeProps);
     };
 
+    /************************* public *************************/
+
+    /**
+     * 初始化播放器
+     * 将启动流量监听线程
+     * 
+     * @param {*} config 参考 _initPlayer
+     */
+    initPlayer(config) {
+        this._initPlayer(config)
+
+        // 流量监听，每秒查询一次。初始化一秒后执行，避免尚未初始化的数据异常
+        this._streamFlowTimer = setInterval(
+            () => {
+                this._getStreamFlow()
+            },
+            1000
+        )
+    }
 
     /************************* NativeModules *************************/
 
     // 初始化SDK
     _initSdk(appKey, pringLog) {
-        NativeModules.RNHatomVideo.initSdk(this.sdkVersion, appKey, pringLog)
+        NativeModules.RNHatomVideo.initSdk(this._sdkVersion, appKey, pringLog)
     }
 
     /************************* setNativeProps *************************/
 
     /**
      * 初始化播放器
+     * 请使用 initPlayer
+     * 
      * **************************************************
      * HikVideo and Primordial
      * configk 可为空对象{}
@@ -95,7 +119,7 @@ export default class HatomVideo extends Component {
      * 结束本地直播流录像
      * 与 _startLocalRecord 成对使用
      * 
-     * 通过 onLocalRecord 回调结果
+     * 通过 _onLocalRecord 回调结果
      */
     _stopLocalRecord() {
         this.setNativeProps({stopLocalRecord: "phString"})
@@ -139,7 +163,7 @@ export default class HatomVideo extends Component {
 
     /**
      * 截图
-     * 通过 onCapturePicture 回调结果
+     * 通过 _onCapturePicture 回调结果
      */
     _capturePicture() {
         this.setNativeProps({capturePicture: "phString"})
@@ -155,6 +179,14 @@ export default class HatomVideo extends Component {
      */
      _setVideoLevel(config) {
         this.setNativeProps({setVideoLevel: config})
+    }
+
+    /**
+     * 获取总流量值
+     * 通过 _onStreamFlow 回调结果
+     */
+     _getStreamFlow() {
+        this.setNativeProps({getStreamFlow: "phString"})
     }
 
     /************************* event *************************/
@@ -173,7 +205,7 @@ export default class HatomVideo extends Component {
      * 录像结果回调
      * nativeEvent.success： (Boolean)   是否成功，只有保存到系统相册才算成功
      * nativeEvent.message： (String?)   信息，失败时的信息
-     * nativeEvent.path      (String?)   文件路径，成功时
+     * nativeEvent.data      (String?)   文件路径，成功时
      */
     _onLocalRecord = (event) => {
         if (this.props.onLocalRecord) {
@@ -192,17 +224,38 @@ export default class HatomVideo extends Component {
         }
     }
 
+    /**
+     * 流量使用回调，总流量
+     * nativeEvent.data      (number)   总流量值，单位：B
+     */
+    _onStreamFlow = (event) => {
+        // 最新总流量
+        let data = event.nativeEvent.data
+
+        // 回调
+        if (this.props.onStreamFlow) {
+            this.props.onStreamFlow({
+                streamFlow: data,
+                speed:      data - this._streamFlow
+            })
+        }
+
+        // 重置当前流量
+        this._streamFlow = data
+    }
+
     render() {
         // 参数复制
         const nativeProps = Object.assign({}, this.props);
         Object.assign(nativeProps, {
             // 属性
-            initSdkVersion: this.sdkVersion,
+            initSdkVersion: this._sdkVersion,
 
             // 回调事件
             OnCapturePicture:   this._onCapturePicture,
             OnLocalRecord:      this._onLocalRecord,
-            OnPtzControl:       this._onPtzControl
+            OnPtzControl:       this._onPtzControl,
+            OnStreamFlow:       this._onStreamFlow
         });
 
         // 获取RN播放器
@@ -228,6 +281,12 @@ HatomVideo.propTypes = {
     onLocalRecord:      PropTypes.func,
     // 云台控制回调
     onPtzControl:       PropTypes.func,
+    /**
+     * 流量使用回调，每秒回调一次
+     * params.streamFlow    (number) 总流量，单位：B
+     * params.speed         (number) 网速，单位：B/s
+     */
+    onStreamFlow:       PropTypes.func,
 
     // 继承页面
     scaleX:         PropTypes.number,

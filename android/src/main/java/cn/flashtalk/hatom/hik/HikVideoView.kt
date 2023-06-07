@@ -2,6 +2,9 @@ package cn.flashtalk.hatom.hik
 
 import android.content.res.AssetFileDescriptor
 import android.media.MediaPlayer
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.text.TextUtils
 import android.util.Log
 import android.view.SurfaceView
@@ -17,6 +20,7 @@ import com.facebook.react.uimanager.events.RCTEventEmitter
 import com.hikvision.hatomplayer.DefaultHatomPlayer
 import com.hikvision.hatomplayer.HatomPlayer
 import com.hikvision.hatomplayer.PlayConfig
+import com.videogo.constant.Constant
 import com.videogo.openapi.EZConstants
 import com.videogo.openapi.EZOpenSDK
 import com.videogo.openapi.EZOpenSDKListener
@@ -28,6 +32,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.runBlocking
 import java.io.File
+import java.lang.ref.WeakReference
 
 /**
  * 集成版 View
@@ -171,6 +176,27 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
         EZOpenSDK.getInstance().createPlayer(deviceSerial, cameraNo)
     }
 
+    // 萤石播放器 Handler
+    private val ezHandler = EzHandler(WeakReference(this))
+
+    /**
+     * 萤石播放器Handler处理
+     * 使用弱引用实现，避免内存泄漏
+     */
+    private class EzHandler(val hikVideoView: WeakReference<HikVideoView>): Handler(Looper.getMainLooper()) {
+        override fun handleMessage(msg: Message) {
+            super.handleMessage(msg)
+
+            hikVideoView.get()?.run {
+                when (msg.what) {
+                    else -> {
+                        Log.i(TAG, "EzHandler: $msg")
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * 初始化播放器
      * @param accessToken   token
@@ -178,10 +204,11 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
      * @param cameraNo      通道号
      */
     fun initPlayerEzviz(accessToken: String, deviceSerial: String, cameraNo: Int) {
-        EZOpenSDK.getInstance().setAccessToken(accessToken)
         this.deviceSerial = deviceSerial
         this.cameraNo = cameraNo
+        EZOpenSDK.getInstance().setAccessToken(accessToken)
         ezPlayer.setSurfaceHold(this.holder)
+        ezPlayer.setHandler(ezHandler)
     }
 
     /**
@@ -218,7 +245,7 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
                 // 回调结果
                 val propMap = Arguments.createMap()
                 propMap.putBoolean(EventProp.success.name, true)
-                propMap.putString(EventProp.path.name, path)
+                propMap.putString(EventProp.data.name, path)
                 eventEmitter.receiveEvent(id, Events.OnLocalRecord.name, propMap)
             }
 
@@ -334,5 +361,16 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
      */
     fun voiceTalkStatusEzviz(pressed: Boolean) {
         talkEzPlayer.setVoiceTalkStatus(pressed)
+    }
+
+    /**
+     * 获取总流量值
+     *
+     * 通过 Events.OnStreamFlow 通知结果
+     */
+    fun getStreamFlowEzviz() {
+        val propMap = Arguments.createMap()
+        propMap.putDouble(EventProp.data.name, ezPlayer.streamFlow.toDouble())
+        eventEmitter.receiveEvent(id, Events.OnStreamFlow.name, propMap)
     }
 }
