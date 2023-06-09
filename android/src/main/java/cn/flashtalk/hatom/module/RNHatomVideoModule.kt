@@ -177,12 +177,12 @@ class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : Re
      *
      ***************************************************
      * Ezviz
-     * @param  configMap.deviceSsid                     (String)    设备ssid
-     * @param  configMap.devicePassword                 (String)    设备密码
+     * @param  configMap.deviceSsid                     (String)    设备wifi ssid，可传空，默认为"EZVIZ_" + 设备序列号
+     * @param  configMap.devicePassword                 (String)    设备wifi 密码， 可传空，默认为"EZVIZ_" + 设备验证码
      * @param  configMap.deviceSerial                   (String)    设备序列号
      * @param  configMap.verifyCode                     (String)    设备验证码
-     * @param  configMap.routerSsid                     (String?)   路由器ssid，可传空，默认为"EZVIZ_"+设备序列号
-     * @param  configMap.routerPassword                 (String?)   路由器密码,可传空，默认为"EZVIZ_"+设备验证码
+     * @param  configMap.routerSsid                     (String)    路由器ssid
+     * @param  configMap.routerPassword                 (String)    路由器密码
      * @param  configMap.isAutoConnect                  (Boolean)   是否自动连接设备热点,需要获取可扫描wifi的权限；如果开发者已经确认手机连接到设备热点，则传false
      */
     @ReactMethod
@@ -196,19 +196,19 @@ class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : Re
 
             SdkVersion.EzvizVideo -> {
                 // 设备ssid
-                val deviceSsid = configMap.getString("deviceSsid")
-                // 设备密码
-                val devicePassword = configMap.getString("devicePassword")
+                var deviceSsid: String? = null
+                if (configMap.hasKey("deviceSsid")) deviceSsid = configMap.getString("deviceSsid")
+                // 设备wifi 密码
+                var devicePassword: String? = null
+                if (configMap.hasKey("devicePassword")) devicePassword = configMap.getString("devicePassword")
                 // 设备序列号
                 val deviceSerial = configMap.getString("deviceSerial")
                 // 设备验证码
                 val verifyCode = configMap.getString("verifyCode")
-                // 路由器ssid
-                var routerSsid: String? = null
-                if (configMap.hasKey("routerSsid")) routerSsid = configMap.getString("routerSsid")
-                // 路由器密码
-                var routerPassword: String? = null
-                if (configMap.hasKey("routerPassword")) routerPassword = configMap.getString("routerPassword")
+                // 设备ssid
+                val routerSsid = configMap.getString("routerSsid")
+                // 设备密码
+                val routerPassword = configMap.getString("routerPassword")
                 // 是否自动连接设备热点
                 val isAutoConnect = configMap.getBoolean("isAutoConnect")
 

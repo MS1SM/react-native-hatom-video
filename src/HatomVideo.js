@@ -95,13 +95,13 @@ export default class HatomVideo extends Component {
      *
      ***************************************************
      * Ezviz
-     * @param {string} config.deviceSsid            设备ssid
-     * @param {string} config.devicePassword        设备密码
+     * @param {string} config.deviceSsid            设备wifi ssid，可传空，默认为"EZVIZ_" + 设备序列号
+     * @param {string} config.devicePassword        设备wifi 密码， 可传空，默认为"EZVIZ_" + 设备验证码
      * @param {string} config.deviceSerial          设备序列号
      * @param {string} config.verifyCode            设备验证码
-     * @param {string} config.routerSsid            路由器ssid，可传空，默认为"EZVIZ_"+设备序列号
-     * @param {string} config.routerPassword        路由器密码,可传空，默认为"EZVIZ_"+设备验证码
-     * @param {string} config.isAutoConnect         是否自动连接设备热点,需要获取可扫描wifi的权限；如果开发者已经确认手机连接到设备热点，则传false
+     * @param {string} config.routerSsid            路由器ssid
+     * @param {string} config.routerPassword        路由器密码
+     * @param {Boolean}config.isAutoConnect         是否自动连接设备热点,需要获取可扫描wifi的权限；如果开发者已经确认手机连接到设备热点，则传false
      * 
      * @return {object} promise.resolve             成功，无实际数据
      *
