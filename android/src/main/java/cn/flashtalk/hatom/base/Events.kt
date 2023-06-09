@@ -52,5 +52,11 @@ enum class EventProp {
      * 数据
      * Any
      */
-    data
+    data,
+
+    /**
+     * 编码
+     * Int
+     */
+    code
 }

@@ -1,6 +1,5 @@
 package cn.flashtalk.hatom.hik
 
-import android.os.Environment
 import android.util.Log
 import cn.flashtalk.hatom.base.Events
 import cn.flashtalk.hatom.base.EzPtzSpeed
@@ -49,15 +48,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
      */
     @ReactProp(name = "initSdkVersion")
     fun initSdkVersion(hikVideoView: HikVideoView, sdkVersion: String) {
-        try {
-            if (sdkVersion == SdkVersion.Unknown.name) {
-                throw Exception("not exist")
-            }
-            hikVideoView.initSdkVersion(SdkVersion.valueOf(sdkVersion))
-        } catch (e: Exception) {
-            Log.e(TAG, "initSdkVersion: 请使用枚举中记录的Sdk版本，Unknown 除外")
-            hikVideoView.initSdkVersion(SdkVersion.Unknown)
-        }
+        hikVideoView.initSdkVersion(SdkVersion.nameToEnum(sdkVersion))
     }
 
     /**
@@ -72,12 +63,11 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
      ***************************************************
      * Ezviz
      *
-     * @param  configMap.accessToken      (String) token
      * @param  configMap.deviceSerial     (String) 设备序列号
      * @param  configMap.cameraNo         (int)    通道号
      */
     @ReactProp(name = "initPlayer")
-    fun initPlayer(hikVideoView: HikVideoView, configMap: ReadableMap?) {
+    fun initPlayer(hikVideoView: HikVideoView, configMap: ReadableMap) {
         when (hikVideoView.getSdkVersion()) {
             SdkVersion.HikVideo_V2_1_0 -> {
                 hikVideoView.initPlayerHatom()
@@ -89,18 +79,10 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
 
             SdkVersion.EzvizVideo -> {
                 // 数据转换
-                configMap?.let {
-                    val accessToken     = it.getString   ("accessToken")
-                    val deviceSerial    = it.getString   ("deviceSerial")
-                    val cameraNo        = it.getInt      ("cameraNo")
-                    // 未配置
-                    if (deviceSerial == null || accessToken == null) {
-                        Log.e(TAG, "initPlayer: EzvizVideo 需配置正确的：accessToken、deviceSerial 和 cameraNo")
-                        return
-                    }
-                    // 配置
-                    hikVideoView.initPlayerEzviz(accessToken, deviceSerial, cameraNo)
-                }
+                val deviceSerial    = configMap.getString   ("deviceSerial").toString()
+                val cameraNo        = configMap.getInt      ("cameraNo")
+                // 配置
+                hikVideoView.initPlayerEzviz(deviceSerial, cameraNo)
             }
 
             SdkVersion.Unknown -> {
@@ -126,17 +108,15 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
      * Primordial
      */
     @ReactProp(name = "setPlayConfig")
-    fun setPlayConfig(hikVideoView: HikVideoView, configMap: ReadableMap?) {
+    fun setPlayConfig(hikVideoView: HikVideoView, configMap: ReadableMap) {
         when (hikVideoView.getSdkVersion()) {
             SdkVersion.HikVideo_V2_1_0 -> {
                 // 数据转换
                 val playConfig = PlayConfig()
-                configMap?.let {
-                    playConfig.hardDecode   = it.getBoolean      ("hardDecode")
-                    playConfig.privateData  = it.getBoolean      ("privateData")
-                    playConfig.timeout      = it.getInt          ("timeout")
-                    playConfig.secretKey    = it.getString       ("secretKey")
-                }
+                playConfig.hardDecode   = configMap.getBoolean      ("hardDecode")
+                playConfig.privateData  = configMap.getBoolean      ("privateData")
+                playConfig.timeout      = configMap.getInt          ("timeout")
+                playConfig.secretKey    = configMap.getString       ("secretKey")
                 // 配置
                 hikVideoView.setPlayConfigHatom(playConfig)
             }
@@ -175,19 +155,17 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
                 val headerMap = HashMap<String, String>()
                 if (configMap.hasKey("headers")) {
                     val headers = configMap.getMap("headers")
-                    headers?.let { header ->
-                        header.getString("TOKEN")?.         let { headerMap.put("TOKEN", it) }
-                        header.getString("START_TIME")?.    let { headerMap.put("START_TIME", it) }
-                        header.getString("END_TIME")?.      let { headerMap.put("END_TIME", it) }
-                    }
+                    headers!!.getString("TOKEN")?.       let { headerMap.put("TOKEN", it) }
+                    headers.getString("START_TIME")?.    let { headerMap.put("START_TIME", it) }
+                    headers.getString("END_TIME")?.      let { headerMap.put("END_TIME", it) }
                 }
 
                 // 设置
-                configMap.getString("path")?.let { hikVideoView.setDataSourceHatom(it, headerMap) }
+                hikVideoView.setDataSourceHatom(configMap.getString("path").toString(), headerMap)
             }
 
             SdkVersion.PrimordialVideo -> {
-                configMap.getString("path")?.let { hikVideoView.setDataSourcePrimordial(it) }
+                hikVideoView.setDataSourcePrimordial(configMap.getString("path").toString())
             }
 
             SdkVersion.Unknown -> {

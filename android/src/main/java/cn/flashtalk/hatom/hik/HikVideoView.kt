@@ -20,18 +20,16 @@ import com.facebook.react.uimanager.events.RCTEventEmitter
 import com.hikvision.hatomplayer.DefaultHatomPlayer
 import com.hikvision.hatomplayer.HatomPlayer
 import com.hikvision.hatomplayer.PlayConfig
-import com.videogo.constant.Constant
 import com.videogo.openapi.EZConstants
 import com.videogo.openapi.EZOpenSDK
 import com.videogo.openapi.EZOpenSDKListener
 import com.videogo.openapi.EZPlayer
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.runBlocking
-import java.io.File
+import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
 /**
@@ -198,15 +196,35 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
     }
 
     /**
+     * 录像结果回调
+     * 通过 Events.OnLocalRecord 通知 js
+     */
+    private val ezLocalRecordCallback = object: EZOpenSDKListener.EZStreamDownloadCallback {
+        override fun onSuccess(path: String?) {
+            // 回调结果
+            val propMap = Arguments.createMap()
+            propMap.putBoolean(EventProp.success.name, true)
+            propMap.putString(EventProp.data.name, path)
+            eventEmitter.receiveEvent(id, Events.OnLocalRecord.name, propMap)
+        }
+
+        override fun onError(error: EZOpenSDKListener.EZStreamDownloadError?) {
+            // 失败回调
+            val propMap = Arguments.createMap()
+            propMap.putBoolean(EventProp.success.name, false)
+            error?.let { propMap.putString(EventProp.message.name, error.name) }
+            eventEmitter.receiveEvent(id, Events.OnLocalRecord.name, propMap)
+        }
+    }
+
+    /**
      * 初始化播放器
-     * @param accessToken   token
      * @param deviceSerial  设备序列号
      * @param cameraNo      通道号
      */
-    fun initPlayerEzviz(accessToken: String, deviceSerial: String, cameraNo: Int) {
+    fun initPlayerEzviz(deviceSerial: String, cameraNo: Int) {
         this.deviceSerial = deviceSerial
         this.cameraNo = cameraNo
-        EZOpenSDK.getInstance().setAccessToken(accessToken)
         ezPlayer.setSurfaceHold(this.holder)
         ezPlayer.setHandler(ezHandler)
     }
@@ -240,23 +258,7 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
          * 录像结果回调接口
          * 通过 Events.OnLocalRecord 通知 js
          */
-        ezPlayer.setStreamDownloadCallback(object: EZOpenSDKListener.EZStreamDownloadCallback {
-            override fun onSuccess(path: String?) {
-                // 回调结果
-                val propMap = Arguments.createMap()
-                propMap.putBoolean(EventProp.success.name, true)
-                propMap.putString(EventProp.data.name, path)
-                eventEmitter.receiveEvent(id, Events.OnLocalRecord.name, propMap)
-            }
-
-            override fun onError(error: EZOpenSDKListener.EZStreamDownloadError?) {
-                // 失败回调
-                val propMap = Arguments.createMap()
-                propMap.putBoolean(EventProp.success.name, false)
-                error?.let { propMap.putString(EventProp.message.name, error.name) }
-                eventEmitter.receiveEvent(id, Events.OnLocalRecord.name, propMap)
-            }
-        })
+        ezPlayer.setStreamDownloadCallback(ezLocalRecordCallback)
 
         val recordFile = Utils.generateRecordPath(context)
         ezPlayer.startLocalRecordWithFile(recordFile)
@@ -305,8 +307,8 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
      * 操作失败将抛出异常
      */
     fun controlPtzEzviz(command: EZConstants.EZPTZCommand, action: EZConstants.EZPTZAction, speed: EzPtzSpeed = EzPtzSpeed.PTZ_SPEED_DEFAULT) {
-        runBlocking {
-            flow<Int> {
+        CoroutineScope(Dispatchers.IO).launch {
+            flow<String> {
                 EZOpenSDK.getInstance().controlPTZ(
                     deviceSerial,
                     cameraNo,
@@ -314,16 +316,14 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
                     action,
                     speed.value
                 )
-            }.flowOn(Dispatchers.IO).catch {
+            }.catch {
                 Log.e(TAG, "controlPtzEzviz: 操作异常", it)
                 // 失败回调
                 val propMap = Arguments.createMap()
                 propMap.putBoolean(EventProp.success.name, false)
                 propMap.putString(EventProp.message.name, it.message)
                 eventEmitter.receiveEvent(id, Events.OnPtzControl.name, propMap)
-            }.collect {
-
-            }
+            }.collect {}
         }
     }
 

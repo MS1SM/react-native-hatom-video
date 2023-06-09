@@ -1,5 +1,7 @@
 package cn.flashtalk.hatom.base
 
+import android.util.Log
+
 /**
  * sdk 版本枚举
  */
@@ -11,5 +13,21 @@ enum class SdkVersion {
     // 支持 Android MediaPlayer 播放器
     PrimordialVideo,
     // 支持萤石 SDK。萤石使用 Gradle 获得，不强调版本。
-    EzvizVideo
+    EzvizVideo;
+
+    companion object {
+        private const val TAG = "SdkVersion"
+
+        fun nameToEnum(name: String): SdkVersion {
+            return try {
+                if (name == Unknown.name) {
+                    throw Exception("not exist")
+                }
+                SdkVersion.valueOf(name)
+            } catch (e: Exception) {
+                Log.e(TAG, "nameToEnum: SdkVersion = $name 请使用枚举中记录的Sdk版本，请勿使用 Unknown")
+                Unknown
+            }
+        }
+    }
 }

@@ -56,9 +56,60 @@ export default class HatomVideo extends Component {
 
     /************************* NativeModules *************************/
 
-    // 初始化SDK
-    _initSdk(appKey, pringLog) {
-        NativeModules.RNHatomVideo.initSdk(this._sdkVersion, appKey, pringLog)
+    /**
+     * 初始化SDK
+     * @param {object}      config
+     * @param {string}      config.sdkVersion 
+     * @param {string}      config.appKey 
+     * @param {Boolean}     config.printLog 
+     * 
+     * **************************************************
+     * Ezviz
+     * @param {string} config.accessToken 
+     */
+    static _initSdk(config) {
+        NativeModules.RNHatomVideo.initSdk(config)
+    }
+
+    /**
+     * 查询设备信息
+     * @param {object}      config
+     * @param {string}      config.sdkVersion 
+     * 
+     * **************************************************
+     * Ezviz
+     * @param {string} config.deviceSerial   设备序列号
+     * @param {string} config.deviceType     设备型号
+     * 
+     * @return {object} promise.resolve      操作结果，返回数据对象。成功与失败都通过此方式返回结果，通过code判断。
+     *         {number?} resolve.code        不存在时表示查询成功，需要添加对象；存在时根据错误码确定设备状态。参考 设备添加流程：https://open.ys7.com/help/36
+     */
+    static _probeDeviceInfo(config) {
+        return NativeModules.RNHatomVideo.probeDeviceInfo(config)
+    }
+
+    /**
+     * wifi 配网
+     * @param {object}      config
+     * @param {string}      config.sdkVersion 
+     *
+     ***************************************************
+     * Ezviz
+     * @param {string} config.deviceSsid            设备ssid
+     * @param {string} config.devicePassword        设备密码
+     * @param {string} config.deviceSerial          设备序列号
+     * @param {string} config.verifyCode            设备验证码
+     * @param {string} config.routerSsid            路由器ssid，可传空，默认为"EZVIZ_"+设备序列号
+     * @param {string} config.routerPassword        路由器密码,可传空，默认为"EZVIZ_"+设备验证码
+     * @param {string} config.isAutoConnect         是否自动连接设备热点,需要获取可扫描wifi的权限；如果开发者已经确认手机连接到设备热点，则传false
+     * 
+     * @return {object} promise.resolve             成功，无实际数据
+     *
+     * @return {object} promise.reject              操作异常，返回异常内容
+     *         {String} reject.message              异常编码code
+     */
+     static _startConfigWifi(config) {
+        return NativeModules.RNHatomVideo.startConfigWifi(config)
     }
 
     /************************* setNativeProps *************************/
@@ -74,7 +125,6 @@ export default class HatomVideo extends Component {
      * **************************************************
      * Ezviz
      * @param {object} config
-     * @param {string} config.accessToken   token
      * @param {string} config.deviceSerial  设备序列号
      * @param {number} config.cameraNo      通道号
      */
