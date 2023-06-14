@@ -318,6 +318,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
 
     /**
      * 云台 PTZ 控制接口
+     * 通过 Events.OnPtzControl 通知结果
      *
      ***************************************************
      * Ezviz

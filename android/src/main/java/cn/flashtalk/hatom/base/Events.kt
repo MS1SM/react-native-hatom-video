@@ -20,6 +20,7 @@ enum class Events {
 
     /**
      * 云台控制回调
+     * 暂时只有失败才做回调
      * success： (Boolean)   操作是否成功
      * message： (String?)   信息，失败时的信息
      */

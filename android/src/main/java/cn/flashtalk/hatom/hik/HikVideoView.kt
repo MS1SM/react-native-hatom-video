@@ -323,7 +323,9 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
                 propMap.putBoolean(EventProp.success.name, false)
                 propMap.putString(EventProp.message.name, it.message)
                 eventEmitter.receiveEvent(id, Events.OnPtzControl.name, propMap)
-            }.collect {}
+            }.collect {
+
+            }
         }
     }
 

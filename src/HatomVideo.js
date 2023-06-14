@@ -25,6 +25,13 @@ export default class HatomVideo extends Component {
         this._streamFlowTimer = null
     }
 
+    componentWillUnmount() {
+        // 清理流量监听定时器
+        if (this._streamFlowTimer) {
+            clearInterval(this._streamFlowTimer)
+        }
+    }
+
     // 获取组件进行保存
     _assignRoot = (component) => {
         this._root = component
@@ -185,6 +192,7 @@ export default class HatomVideo extends Component {
 
     /**
      * 云台 PTZ 控制接口
+     * 通过 _onPtzControl 回调结果 暂时只有失败才回调结果
      *
      ***************************************************
      * Ezviz
@@ -253,7 +261,7 @@ export default class HatomVideo extends Component {
 
     /**
      * 录像结果回调
-     * nativeEvent.success： (Boolean)   是否成功，只有保存到系统相册才算成功
+     * nativeEvent.success： (Boolean)   是否成功
      * nativeEvent.message： (String?)   信息，失败时的信息
      * nativeEvent.data      (String?)   文件路径，成功时
      */
