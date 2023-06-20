@@ -11,15 +11,34 @@
 #import <React/RCTViewManager.h>
 #import <RNHatomVideo-Swift.h>
 
-// module
+#pragma mark - module
 @interface RCT_EXTERN_MODULE(RNHatomVideo, NSObject)
 
-// 初始化sdk 三个: 即三个参数
-RCT_EXTERN_METHOD(initSdk:::(BOOL))
+/**
+ 初始化 SDK
+ 一个冒号表示一个参数
+ 
+ .sdkVersion    (String)        sdk 版本
+ .appKey         (String)        appKey
+ .printLog        (Boolean)    是否打开日志，仅限 SDK 的日志，本封装库的日志不受控
+ 
+ **************************************************
+ Ezviz
+ .accessToken  (String)  token
+ */
+RCT_EXTERN_METHOD(initSdk:)
 
 @end
 
-// HikVideo
+#pragma mark - UI
+/**
+ * 集成版播放器
+ *
+ * **************************************************
+ * 支持海康 SDK V2.1.0
+ * 支持 原生 播放器
+ * 支持 萤石 SDK
+ */
 @interface RCT_EXTERN_MODULE(HikVideo, RCTViewManager)
 
 /**
@@ -28,29 +47,55 @@ RCT_EXTERN_METHOD(initSdk:::(BOOL))
 RCT_EXPORT_VIEW_PROPERTY(initSdkVersion, NSString)
 
 /**
- 初始化SDK
- NSDictionary.appKey      (String)        保留字段
- NSDictionary.printLog    (Boolean)       是否打印sdk日志
- */
-RCT_EXPORT_VIEW_PROPERTY(initSdk, NSDictionary)
-
-/**
  初始化播放器
- NSString 占位，无实际意义
+ *
+ ***************************************************
+ * HikVideo
+ *
+ ***************************************************
+ * Primordial
+ *
+ ***************************************************
+ * Ezviz
+ *
+ * @param  NSDictionary.deviceSerial     (String) 设备序列号
+ * @param  NSDictionary.cameraNo              (int)       通道号
  */
-RCT_EXPORT_VIEW_PROPERTY(initPlayer, NSString)
+RCT_EXPORT_VIEW_PROPERTY(initPlayer, NSDictionary)
 
 /**
- 设置视频配置
- 设置视频配置。在开始播放前设置。
+ * 设置视频配置
+ * 设置视频配置。在开始播放前设置。
+ *
+ ***************************************************
+ * HikVideo
+ *
+ * @Nullable NSDictionary.hardDecode  (Boolean)   是否使用硬解码，默认false
+ * @Nullable NSDictionary.privateData   (Boolean)   是否显示智能信息,默认false
+ * @Nullable NSDictionary.timeout         (int)             取流超时时间，单位秒，默认20s
+ * @Nullable NSDictionary.secretKey     (String)        解码秘钥。如果码流进行了加密，需要设置解码秘钥
+ *
+ ***************************************************
+ * Primordial
  */
 RCT_EXPORT_VIEW_PROPERTY(setPlayConfig, NSDictionary)
 
 /**
- 设置视频播放参数
- 设置视频参数，开启播放前设置
- NSDictionary.path          (String)                    播放url
- NSDictionary.headers    (NSDictionary)         其他请求参数
+ * 设置视频播放参数
+ * 设置视频参数，开启播放前设置。实时预览、录像回放开启播放时，需要用到的取流url及其他请求参数。
+ *
+ ***************************************************
+ * HikVideo
+ * @param NSDictionary.path             (String)                            播放url
+ * @param NSDictionary.headers      (ReadableNativeMap)     其他请求参数
+ *
+ * headers.TOKEN                (String)  用于headers中传递token的key
+ * headers.START_TIME       (String)  用于headers中传递回放开始时间的key
+ * headers.END_TIME          (String)  用于headers中传递回放结束时间的key
+ *
+ ***************************************************
+ * Primordial
+ * @param configMap.path    (String)                播放文件名
  */
 RCT_EXPORT_VIEW_PROPERTY(setDataSource, NSDictionary)
 
@@ -61,5 +106,88 @@ RCT_EXPORT_VIEW_PROPERTY(setDataSource, NSDictionary)
  NSString 占位，无实际意义
  */
 RCT_EXPORT_VIEW_PROPERTY(startPlay, NSString)
+
+/**
+ 停止播放
+ NSString 占位，无实际意义
+ */
+RCT_EXPORT_VIEW_PROPERTY(stopPlay, NSString)
+
+/**
+ 释放资源
+ NSString 占位，无实际意义
+ */
+RCT_EXPORT_VIEW_PROPERTY(release, NSString)
+
+/**
+ * 开启录像
+ *
+ ***************************************************
+ * Ezviz
+ */
+RCT_EXPORT_VIEW_PROPERTY(startLocalRecord, NSDictionary)
+
+/**
+ * 结束本地直播流录像
+ * 与 startLocalRecord 成对使用
+ * NSString 占位，无实际意义
+ *
+ * 通过 Events.OnLocalRecord 通知结果
+ */
+RCT_EXPORT_VIEW_PROPERTY(stopLocalRecord, NSString)
+
+/**
+ * 声音控制
+ * @param BOOL 是否打开
+ */
+RCT_EXPORT_VIEW_PROPERTY(sound, BOOL)
+
+/**
+ * 云台 PTZ 控制接口
+ * 通过 Events.OnPtzControl 通知结果
+ *
+ ***************************************************
+ * Ezviz
+ *
+ * @param  NSDictionary.command    (String)    参考 enum EZConstants.EZPTZCommand
+ * @param  NSDictionary.action     (String)     参考 enum EZConstants.EZPTZAction
+ * @param  NSDictionary.speed      (String)      可为空，EzPtzSpeed, 默认：PTZ_SPEED_DEFAULT
+ */
+RCT_EXPORT_VIEW_PROPERTY(controlPtz, NSDictionary)
+
+/**
+ * 对讲控制
+ *
+ ***************************************************
+ * Ezviz
+ *
+ * @param  NSDictionary.isStart                       (Boolean)    是否开启对讲
+ * @param  NSDictionary.isDeviceTalkBack   (Boolean)    可为空，默认true。用于判断对讲的设备，true表示与当前设备对讲，false表示与NVR设备下的IPC通道对讲。
+ */
+RCT_EXPORT_VIEW_PROPERTY(voiceTalk, NSDictionary)
+
+/**
+ * 截图
+ * 通过 Events.OnCapturePicture 通知结果
+ */
+RCT_EXPORT_VIEW_PROPERTY(capturePicture, NSDictionary)
+
+/**
+ * 设置视频清晰度
+ *
+ ***************************************************
+ * Ezviz
+ *
+ * @param  NSDictionary.videoLevel     (String)    参考 enum EZConstants.EZVideoLevel
+ */
+RCT_EXPORT_VIEW_PROPERTY(setVideoLevel, NSDictionary)
+
+/**
+ * 获取总流量值
+ * NSString 占位，无实际意义
+ *
+ * 通过 Events.OnStreamFlow 通知结果
+ */
+RCT_EXPORT_VIEW_PROPERTY(getStreamFlow, NSString)
 
 @end

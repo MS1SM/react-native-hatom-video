@@ -10,6 +10,7 @@
 		4E0560132A24A0AD00F05B56 /* RNHikVideoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0560112A24A0AD00F05B56 /* RNHikVideoManager.swift */; };
 		4E0560142A24A0AD00F05B56 /* HikVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0560122A24A0AD00F05B56 /* HikVideoView.swift */; };
 		4E0560162A24A0C200F05B56 /* SdkVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0560152A24A0C200F05B56 /* SdkVersion.swift */; };
+		515129CB9FE5B6FF67608D2A /* libPods-RNHatomVideo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A5CC294B9DA57480CDE9117 /* libPods-RNHatomVideo.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,12 +27,16 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRNHatomVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNHatomVideo.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		1A5CC294B9DA57480CDE9117 /* libPods-RNHatomVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RNHatomVideo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4E0560112A24A0AD00F05B56 /* RNHikVideoManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RNHikVideoManager.swift; sourceTree = "<group>"; };
 		4E0560122A24A0AD00F05B56 /* HikVideoView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HikVideoView.swift; sourceTree = "<group>"; };
 		4E0560152A24A0C200F05B56 /* SdkVersion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SdkVersion.swift; sourceTree = "<group>"; };
+		4E7F92A02A3AE58600F8DB62 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4E8DF13A2A05ECFB0002AF21 /* RNHatomVideo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RNHatomVideo-Bridging-Header.h"; sourceTree = "<group>"; };
 		4E9C8B392A08DB2C005670D3 /* RNHatomVideoPackage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNHatomVideoPackage.m; sourceTree = "<group>"; };
 		4E9C8B3D2A09EE59005670D3 /* RNHatomVideoModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNHatomVideoModule.swift; sourceTree = "<group>"; };
+		9C505733C4C7B5A4FDC3B1AA /* Pods-RNHatomVideo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNHatomVideo.release.xcconfig"; path = "Target Support Files/Pods-RNHatomVideo/Pods-RNHatomVideo.release.xcconfig"; sourceTree = "<group>"; };
+		ADB5BD42B8986C879D2BAAC7 /* Pods-RNHatomVideo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNHatomVideo.debug.xcconfig"; path = "Target Support Files/Pods-RNHatomVideo/Pods-RNHatomVideo.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +44,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				515129CB9FE5B6FF67608D2A /* libPods-RNHatomVideo.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,13 +87,33 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				4E7F92A02A3AE58600F8DB62 /* Info.plist */,
 				4E0560102A24A0AD00F05B56 /* hik */,
 				4E9C8B422A0B2BF6005670D3 /* module */,
 				4E9C8B402A0B2BD8005670D3 /* base */,
 				4E9C8B392A08DB2C005670D3 /* RNHatomVideoPackage.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
 				4E8DF13A2A05ECFB0002AF21 /* RNHatomVideo-Bridging-Header.h */,
+				F84641E07582EDDFD1272AB7 /* Pods */,
+				FCCD387368A0E5AC5280368A /* Frameworks */,
 			);
+			sourceTree = "<group>";
+		};
+		F84641E07582EDDFD1272AB7 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				ADB5BD42B8986C879D2BAAC7 /* Pods-RNHatomVideo.debug.xcconfig */,
+				9C505733C4C7B5A4FDC3B1AA /* Pods-RNHatomVideo.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		FCCD387368A0E5AC5280368A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1A5CC294B9DA57480CDE9117 /* libPods-RNHatomVideo.a */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -97,6 +123,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RNHatomVideo" */;
 			buildPhases = (
+				E62513A355C17F454731BB81 /* [CP] Check Pods Manifest.lock */,
 				58B511D71A9E6C8500147676 /* Sources */,
 				58B511D81A9E6C8500147676 /* Frameworks */,
 				58B511D91A9E6C8500147676 /* CopyFiles */,
@@ -142,6 +169,31 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		E62513A355C17F454731BB81 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-RNHatomVideo-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		58B511D71A9E6C8500147676 /* Sources */ = {
@@ -240,10 +292,15 @@
 		};
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = ADB5BD42B8986C879D2BAAC7 /* Pods-RNHatomVideo.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/../../node_modules/react-native-hatom-video/Frameworks/hatom-player-2_1_0";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../../node_modules/react-native-hatom-video/Frameworks/hatom-player-2_1_0",
+					"$(inherited)",
+				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
@@ -251,9 +308,13 @@
 					"$(SRCROOT)/../../react-native/React/**",
 					"$(SRCROOT)/../node_modules/react-native/React/**",
 				);
+				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"$(inherited)",
+				);
 				PRODUCT_NAME = RNHatomVideo;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "RNHatomVideo-Bridging-Header.h";
@@ -264,10 +325,15 @@
 		};
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9C505733C4C7B5A4FDC3B1AA /* Pods-RNHatomVideo.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/../../node_modules/react-native-hatom-video/Frameworks/hatom-player-2_1_0";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../../node_modules/react-native-hatom-video/Frameworks/hatom-player-2_1_0",
+					"$(inherited)",
+				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
@@ -275,9 +341,13 @@
 					"$(SRCROOT)/../../react-native/React/**",
 					"$(SRCROOT)/../node_modules/react-native/React/**",
 				);
+				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"$(inherited)",
+				);
 				PRODUCT_NAME = RNHatomVideo;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "RNHatomVideo-Bridging-Header.h";

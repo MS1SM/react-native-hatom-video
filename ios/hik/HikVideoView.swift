@@ -9,12 +9,13 @@
 import Foundation
 import UIKit
 import AVKit
+import EZOpenSDKFramework
 
 /**
  * 集成版 View
  *
  * **************************************************
- * 支持海康 SDK V2.1.0 版本的播放器
+ * 支持海康 SDK V2.1.0 Normal 版本的播放器
  *
  * 资源demo
  * https://open.hikvision.com/download/5c67f1e2f05948198c909700?type=10
@@ -23,46 +24,48 @@ import AVKit
  *
  * **************************************************
  * 使用原生播放器的控件
+ *
+ * **************************************************
+ * 支持 萤石 SDK
  */
 @available(iOS 8.0, *)
 @objc(HikVideoView)
-class HikVideoView: UITextView {
+class HikVideoView: UITextView, EZPlayerDelegate {
     let TAG = "HikVideoView"
     
     var sdkVersion = SdkVersion.Unknown
     
-    /*--------------- 属性入口配置 ---------------*/
+    // MARK: - 属性入口配置
+    
     // 初始化sdk版本
     @objc var initSdkVersion: NSString? {
         didSet {
             print(TAG, "initSdkVersion", initSdkVersion!)
-            switch initSdkVersion {
-            case "HikVideo_V2_1_0":
-                sdkVersion = SdkVersion.HikVideo_V2_1_0
-                break
-                
-            case "PrimordialVideo":
-                sdkVersion = SdkVersion.PrimordialVideo
-                break
-                
-            default :
-                sdkVersion = SdkVersion.Unknown
-                break
-            }
-        }
-    }
-    
-    // 初始化SDK
-    @objc var initSdk: NSDictionary? {
-        didSet {
-            print(TAG, "initSdk", initSdk!)
+            self.sdkVersion = SdkVersion.nameToEnum(name: initSdkVersion as! String)
         }
     }
     
     // 初始化播放器
-    @objc var initPlayer: NSString? {
+    @objc var initPlayer: NSDictionary? {
         didSet {
-            print(TAG, "initPlayer", initPlayer!)
+            let configDic = initPlayer as! Dictionary<String, Any>
+            switch sdkVersion {
+            case .Unknown:
+                print(TAG, "error 未 initSdkVersion")
+                
+            case .HikVideo_V2_1_0:
+                initPlayerHatom()
+                
+            case .PrimordialVideo:
+                initPlayerPrimordial()
+                
+            case .EzvizVideo:
+                // 数据
+                let deviceSerial    = configDic["deviceSerial"] as! String
+                let cameraNo        = configDic["cameraNo"]     as! Int
+                // 配置
+                initPlayerEzviz(deviceSerial: deviceSerial, cameraNo: cameraNo)
+            }
         }
     }
     
@@ -76,18 +79,20 @@ class HikVideoView: UITextView {
     // 设置视频播放参数
     @objc var setDataSource: NSDictionary? {
         didSet {
-            print(TAG, "setDataSource", setDataSource!)
             switch sdkVersion {
             case .Unknown:
-                print(TAG, "error SdkVersion 未配置")
+                print(TAG, "error 未 initSdkVersion")
                 
             case .HikVideo_V2_1_0:
                 let sourceDic = setDataSource as! Dictionary<String, Any>
-                text = sourceDic["path"] as? String
+                print(TAG, "setDataSource", sourceDic["path"] as! String)
                 
             case .PrimordialVideo:
                 let sourceDic = setDataSource as! Dictionary<String, Any>
-                setDataSourcePrimordial(path: (sourceDic["path"] as? String)!)
+                setDataSourcePrimordial(path: (sourceDic["path"] as! String))
+                
+            case .EzvizVideo:
+                print(TAG, "EzvizVideo setDataSource")
             }
         }
     }
@@ -95,21 +100,41 @@ class HikVideoView: UITextView {
     // 开始播放，"start" 将产生冲突异常，改为 startPlay
     @objc var startPlay: NSString? {
         didSet {
-            print(TAG, "startPlay", startPlay!)
             switch sdkVersion {
             case .Unknown:
-                print(TAG, "error SdkVersion 未配置")
+                print(TAG, "error 未 initSdkVersion")
                 
             case .HikVideo_V2_1_0:
                 print(TAG, "HikVideo startPlay")
                 
             case .PrimordialVideo:
                 startPrimordial()
+                
+            case .EzvizVideo:
+                startRealEzviz()
             }
         }
     }
     
-    /*--------------- 海康 SDK V2.1.0 播放器 ---------------*/
+    @objc var getStreamFlow: NSString? {
+        didSet {
+            switch sdkVersion {
+            case .Unknown:
+                print(TAG, "error 未 initSdkVersion")
+                
+            case .HikVideo_V2_1_0:
+                print(TAG, "HikVideo getStreamFlow")
+                
+            case .PrimordialVideo:
+                print(TAG, "PrimordialVideo getStreamFlow")
+                
+            case .EzvizVideo:
+                getStreamFlowEzviz()
+            }
+        }
+    }
+    
+    // MARK: - 海康 SDK V2.1.0 播放器
     /**
      * 初始化SDK
      */
@@ -145,7 +170,7 @@ class HikVideoView: UITextView {
 
     }
     
-    /*--------------- 原生播放器 ---------------*/
+    // MARK: - 原生播放器
     lazy var playerVc: AVPlayerViewController = {
         let playerVc = AVPlayerViewController()
         return playerVc
@@ -189,5 +214,64 @@ class HikVideoView: UITextView {
     func startPrimordial() {
         print(TAG, "_start")
         playerVc.player?.play()
+    }
+    
+    // MARK: - 萤石播放器
+    
+    // 设备序列号
+    var deviceSerialEzviz = ""
+    // 通道号
+    var cameraNoEzviz = -1
+    // 萤石视频播放器
+    lazy var ezPlayer: EZPlayer = {
+        if self.deviceSerialEzviz.isEmpty || self.cameraNoEzviz == -1 {
+            print(TAG, "error", "ezPlayer: 必须先使用正确参数调用initPlayer，初始化播放器，才可以调用其他方法")
+        }
+        return EZOpenSDK.createPlayer(withDeviceSerial: self.deviceSerialEzviz, cameraNo: self.cameraNoEzviz)
+    }()
+    
+    // MARK: EZPlayerDelegate
+    /**
+     播放器播放失败错误回调
+     */
+    func didPlayFailed(error: NSError) {
+        print(TAG, "error didPlayFailed", error)
+    }
+    
+    /**
+     播放器消息回调
+     */
+    func didReceivedMessage(messageCode: NSInteger) {
+        print(TAG, "didReceivedMessage", messageCode)
+    }
+    
+    // MARK: 播放器方法
+    /**
+     初始化
+     */
+    func initPlayerEzviz(deviceSerial: String, cameraNo: Int) {
+        // data
+        self.deviceSerialEzviz   = deviceSerial
+        self.cameraNoEzviz       = cameraNo
+        // EZPlayerDelegate
+        ezPlayer.delegate = self
+        // view
+        ezPlayer.setPlayerView(self)
+    }
+    
+    /**
+     开始直播
+     */
+    func startRealEzviz() {
+        ezPlayer.startRealPlay()
+    }
+    
+    /**
+     * 获取总流量值
+     *
+     * 通过 Events.OnStreamFlow 通知结果
+     */
+    func getStreamFlowEzviz() {
+        print(TAG, "getStreamFlowEzviz")
     }
 }

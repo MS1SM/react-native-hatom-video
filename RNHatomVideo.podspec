@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
   #s.dependency "others"
   
   s.pod_target_xcconfig  = {
-      'FRAMEWORK_SEARCH_PATHS'                => '$(PROJECT_DIR)/../../node_modules/react-native-hatom-video/Frameworks/hatom-player-2_1_0',
+      'FRAMEWORK_SEARCH_PATHS'                => '$(PROJECT_DIR)/../../node_modules/react-native-hatom-video/Frameworks/hatom-player-2_1_0 $(PROJECT_DIR)/../../ios/Pods/EZOpenSDK/dist/EZOpenSDK/dynamicSDK'
     }
 
 end

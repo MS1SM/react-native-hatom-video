@@ -97,7 +97,29 @@ android {
 
 
 
+#### 配置萤石
 
+##### Android
+
+无需额外配置
+
+##### IOS
+
+需要在 `PROJECT_DIR -> ios -> Podfile -> 对应target`  配置
+
+```
+pod 'EZOpenSDK', '~> 5.3' 
+```
+
+需要配置权限，详情参考萤石文档 https://open.ys7.com/help/43
+
+# 权限
+
+Android 无需配置权限（库已经做好了配置），但需要在使用到权限时动态申请
+
+ios 需要配置权限
+
+详情参考相关库使用到的具体权限
 
 ## Usage
 
