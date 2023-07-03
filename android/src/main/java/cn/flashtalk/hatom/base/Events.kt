@@ -8,7 +8,7 @@ enum class Events {
      * 截图回调
      * success： (Boolean)   是否成功，只有保存到系统相册才算成功
      */
-    OnCapturePicture,
+    onCapturePicture,
 
     /**
      * 录像结果回调
@@ -16,7 +16,7 @@ enum class Events {
      * message： (String?)   信息，失败时的信息
      * data：    (String?)   文件路径，成功时
      */
-    OnLocalRecord,
+    onLocalRecord,
 
     /**
      * 云台控制回调
@@ -24,13 +24,13 @@ enum class Events {
      * success： (Boolean)   操作是否成功
      * message： (String?)   信息，失败时的信息
      */
-    OnPtzControl,
+    onPtzControl,
 
     /**
      * 流量使用回调，总流量
      * data:    (Double)  总流量值，单位：B
      */
-    OnStreamFlow
+    onStreamFlow
 }
 
 /**

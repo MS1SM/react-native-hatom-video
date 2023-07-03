@@ -310,10 +310,10 @@ export default class HatomVideo extends Component {
             initSdkVersion: this._sdkVersion,
 
             // 回调事件
-            OnCapturePicture:   this._onCapturePicture,
-            OnLocalRecord:      this._onLocalRecord,
-            OnPtzControl:       this._onPtzControl,
-            OnStreamFlow:       this._onStreamFlow
+            onCapturePicture:   this._onCapturePicture,
+            onLocalRecord:      this._onLocalRecord,
+            onPtzControl:       this._onPtzControl,
+            onStreamFlow:       this._onStreamFlow
         });
 
         // 获取RN播放器

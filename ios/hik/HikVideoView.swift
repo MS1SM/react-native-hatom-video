@@ -35,6 +35,12 @@ class HikVideoView: UITextView, EZPlayerDelegate {
     
     var sdkVersion = SdkVersion.Unknown
     
+    // MARK: - Events
+    @objc var onCapturePicture: RCTDirectEventBlock?
+    @objc var onLocalRecord: RCTDirectEventBlock?
+    @objc var onPtzControl: RCTDirectEventBlock?
+    @objc var onStreamFlow: RCTDirectEventBlock?
+    
     // MARK: - 属性入口配置
     
     // 初始化sdk版本
@@ -273,5 +279,6 @@ class HikVideoView: UITextView, EZPlayerDelegate {
      */
     func getStreamFlowEzviz() {
         print(TAG, "getStreamFlowEzviz")
+        onStreamFlow!([EventProp.data.rawValue: 8848])
     }
 }

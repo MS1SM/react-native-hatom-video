@@ -197,7 +197,7 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
 
     /**
      * 录像结果回调
-     * 通过 Events.OnLocalRecord 通知 js
+     * 通过 Events.onLocalRecord 通知 js
      */
     private val ezLocalRecordCallback = object: EZOpenSDKListener.EZStreamDownloadCallback {
         override fun onSuccess(path: String?) {
@@ -205,7 +205,7 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
             val propMap = Arguments.createMap()
             propMap.putBoolean(EventProp.success.name, true)
             propMap.putString(EventProp.data.name, path)
-            eventEmitter.receiveEvent(id, Events.OnLocalRecord.name, propMap)
+            eventEmitter.receiveEvent(id, Events.onLocalRecord.name, propMap)
         }
 
         override fun onError(error: EZOpenSDKListener.EZStreamDownloadError?) {
@@ -213,7 +213,7 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
             val propMap = Arguments.createMap()
             propMap.putBoolean(EventProp.success.name, false)
             error?.let { propMap.putString(EventProp.message.name, error.name) }
-            eventEmitter.receiveEvent(id, Events.OnLocalRecord.name, propMap)
+            eventEmitter.receiveEvent(id, Events.onLocalRecord.name, propMap)
         }
     }
 
@@ -256,7 +256,7 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
     fun startLocalRecordEzviz() {
         /**
          * 录像结果回调接口
-         * 通过 Events.OnLocalRecord 通知 js
+         * 通过 Events.onLocalRecord 通知 js
          */
         ezPlayer.setStreamDownloadCallback(ezLocalRecordCallback)
 
@@ -275,13 +275,13 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
 
     /**
      * 截图
-     * 通过 Events.OnCapturePicture 通知结果
+     * 通过 Events.onCapturePicture 通知结果
      */
     fun capturePictureEzviz() {
         // 回调截图保存结果
         val propMap = Arguments.createMap()
         propMap.putBoolean(EventProp.success.name, SaveUtils.saveBitmapToAlbum(context, ezPlayer.capturePicture()))
-        eventEmitter.receiveEvent(id, Events.OnCapturePicture.name, propMap)
+        eventEmitter.receiveEvent(id, Events.onCapturePicture.name, propMap)
     }
 
     /**
@@ -322,7 +322,7 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
                 val propMap = Arguments.createMap()
                 propMap.putBoolean(EventProp.success.name, false)
                 propMap.putString(EventProp.message.name, it.message)
-                eventEmitter.receiveEvent(id, Events.OnPtzControl.name, propMap)
+                eventEmitter.receiveEvent(id, Events.onPtzControl.name, propMap)
             }.collect {
 
             }
@@ -368,11 +368,11 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
     /**
      * 获取总流量值
      *
-     * 通过 Events.OnStreamFlow 通知结果
+     * 通过 Events.onStreamFlow 通知结果
      */
     fun getStreamFlowEzviz() {
         val propMap = Arguments.createMap()
         propMap.putDouble(EventProp.data.name, ezPlayer.streamFlow.toDouble())
-        eventEmitter.receiveEvent(id, Events.OnStreamFlow.name, propMap)
+        eventEmitter.receiveEvent(id, Events.onStreamFlow.name, propMap)
     }
 }

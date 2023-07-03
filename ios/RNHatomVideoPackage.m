@@ -132,7 +132,7 @@ RCT_EXPORT_VIEW_PROPERTY(startLocalRecord, NSDictionary)
  * 与 startLocalRecord 成对使用
  * NSString 占位，无实际意义
  *
- * 通过 Events.OnLocalRecord 通知结果
+ * 通过 Events.onLocalRecord 通知结果
  */
 RCT_EXPORT_VIEW_PROPERTY(stopLocalRecord, NSString)
 
@@ -144,7 +144,7 @@ RCT_EXPORT_VIEW_PROPERTY(sound, BOOL)
 
 /**
  * 云台 PTZ 控制接口
- * 通过 Events.OnPtzControl 通知结果
+ * 通过 Events.onPtzControl 通知结果
  *
  ***************************************************
  * Ezviz
@@ -168,7 +168,7 @@ RCT_EXPORT_VIEW_PROPERTY(voiceTalk, NSDictionary)
 
 /**
  * 截图
- * 通过 Events.OnCapturePicture 通知结果
+ * 通过 Events.onCapturePicture 通知结果
  */
 RCT_EXPORT_VIEW_PROPERTY(capturePicture, NSDictionary)
 
@@ -186,8 +186,37 @@ RCT_EXPORT_VIEW_PROPERTY(setVideoLevel, NSDictionary)
  * 获取总流量值
  * NSString 占位，无实际意义
  *
- * 通过 Events.OnStreamFlow 通知结果
+ * 通过 Events.onStreamFlow 通知结果
  */
 RCT_EXPORT_VIEW_PROPERTY(getStreamFlow, NSString)
 
+#pragma mark Events
+
+/**
+ * 截图回调
+ * success： (Boolean)   是否成功，只有保存到系统相册才算成功
+ */
+RCT_EXPORT_VIEW_PROPERTY(onCapturePicture, RCTDirectEventBlock)
+
+/**
+ * 录像结果回调
+ * success： (Boolean)   是否成功，不保存到系统相册
+ * message： (String?)   信息，失败时的信息
+ * data：    (String?)   文件路径，成功时
+ */
+RCT_EXPORT_VIEW_PROPERTY(onLocalRecord, RCTDirectEventBlock)
+
+/**
+ * 云台控制回调
+ * 暂时只有失败才做回调
+ * success： (Boolean)   操作是否成功
+ * message： (String?)   信息，失败时的信息
+ */
+RCT_EXPORT_VIEW_PROPERTY(onPtzControl, RCTDirectEventBlock)
+
+/**
+ * 流量使用回调，总流量
+ * data:    (Double)  总流量值，单位：B
+ */
+RCT_EXPORT_VIEW_PROPERTY(onStreamFlow, RCTDirectEventBlock)
 @end
