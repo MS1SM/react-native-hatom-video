@@ -9,8 +9,7 @@
 /* Begin PBXBuildFile section */
 		4E0560132A24A0AD00F05B56 /* RNHikVideoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0560112A24A0AD00F05B56 /* RNHikVideoManager.swift */; };
 		4E0560142A24A0AD00F05B56 /* HikVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0560122A24A0AD00F05B56 /* HikVideoView.swift */; };
-		4E0560162A24A0C200F05B56 /* SdkVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0560152A24A0C200F05B56 /* SdkVersion.swift */; };
-		4EA137F62A52C54C00AC8936 /* Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA137F52A52C53F00AC8936 /* Events.swift */; };
+		4EA137F62A52C54C00AC8936 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA137F52A52C53F00AC8936 /* Constants.swift */; };
 		515129CB9FE5B6FF67608D2A /* libPods-RNHatomVideo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A5CC294B9DA57480CDE9117 /* libPods-RNHatomVideo.a */; };
 /* End PBXBuildFile section */
 
@@ -31,12 +30,11 @@
 		1A5CC294B9DA57480CDE9117 /* libPods-RNHatomVideo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RNHatomVideo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4E0560112A24A0AD00F05B56 /* RNHikVideoManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RNHikVideoManager.swift; sourceTree = "<group>"; };
 		4E0560122A24A0AD00F05B56 /* HikVideoView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HikVideoView.swift; sourceTree = "<group>"; };
-		4E0560152A24A0C200F05B56 /* SdkVersion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SdkVersion.swift; sourceTree = "<group>"; };
 		4E7F92A02A3AE58600F8DB62 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4E8DF13A2A05ECFB0002AF21 /* RNHatomVideo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RNHatomVideo-Bridging-Header.h"; sourceTree = "<group>"; };
 		4E9C8B392A08DB2C005670D3 /* RNHatomVideoPackage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNHatomVideoPackage.m; sourceTree = "<group>"; };
 		4E9C8B3D2A09EE59005670D3 /* RNHatomVideoModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNHatomVideoModule.swift; sourceTree = "<group>"; };
-		4EA137F52A52C53F00AC8936 /* Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Events.swift; sourceTree = "<group>"; };
+		4EA137F52A52C53F00AC8936 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		9C505733C4C7B5A4FDC3B1AA /* Pods-RNHatomVideo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNHatomVideo.release.xcconfig"; path = "Target Support Files/Pods-RNHatomVideo/Pods-RNHatomVideo.release.xcconfig"; sourceTree = "<group>"; };
 		ADB5BD42B8986C879D2BAAC7 /* Pods-RNHatomVideo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNHatomVideo.debug.xcconfig"; path = "Target Support Files/Pods-RNHatomVideo/Pods-RNHatomVideo.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -70,13 +68,12 @@
 			path = hik;
 			sourceTree = "<group>";
 		};
-		4E9C8B402A0B2BD8005670D3 /* base */ = {
+		4E9C8B402A0B2BD8005670D3 /* common */ = {
 			isa = PBXGroup;
 			children = (
-				4EA137F52A52C53F00AC8936 /* Events.swift */,
-				4E0560152A24A0C200F05B56 /* SdkVersion.swift */,
+				4EA137F52A52C53F00AC8936 /* Constants.swift */,
 			);
-			path = base;
+			path = common;
 			sourceTree = "<group>";
 		};
 		4E9C8B422A0B2BF6005670D3 /* module */ = {
@@ -93,7 +90,7 @@
 				4E7F92A02A3AE58600F8DB62 /* Info.plist */,
 				4E0560102A24A0AD00F05B56 /* hik */,
 				4E9C8B422A0B2BF6005670D3 /* module */,
-				4E9C8B402A0B2BD8005670D3 /* base */,
+				4E9C8B402A0B2BD8005670D3 /* common */,
 				4E9C8B392A08DB2C005670D3 /* RNHatomVideoPackage.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
 				4E8DF13A2A05ECFB0002AF21 /* RNHatomVideo-Bridging-Header.h */,
@@ -203,9 +200,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4EA137F62A52C54C00AC8936 /* Events.swift in Sources */,
+				4EA137F62A52C54C00AC8936 /* Constants.swift in Sources */,
 				4E0560132A24A0AD00F05B56 /* RNHikVideoManager.swift in Sources */,
-				4E0560162A24A0C200F05B56 /* SdkVersion.swift in Sources */,
 				4E0560142A24A0AD00F05B56 /* HikVideoView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

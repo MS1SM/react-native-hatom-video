@@ -8,10 +8,10 @@ import android.os.Message
 import android.text.TextUtils
 import android.util.Log
 import android.view.SurfaceView
-import cn.flashtalk.hatom.base.EventProp
-import cn.flashtalk.hatom.base.Events
-import cn.flashtalk.hatom.base.EzPtzSpeed
-import cn.flashtalk.hatom.base.SdkVersion
+import cn.flashtalk.hatom.common.EventProp
+import cn.flashtalk.hatom.common.Events
+import cn.flashtalk.hatom.common.EzPtzSpeed
+import cn.flashtalk.hatom.common.SdkVersion
 import cn.flashtalk.hatom.utils.SaveUtils
 import cn.flashtalk.hatom.utils.Utils
 import com.facebook.react.bridge.Arguments
@@ -60,6 +60,7 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
         private const val TAG = "HikVideoView"
     }
 
+    //region 公用
     /**
      * 事件发射器
      */
@@ -81,9 +82,9 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
     fun getSdkVersion(): SdkVersion {
         return sdkVersion
     }
+    //endregion
 
-    /************************* 海康 SDK V2.1.0 Normal 版本的播放器 *************************/
-
+    //region 海康 SDK V2.1.0 Normal 版本的播放器
     private val hatomPlayer: HatomPlayer by lazy {
         DefaultHatomPlayer()
     }
@@ -120,9 +121,9 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
     fun startHatom() {
         hatomPlayer.start()
     }
+    //endregion
 
-    /************************* 使用 Android MediaPlayer 播放器 *************************/
-
+    //region Android MediaPlayer 播放器
     private val mediaPlayer: MediaPlayer by lazy {
         MediaPlayer()
     }
@@ -153,8 +154,9 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
             mediaPlayer.start()
         }
     }
+    //endregion
 
-    /************************* 使用 萤石 播放器 *************************/
+    //region 萤石 播放器
     // 设备序列号
     private var deviceSerial = ""
     // 通道号
@@ -375,4 +377,5 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
         propMap.putDouble(EventProp.data.name, ezPlayer.streamFlow.toDouble())
         eventEmitter.receiveEvent(id, Events.onStreamFlow.name, propMap)
     }
+    //endregion
 }

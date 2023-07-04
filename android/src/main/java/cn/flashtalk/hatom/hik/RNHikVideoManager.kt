@@ -1,9 +1,9 @@
 package cn.flashtalk.hatom.hik
 
 import android.util.Log
-import cn.flashtalk.hatom.base.Events
-import cn.flashtalk.hatom.base.EzPtzSpeed
-import cn.flashtalk.hatom.base.SdkVersion
+import cn.flashtalk.hatom.common.Events
+import cn.flashtalk.hatom.common.EzPtzSpeed
+import cn.flashtalk.hatom.common.SdkVersion
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.common.MapBuilder
 import com.facebook.react.uimanager.SimpleViewManager
@@ -43,6 +43,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
         return builder.build()
     }
 
+    //region 属性
     /**
      * 初始化sdk版本
      */
@@ -473,4 +474,5 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
             }
         }
     }
+    //endregion
 }

@@ -1,8 +1,8 @@
 package cn.flashtalk.hatom.module
 
 import android.util.Log
-import cn.flashtalk.hatom.base.EventProp
-import cn.flashtalk.hatom.base.SdkVersion
+import cn.flashtalk.hatom.common.EventProp
+import cn.flashtalk.hatom.common.SdkVersion
 import com.ezviz.sdk.configwifi.EZWiFiConfigManager
 import com.ezviz.sdk.configwifi.ap.ApConfigParam
 import com.facebook.react.bridge.Arguments
@@ -33,6 +33,7 @@ class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : Re
         return NAME
     }
 
+    //region 内部方法
     private fun getSdkVersion(configMap: ReadableMap): SdkVersion {
         // 获取 sdkVersion
         var sdkVersion = ""
@@ -72,7 +73,9 @@ class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : Re
 
         }
     }
+    //endregion
 
+    //region 对外接口
     /**
      * 初始化 SDK
      * @param configMap.sdkVersion    (String)  sdk 版本
@@ -231,4 +234,5 @@ class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : Re
             }
         }
     }
+    //endregion
 }

@@ -1,16 +1,41 @@
 //
-//  SdkVersion.swift
+//  Events.swift
 //  RNHatomVideo
 //
-//  Created by 刘彬 on 2023/5/29.
+//  Created by 刘彬 on 2023/7/3.
 //  Copyright © 2023 Facebook. All rights reserved.
 //
 
 import Foundation
 
-/**
- * sdk 版本枚举
- */
+// MARK: - 与 js 交互时事件携带的参数
+enum EventProp: String {
+    /**
+     * 是否成功
+     * Boolean
+     */
+    case success = "success"
+    
+    /**
+     * 信息
+     * String
+     */
+    case message = "message"
+    
+    /**
+     * 数据
+     * Any
+     */
+    case data = "data"
+    
+    /**
+     * 编码
+     * Int
+     */
+    case code = "code"
+}
+
+// MARK: - sdk 版本枚举
 enum SdkVersion: String {
     // 没有配置，未知。实际使用不得配置此版本，仅用于报错提示。
     case Unknown = "Unknown"
