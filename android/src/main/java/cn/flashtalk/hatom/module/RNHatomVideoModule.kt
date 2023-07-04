@@ -3,8 +3,10 @@ package cn.flashtalk.hatom.module
 import android.util.Log
 import cn.flashtalk.hatom.common.EventProp
 import cn.flashtalk.hatom.common.SdkVersion
+import com.ezviz.sdk.configwifi.EZConfigWifiInfoEnum
 import com.ezviz.sdk.configwifi.EZWiFiConfigManager
 import com.ezviz.sdk.configwifi.ap.ApConfigParam
+import com.ezviz.sdk.configwifi.common.EZConfigWifiCallback
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
@@ -13,14 +15,12 @@ import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.ReadableMap
 import com.hikvision.hatomplayer.HatomPlayerSDK
 import com.videogo.openapi.EZOpenSDK
-import com.videogo.wificonfig.APWifiConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
-import java.lang.Exception
 
 class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
@@ -53,24 +53,21 @@ class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : Re
      * @return promise.reject       (Exception)     操作异常，返回异常内容
      *          reject.message      (String)        异常编码code
      */
-    private fun getEzConfigWifiCallback(promise: Promise): APWifiConfig.APConfigCallback {
-        return object: APWifiConfig.APConfigCallback() {
-            /**
-             * 配网成功
-             */
-            override fun onSuccess() {
-                EZWiFiConfigManager.stopAPConfig()
-                promise.resolve("")
+    private fun getEzConfigWifiCallback(promise: Promise): EZConfigWifiCallback {
+        return object: EZConfigWifiCallback() {
+            override fun onInfo(code: Int, message: String?) {
+                super.onInfo(code, message)
+                if (code == EZConfigWifiInfoEnum.CONNECTING_SENT_CONFIGURATION_TO_DEVICE.code) {
+                    EZWiFiConfigManager.stopAPConfig()
+                    promise.resolve("")
+                }
             }
 
-            /**
-             * 配网失败
-             */
-            override fun OnError(code: Int) {
+            override fun onError(code: Int, description: String?) {
+                super.onError(code, description)
                 EZWiFiConfigManager.stopAPConfig()
                 promise.reject(Exception(code.toString()))
             }
-
         }
     }
     //endregion

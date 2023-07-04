@@ -306,7 +306,7 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
      * @param action    控制启动/停止
      * @param speed     速度（0-2）
      *
-     * 操作失败将抛出异常
+     * 通过 Events.onPtzControl 通知失败结果
      */
     fun controlPtzEzviz(command: EZConstants.EZPTZCommand, action: EZConstants.EZPTZAction, speed: EzPtzSpeed = EzPtzSpeed.PTZ_SPEED_DEFAULT) {
         CoroutineScope(Dispatchers.IO).launch {

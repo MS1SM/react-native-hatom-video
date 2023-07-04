@@ -122,6 +122,7 @@ class HikVideoView: UITextView, EZPlayerDelegate {
         }
     }
     
+    // 流量获取
     @objc var getStreamFlow: NSString? {
         didSet {
             switch sdkVersion {
@@ -136,6 +137,33 @@ class HikVideoView: UITextView, EZPlayerDelegate {
                 
             case .EzvizVideo:
                 getStreamFlowEzviz()
+            }
+        }
+    }
+    
+    // 云台控制
+    @objc var controlPtz: NSDictionary? {
+        didSet {
+            let configDic = controlPtz as! Dictionary<String, Any>
+            switch sdkVersion {
+            case .Unknown:
+                print(TAG, "error 未 initSdkVersion")
+                
+            case .HikVideo_V2_1_0:
+                print(TAG, "HikVideo controlPtz")
+                
+            case .PrimordialVideo:
+                print(TAG, "PrimordialVideo controlPtz")
+                
+            case .EzvizVideo:
+                let command = EZConstants.PTZCommand[configDic["command"] as! String]!
+                let action = EZConstants.PTZAction[configDic["action"] as! String]!
+                var speed = EZConstants.PTZSpeed["PTZ_SPEED_DEFAULT"]!
+                if configDic.keys.contains("speed") {
+                    speed = EZConstants.PTZSpeed[configDic["speed"] as! String]!
+                }
+                
+                controlPtzEzviz(command: command, action: action, speed: speed)
             }
         }
     }
@@ -278,7 +306,29 @@ class HikVideoView: UITextView, EZPlayerDelegate {
      * 通过 Events.OnStreamFlow 通知结果
      */
     func getStreamFlowEzviz() {
-        print(TAG, "getStreamFlowEzviz")
-        onStreamFlow!([EventProp.data.rawValue: 8848])
+        onStreamFlow!([EventProp.data.rawValue: ezPlayer.getStreamFlow()])
+    }
+    
+    
+    /**
+     * 云台 PTZ 控制接口
+     * 该接口为耗时操作，必须在线程中调用
+     *
+     * @param command   ptz控制命令
+     * @param action         控制启动/停止
+     * @param speed         速度（0-2）
+     *
+     * 通过 Events.onPtzControl 通知失败结果
+     */
+    func controlPtzEzviz(command:EZPTZCommand, action:EZPTZAction, speed: Int) {
+        EZOpenSDK.controlPTZ(
+            deviceSerialEzviz,
+            cameraNo: cameraNoEzviz,
+            command: command,
+            action: action,
+            speed: speed) { error in
+                print(self.TAG, "controlPtzEzviz")
+                print(self.TAG, "controlPtzEzviz", error)
+            }
     }
 }

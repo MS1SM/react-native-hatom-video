@@ -273,7 +273,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
      * 结束本地直播流录像
      * 与 startLocalRecord 成对使用
      *
-     * 通过 Events.OnLocalRecord 通知结果
+     * 通过 Events.onLocalRecord 通知结果
      */
     @ReactProp(name = "stopLocalRecord")
     fun stopLocalRecord(hikVideoView: HikVideoView, phString: String?) {
@@ -319,7 +319,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
 
     /**
      * 云台 PTZ 控制接口
-     * 通过 Events.OnPtzControl 通知结果
+     * 通过 Events.onPtzControl 通知结果
      *
      ***************************************************
      * Ezviz
@@ -396,7 +396,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
 
     /**
      * 截图
-     * 通过 Events.OnCapturePicture 通知结果
+     * 通过 Events.onCapturePicture 通知结果
      */
     @ReactProp(name = "capturePicture")
     fun capturePicture(hikVideoView: HikVideoView, phString: String?) {
@@ -453,7 +453,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
 
     /**
      * 获取总流量值
-     * 通过 Events.OnStreamFlow 通知结果
+     * 通过 Events.onStreamFlow 通知结果
      */
     @ReactProp(name = "getStreamFlow")
     fun getStreamFlow(hikVideoView: HikVideoView, phString: String?) {
