@@ -121,6 +121,8 @@ ios 需要配置权限
 
 详情参考相关库使用到的具体权限
 
+萤石权限可参考`ios/Info.plist`
+
 ## Usage
 
 ```javascript

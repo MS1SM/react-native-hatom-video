@@ -170,7 +170,7 @@ RCT_EXPORT_VIEW_PROPERTY(voiceTalk, NSDictionary)
  * 截图
  * 通过 Events.onCapturePicture 通知结果
  */
-RCT_EXPORT_VIEW_PROPERTY(capturePicture, NSDictionary)
+RCT_EXPORT_VIEW_PROPERTY(capturePicture, NSString)
 
 /**
  * 设置视频清晰度
@@ -200,7 +200,7 @@ RCT_EXPORT_VIEW_PROPERTY(onCapturePicture, RCTDirectEventBlock)
 
 /**
  * 录像结果回调
- * success： (Boolean)   是否成功，不保存到系统相册
+ * success： (Boolean)   是否成功
  * message： (String?)   信息，失败时的信息
  * data：    (String?)   文件路径，成功时
  */

@@ -35,6 +35,15 @@ class HikVideoView: UITextView, EZPlayerDelegate {
     
     var sdkVersion = SdkVersion.Unknown
     
+    // MARK: - 内部方法
+    
+    /**
+     图片保存到手机相册的回调
+     */
+    @objc func imageSavedToAlbum(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+        onCapturePicture!([EventProp.success.rawValue: error == nil])
+    }
+    
     // MARK: - Events
     @objc var onCapturePicture: RCTDirectEventBlock?
     @objc var onLocalRecord: RCTDirectEventBlock?
@@ -168,6 +177,63 @@ class HikVideoView: UITextView, EZPlayerDelegate {
         }
     }
     
+    // 截图
+    @objc var capturePicture: NSString? {
+        didSet {
+            switch sdkVersion {
+            case .Unknown:
+                print(TAG, "error 未 initSdkVersion")
+                
+            case .HikVideo_V2_1_0:
+                print(TAG, "HikVideo capturePicture")
+                
+            case .PrimordialVideo:
+                print(TAG, "PrimordialVideo capturePicture")
+                
+            case .EzvizVideo:
+                capturePictureEzviz()
+            }
+        }
+    }
+    
+    // 开启录像
+    @objc var startLocalRecord: NSDictionary? {
+        didSet {
+            switch sdkVersion {
+            case .Unknown:
+                print(TAG, "error 未 initSdkVersion")
+                
+            case .HikVideo_V2_1_0:
+                print(TAG, "HikVideo startLocalRecord")
+                
+            case .PrimordialVideo:
+                print(TAG, "PrimordialVideo startLocalRecord")
+                
+            case .EzvizVideo:
+                startLocalRecordEzviz()
+            }
+        }
+    }
+    
+    // 结束录像
+    @objc var stopLocalRecord: NSString? {
+        didSet {
+            switch sdkVersion {
+            case .Unknown:
+                print(TAG, "error 未 initSdkVersion")
+                
+            case .HikVideo_V2_1_0:
+                print(TAG, "HikVideo stopLocalRecord")
+                
+            case .PrimordialVideo:
+                print(TAG, "PrimordialVideo stopLocalRecord")
+                
+            case .EzvizVideo:
+                stopLocalRecordEzviz()
+            }
+        }
+    }
+    
     // MARK: - 海康 SDK V2.1.0 播放器
     /**
      * 初始化SDK
@@ -252,6 +318,14 @@ class HikVideoView: UITextView, EZPlayerDelegate {
     
     // MARK: - 萤石播放器
     
+    // 视频存储地址的模板
+    let FORMAT_RECORD_PATH = NSHomeDirectory() + "/Documents/hatom/record/%@.mp4"
+    // 用于生成文件名的时间格式
+    let FORMAT_FILE_NAME = "yyyyMMddHHmmss"
+    
+    // 录像文件地址
+    var recordPathEzviz = ""
+    
     // 设备序列号
     var deviceSerialEzviz = ""
     // 通道号
@@ -312,7 +386,6 @@ class HikVideoView: UITextView, EZPlayerDelegate {
     
     /**
      * 云台 PTZ 控制接口
-     * 该接口为耗时操作，必须在线程中调用
      *
      * @param command   ptz控制命令
      * @param action         控制启动/停止
@@ -326,9 +399,66 @@ class HikVideoView: UITextView, EZPlayerDelegate {
             cameraNo: cameraNoEzviz,
             command: command,
             action: action,
-            speed: speed) { error in
-                print(self.TAG, "controlPtzEzviz")
-                print(self.TAG, "controlPtzEzviz", error)
+            speed: speed) {
+                (error: Error?) in
+                
+                if (error != nil) {
+                    print(self.TAG, "controlPtzEzviz error", error!)
+                    self.onPtzControl!([
+                        EventProp.success.rawValue: false,
+                        EventProp.message.rawValue: error!.localizedDescription
+                    ])
+                } else {
+                    print(self.TAG, "controlPtzEzviz success")
+                }
             }
+    }
+    
+    /**
+     * 截图
+     * 通过 Events.onCapturePicture 通知结果
+     */
+    func capturePictureEzviz() {
+        let image = ezPlayer.capturePicture(100)
+        UIImageWriteToSavedPhotosAlbum(
+            image!,
+            self,
+            #selector(imageSavedToAlbum),
+            nil
+        )
+    }
+    
+    /**
+     * 开启录像
+     */
+    func startLocalRecordEzviz() {
+        // 文件名
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = FORMAT_FILE_NAME
+        
+        // 文件路径
+        recordPathEzviz = String(
+            format: FORMAT_RECORD_PATH,
+            dateFormatter.string(from: Date())
+        )
+        
+        ezPlayer.startLocalRecord(withPathExt: recordPathEzviz)
+    }
+    
+    /**
+     * 结束本地直播流录像
+     * 与 startLocalRecordEzviz 成对使用
+     */
+    func stopLocalRecordEzviz() {
+        if recordPathEzviz == "" {
+            print(TAG, "stopLocalRecordEzviz error 未 开始录像")
+            return
+        }
+        
+        ezPlayer.stopLocalRecordExt() {
+            ret in
+            
+            print(self.TAG, "stopLocalRecordEzviz ret", ret)
+        }
     }
 }
