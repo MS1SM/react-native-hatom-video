@@ -44,6 +44,25 @@ class HikVideoView: UITextView, EZPlayerDelegate {
         onCapturePicture!([EventProp.success.rawValue: error == nil])
     }
     
+    /**
+     视频保存到手机相册的回调
+     */
+    @objc func videoSavedToAlbum(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+        if error != nil {
+            // 保存失败
+            onLocalRecord!([
+                EventProp.success.rawValue: false,
+                EventProp.message.rawValue: error!.localizedDescription,
+            ])
+        } else {
+            // 保存成功
+            onLocalRecord!([
+                EventProp.success.rawValue: true,
+                EventProp.data.rawValue:    "save to phone album",
+            ])
+        }
+    }
+    
     // MARK: - Events
     @objc var onCapturePicture: RCTDirectEventBlock?
     @objc var onLocalRecord: RCTDirectEventBlock?
@@ -318,8 +337,11 @@ class HikVideoView: UITextView, EZPlayerDelegate {
     
     // MARK: - 萤石播放器
     
-    // 视频存储地址的模板
-    let FORMAT_RECORD_PATH = NSHomeDirectory() + "/Documents/hatom/record/%@.mp4"
+    /**
+     视频存储地址的模板
+     视频文件最终需要拷贝到相册，所以直接存放到tmp目录
+     */
+    let FORMAT_RECORD_PATH = NSHomeDirectory() + "/tmp/hatom_record_%@.mov"
     // 用于生成文件名的时间格式
     let FORMAT_FILE_NAME = "yyyyMMddHHmmss"
     
@@ -442,12 +464,16 @@ class HikVideoView: UITextView, EZPlayerDelegate {
             dateFormatter.string(from: Date())
         )
         
-        ezPlayer.startLocalRecord(withPathExt: recordPathEzviz)
+        // 开始录制
+        let startLocal = ezPlayer.startLocalRecord(withPathExt: recordPathEzviz)
+        print(TAG, "startLocalRecordEzviz startLocal", startLocal)
     }
     
     /**
      * 结束本地直播流录像
      * 与 startLocalRecordEzviz 成对使用
+     *
+     * videoSavedToAlbum 回调结果
      */
     func stopLocalRecordEzviz() {
         if recordPathEzviz == "" {
@@ -456,9 +482,24 @@ class HikVideoView: UITextView, EZPlayerDelegate {
         }
         
         ezPlayer.stopLocalRecordExt() {
-            ret in
+            (ret: Bool) in
             
-            print(self.TAG, "stopLocalRecordEzviz ret", ret)
+            if ret {
+                // 录制成功，保存到相册，由 videoSavedToAlbum 回调结果
+                UISaveVideoAtPathToSavedPhotosAlbum(
+                    self.recordPathEzviz,
+                    self,
+                    #selector(self.videoSavedToAlbum),
+                    nil
+                )
+            } else {
+                // 录制失败，回调失败信息
+                self.onLocalRecord!([
+                    EventProp.success.rawValue: false,
+                    EventProp.message.rawValue: "record error",
+                ])
+            }
+            self.recordPathEzviz = ""
         }
     }
 }
