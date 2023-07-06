@@ -253,6 +253,35 @@ class HikVideoView: UITextView, EZPlayerDelegate {
         }
     }
     
+    // 对讲控制
+    @objc var voiceTalk: NSDictionary? {
+        didSet {
+            let configDic = voiceTalk as! Dictionary<String, Any>
+            switch sdkVersion {
+            case .Unknown:
+                print(TAG, "error 未 initSdkVersion")
+                
+            case .HikVideo_V2_1_0:
+                print(TAG, "HikVideo voiceTalk")
+                
+            case .PrimordialVideo:
+                print(TAG, "PrimordialVideo voiceTalk")
+                
+            case .EzvizVideo:
+                let isStart = configDic["isStart"] as! Bool
+                var isDeviceTalkBack = true
+                if configDic.keys.contains("isDeviceTalkBack") {
+                    isDeviceTalkBack = configDic["isDeviceTalkBack"] as! Bool
+                }
+                
+                voiceTalkEzviz(
+                    isStart: isStart,
+                    isDeviceTalkBack: isDeviceTalkBack
+                )
+            }
+        }
+    }
+    
     // MARK: - 海康 SDK V2.1.0 播放器
     /**
      * 初始化SDK
@@ -354,6 +383,13 @@ class HikVideoView: UITextView, EZPlayerDelegate {
     var cameraNoEzviz = -1
     // 萤石视频播放器
     lazy var ezPlayer: EZPlayer = {
+        if self.deviceSerialEzviz.isEmpty || self.cameraNoEzviz == -1 {
+            print(TAG, "error", "ezPlayer: 必须先使用正确参数调用initPlayer，初始化播放器，才可以调用其他方法")
+        }
+        return EZOpenSDK.createPlayer(withDeviceSerial: self.deviceSerialEzviz, cameraNo: self.cameraNoEzviz)
+    }()
+    // 萤石对讲播放器
+    lazy var talkEzPlayer: EZPlayer = {
         if self.deviceSerialEzviz.isEmpty || self.cameraNoEzviz == -1 {
             print(TAG, "error", "ezPlayer: 必须先使用正确参数调用initPlayer，初始化播放器，才可以调用其他方法")
         }
@@ -500,6 +536,19 @@ class HikVideoView: UITextView, EZPlayerDelegate {
                 ])
             }
             self.recordPathEzviz = ""
+        }
+    }
+    
+    /**
+     * 对讲控制
+     * @param isStart           是否开启对讲
+     * @param isDeviceTalkBack  (安卓使用的参数，ios并未使用）用于判断对讲的设备，true表示与当前设备对讲，false表示与NVR设备下的IPC通道对讲。
+     */
+    func voiceTalkEzviz(isStart: Bool, isDeviceTalkBack: Bool) {
+        if isStart {
+            talkEzPlayer.startVoiceTalk()
+        } else {
+            talkEzPlayer.stopVoiceTalk()
         }
     }
 }
