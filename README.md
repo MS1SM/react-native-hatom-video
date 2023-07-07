@@ -123,6 +123,14 @@ ios 需要配置权限
 
 萤石权限可参考`ios/Info.plist`
 
+配网需要
+
+```
+Xcode -> Targets -> Signing&Capabilities -> Capability
+1. Access WiFi Information（这个权限需要苹果开发证书）
+2. BackGround Modes
+```
+
 ## Usage
 
 ```javascript

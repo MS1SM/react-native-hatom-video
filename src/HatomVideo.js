@@ -102,6 +102,10 @@ export default class HatomVideo extends Component {
      *
      ***************************************************
      * Ezviz
+     * 
+     * Android 可以自动切换Wi-Fi实现配网；iOS 需要先连接到设备wifi，才可以开始配网
+     * 
+     * Android
      * @param {string} config.deviceSsid            设备wifi ssid，可传空，默认为"EZVIZ_" + 设备序列号
      * @param {string} config.devicePassword        设备wifi 密码， 可传空，默认为"EZVIZ_" + 设备验证码
      * @param {string} config.deviceSerial          设备序列号
@@ -109,6 +113,12 @@ export default class HatomVideo extends Component {
      * @param {string} config.routerSsid            路由器ssid
      * @param {string} config.routerPassword        路由器密码
      * @param {Boolean}config.isAutoConnect         是否自动连接设备热点,需要获取可扫描wifi的权限；如果开发者已经确认手机连接到设备热点，则传false
+     * 
+     * iOS
+     * @param {string} config.deviceSerial          设备序列号
+     * @param {string} config.verifyCode            设备验证码
+     * @param {string} config.routerSsid            路由器ssid
+     * @param {string} config.routerPassword        路由器密码
      * 
      * @return {object} promise.resolve             成功，无实际数据
      *

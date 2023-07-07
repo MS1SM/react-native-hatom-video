@@ -205,9 +205,9 @@ class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : Re
                 val deviceSerial = configMap.getString("deviceSerial")
                 // 设备验证码
                 val verifyCode = configMap.getString("verifyCode")
-                // 设备ssid
+                // 路由器ssid
                 val routerSsid = configMap.getString("routerSsid")
-                // 设备密码
+                // 路由器密码
                 val routerPassword = configMap.getString("routerPassword")
                 // 是否自动连接设备热点
                 val isAutoConnect = configMap.getBoolean("isAutoConnect")

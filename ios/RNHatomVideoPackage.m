@@ -28,6 +28,46 @@
  */
 RCT_EXTERN_METHOD(initSdk:)
 
+/**
+ * 查询设备信息
+ *
+ * config.sdkVersion     (String)    sdk 版本
+ *
+ ***************************************************
+ * Ezviz
+ * config.deviceSerial   (String)    设备序列号
+ * config.deviceType     (String)    设备型号
+ *
+ * 使用 Promise 回调结果
+ * resolve      (WritableMap)   操作结果，返回数据对象。成功与失败都通过此方式返回结果，通过code判断。
+ *         resolve.code         (Int?)          不存在时表示查询成功，需要添加对象；存在时根据错误码确定设备状态。参考 设备添加流程：https://open.ys7.com/help/36
+ * reject         未使用
+ */
+RCT_EXTERN_METHOD(
+                  probeDeviceInfo: (NSDictionary*)config
+                  resolve: (RCTPromiseResolveBlock)resolve
+                  reject: (RCTPromiseRejectBlock)reject
+)
+
+/**
+ * wifi 配网
+ *
+ * config.sdkVersion     (String)       sdk 版本
+ * resolve and reject     (Promise)   使用 Promise 回调结果
+ *
+ ***************************************************
+ * Ezviz
+ * config.deviceSerial                   (String)    设备序列号
+ * config.verifyCode                     (String)    设备验证码
+ * config.routerSsid                      (String)    路由器ssid
+ * config.routerPassword             (String)    路由器密码
+ */
+RCT_EXTERN_METHOD(
+                  startConfigWifi: (NSDictionary*)config
+                  resolve: (RCTPromiseResolveBlock)resolve
+                  reject: (RCTPromiseRejectBlock)reject
+)
+
 @end
 
 #pragma mark - UI
