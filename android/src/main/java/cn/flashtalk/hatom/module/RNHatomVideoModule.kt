@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
+
 class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
     companion object {
@@ -108,6 +109,10 @@ class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : Re
                 EZOpenSDK.initLib(currentActivity!!.application, appKey)
                 // 设置 token
                 EZOpenSDK.getInstance().setAccessToken(configMap.getString("accessToken"))
+            }
+
+            SdkVersion.Imou -> {
+                Log.e(TAG, "initSdk: ${SdkVersion.Imou.name}")
             }
         }
     }

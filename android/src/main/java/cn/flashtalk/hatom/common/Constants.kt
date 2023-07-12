@@ -79,7 +79,9 @@ enum class SdkVersion {
     // 支持 Android MediaPlayer 播放器
     PrimordialVideo,
     // 支持萤石 SDK。萤石使用 Gradle 获得，不强调版本。
-    EzvizVideo;
+    EzvizVideo,
+    // 乐橙云
+    Imou;
 
     companion object {
         private const val TAG = "SdkVersion"

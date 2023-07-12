@@ -5,6 +5,7 @@ export function SdkVersionEnum() {
     this.HikVideo_2_1_0     = "HikVideo_V2_1_0"
     this.PrimordialVideo    = "PrimordialVideo"
     this.EzvizVideo         = "EzvizVideo"
+    this.Imou               = "Imou"
 
     /**
      * 枚举数组
@@ -12,7 +13,8 @@ export function SdkVersionEnum() {
     this.enums = [
         this.HikVideo_2_1_0,
         this.PrimordialVideo,
-        this.EzvizVideo
+        this.EzvizVideo,
+        this.Imou
     ]
 }
 

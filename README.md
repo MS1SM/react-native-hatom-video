@@ -131,6 +131,8 @@ Xcode -> Targets -> Signing&Capabilities -> Capability
 2. BackGround Modes
 ```
 
+需要自行配置混淆，未配置但启用混淆将有异常
+
 ## Usage
 
 ```javascript

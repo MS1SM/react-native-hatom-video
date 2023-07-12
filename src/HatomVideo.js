@@ -2,14 +2,23 @@ import React, { Component } from 'react';
 import {
     requireNativeComponent,
     ViewPropTypes,
-    NativeModules
+    NativeModules,
+    Dimensions
 } from 'react-native';
 import PropTypes from 'prop-types';
 import { SdkVersionEnum } from './common';
+import { getToken } from 'react-native-hatom-video/src/api/HikApi';
+import Log from 'react-native-hatom-video/src/utils/Log';
+import Video from "react-native-video";
 
 const TAG = 'HatomVideo';
 
 export const SdkVersion = new SdkVersionEnum()
+
+// 全局属性【用于保证that的有效区域】
+let that;
+// 全局属性【用于获取屏幕宽高等信息】
+const windowSize = Dimensions.get("window");
 
 export default class HatomVideo extends Component {
 
@@ -23,6 +32,30 @@ export default class HatomVideo extends Component {
 
         // 流量监听定时器
         this._streamFlowTimer = null
+
+        that = this;
+
+        // 用于 GBVideo 的控制
+        this.state = {
+            // 数据源
+            datasource: "",
+            // 是否暂停
+            isPaused: true,
+            // 总时长
+            duration: 0,
+            // 当前播放时间
+            currentTime: 0,
+            // 进度条的进度
+            sliderValue: 0,
+            // 是否在拖动中
+            isSlider:false,
+
+            //用来控制进入全屏的属性
+            videoViewWidth: windowSize.width,
+            videoViewHeight: this.props.style.height,
+            isFullScreen: false,
+            isVisiblePausedSliderFullScreen: false,
+        };
     }
 
     componentWillUnmount() {
@@ -35,11 +68,33 @@ export default class HatomVideo extends Component {
     // 获取组件进行保存
     _assignRoot = (component) => {
         this._root = component
+        // 支持国标使用 GBVideo 单独存储一个播放器
+        if (this.supportGB()) {
+            that._gbVideo = component
+        }
     }
     // 调用这个组件的setNativeProps方法
     setNativeProps(nativeProps) {
         this._root.setNativeProps(nativeProps);
     };
+
+    /**
+     * 是否支持国标
+     * @param {String} sdkVersion? 可为空，空使用this._sdkVersion 判断
+     * @return {Boolean} 支持：true
+     */
+    supportGB(sdkVersion) {
+        let sdkParam = sdkVersion ? sdkVersion : this._sdkVersion
+
+        switch (sdkParam) {
+            case SdkVersion.Imou:
+                return true
+                break
+            
+            default:
+                return false
+        }
+    }
 
     /************************* public *************************/
 
@@ -59,6 +114,37 @@ export default class HatomVideo extends Component {
             },
             1000
         )
+    }
+
+    getToken() {
+        if (this.supportGB()) {
+            this._getToken()
+        } else {
+            Log.debug(TAG, "getToken", "default")
+        }
+    }
+
+    /**
+     * 设置播放参数
+     * @param {String} path 播放地址
+     */
+    setDataSource(path) {
+        if (this.supportGB()) {
+            that.setState({
+                datasource: path,
+            })
+            that.setState({
+                isPaused: false,
+            })
+
+        } else {
+            this._setDataSource(path)
+        }
+    }
+
+    /************************* HikApi *************************/
+    _getToken() {
+        getToken()
     }
 
     /************************* NativeModules *************************/
@@ -149,7 +235,12 @@ export default class HatomVideo extends Component {
         this.setNativeProps({initPlayer: config})
     }
 
-    // 设置播放参数
+    /**
+     * 设置播放参数
+     * 请使用 setDataSource
+     * 
+     * @param {String} path 播放地址
+     */
     _setDataSource(path) {
         this.setNativeProps({setDataSource: {
             path: path
@@ -313,29 +404,76 @@ export default class HatomVideo extends Component {
     }
 
     render() {
-        // 参数复制
-        const nativeProps = Object.assign({}, this.props);
-        Object.assign(nativeProps, {
-            // 属性
-            initSdkVersion: this._sdkVersion,
+        if (!this.supportGB()) {
+            // 不支持国标使用 sdk 封装的控件
 
-            // 回调事件
-            onCapturePicture:   this._onCapturePicture,
-            onLocalRecord:      this._onLocalRecord,
-            onPtzControl:       this._onPtzControl,
-            onStreamFlow:       this._onStreamFlow
-        });
+            // 参数复制
+            const nativeProps = Object.assign({}, this.props);
+            Object.assign(nativeProps, {
+                // 属性
+                initSdkVersion: this._sdkVersion,
 
-        // 获取RN播放器
-        const RnHatonVideo = getRnHatonVideo("HikVideo")
+                // 回调事件
+                onCapturePicture:   this._onCapturePicture,
+                onLocalRecord:      this._onLocalRecord,
+                onPtzControl:       this._onPtzControl,
+                onStreamFlow:       this._onStreamFlow
+            });
 
-        // 页面
-        return (
-          <RnHatonVideo
-            ref={this._assignRoot}
-            {...nativeProps}
-            />
-        );
+            // 获取RN播放器
+            const RnHatonVideo = getRnHatonVideo("HikVideo")
+
+            // HikVideo 页面
+            return (
+                <RnHatonVideo
+                ref={this._assignRoot}
+                {...nativeProps}
+                />
+            );
+
+        } else {
+            // 支持国标使用 RNVideo 播放器
+            return (
+                <Video 
+                    source={{uri:that.state.datasource}}
+                    ref={this._assignRoot}
+                    style={{ width: that.state.videoViewWidth, height: that.state.videoViewHeight, backgroundColor: "#000000" }}
+
+                    allowsExternalPlayback={false} // 不允许导出 或 其他播放器播放
+
+                    paused={that.state.isPaused} // 控制视频是否播放
+                    resizeMode="cover"
+
+                    posterResizeMode="cover"
+
+                    onLoadStart={(event)=>{
+                        Log.info(TAG, "RNVideo onLoadStart", '开始加载')
+                    }}
+
+                    onBuffer={(event)=>{
+                        Log.info(TAG, "RNVideo onBuffer", '正在缓冲')
+                    }}
+
+                    onReadyForDisplay={(event)=>{
+                        Log.info(TAG, "RNVideo onReadyForDisplay", '准备播放')
+                    }}
+
+                    onEnd={(event)=>{
+                        Log.info(TAG, "RNVideo onReadyForDisplay", '播放结束')
+                    }}
+
+                    onLoad={(event) => {
+                        Log.info(TAG, "RNVideo onLoad", '加载时')
+                    }}
+
+                    onProgress={(event) => {
+                        // Log.info(TAG, "RNVideo onProgress", '进度')
+                    }}
+
+                    fullscreen={that.state.isFullScreen}
+                />
+            )
+        }
     }
 }
 
@@ -369,13 +507,13 @@ HatomVideo.propTypes = {
 let RnHatonVideoList = []
 
 const getRnHatonVideo = (sdkVersion) => {
-    console.info(TAG, sdkVersion)
+    Log.info(TAG, "getRnHatonVideo", sdkVersion)
     
     // 寻找已注册组件
     for (let i=0; i<RnHatonVideoList.length; i++) {
         let item = RnHatonVideoList[i]
         if (item.version == sdkVersion) {
-            console.log(TAG, "已注册")
+            Log.info(TAG, "getRnHatonVideo", "已注册")
             return item.video
         }
     }
