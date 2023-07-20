@@ -19,6 +19,8 @@ import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.events.RCTEventEmitter
 import com.hikvision.hatomplayer.DefaultHatomPlayer
 import com.hikvision.hatomplayer.HatomPlayer
+import com.hikvision.hatomplayer.PlayCallback
+import com.hikvision.hatomplayer.PlayCallback.Status
 import com.hikvision.hatomplayer.PlayConfig
 import com.videogo.openapi.EZConstants
 import com.videogo.openapi.EZOpenSDK
@@ -38,7 +40,7 @@ import java.lang.ref.WeakReference
  *
  * **************************************************
  * 支持海康 SDK V2.1.0 Normal 版本的播放器
- * 
+ *
  * @error NoPlayerSDK中是可以与萤石SDK共用的版本，实际测试无法使用
  *
  * 资源demo
@@ -89,11 +91,28 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
         DefaultHatomPlayer()
     }
 
+    // 播放器回调
+    private val hatomPlayCallback = PlayCallback.PlayStatusCallback { status: Status, errorCode: String ->
+        run {
+            Log.i(TAG, "hatomPlayCallback: $status")
+            if (!TextUtils.isEmpty(errorCode)) {
+                Log.e(TAG, "hatomPlayCallback: $errorCode")
+            }
+        }
+    }
+
     /**
      * 初始化播放器
      */
     fun initPlayerHatom() {
         hatomPlayer.setSurfaceHolder(this.holder)
+        // 默认 PlayConfig
+        var playerConfig = PlayConfig()
+        playerConfig.hardDecode = true
+        playerConfig.privateData = true
+        setPlayConfigHatom(playerConfig)
+        // 播放回调
+        hatomPlayer.setPlayStatusCallback(hatomPlayCallback)
     }
 
     /**
@@ -119,7 +138,14 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
      * 此方法需要在子线程中执行
      */
     fun startHatom() {
-        hatomPlayer.start()
+        CoroutineScope(Dispatchers.IO).launch {
+            flow<String> {
+                hatomPlayer.start()
+            }.catch {
+                Log.e(TAG, "startHatom: 播放异常", it)
+            }.collect {
+            }
+        }
     }
     //endregion
 

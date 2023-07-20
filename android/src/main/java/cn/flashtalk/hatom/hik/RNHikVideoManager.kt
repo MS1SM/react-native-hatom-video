@@ -70,7 +70,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     @ReactProp(name = "initPlayer")
     fun initPlayer(hikVideoView: HikVideoView, configMap: ReadableMap) {
         when (hikVideoView.getSdkVersion()) {
-            SdkVersion.HikVideo_V2_1_0 -> {
+            SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
                 hikVideoView.initPlayerHatom()
             }
 
@@ -111,7 +111,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     @ReactProp(name = "setPlayConfig")
     fun setPlayConfig(hikVideoView: HikVideoView, configMap: ReadableMap) {
         when (hikVideoView.getSdkVersion()) {
-            SdkVersion.HikVideo_V2_1_0 -> {
+            SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
                 // 数据转换
                 val playConfig = PlayConfig()
                 playConfig.hardDecode   = configMap.getBoolean      ("hardDecode")
@@ -124,7 +124,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
 
             SdkVersion.PrimordialVideo -> {
             }
-            
+
             SdkVersion.Unknown -> {
                 Log.e(TAG, "未 initSdkVersion")
             }
@@ -151,10 +151,11 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     @ReactProp(name = "setDataSource")
     fun setDataSource(hikVideoView: HikVideoView, configMap: ReadableMap) {
         when (hikVideoView.getSdkVersion()) {
-            SdkVersion.HikVideo_V2_1_0 -> {
+            SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
                 // 数据转换
-                val headerMap = HashMap<String, String>()
+                var headerMap: HashMap<String, String>? = null
                 if (configMap.hasKey("headers")) {
+                    headerMap = HashMap<String, String>()
                     val headers = configMap.getMap("headers")
                     headers!!.getString("TOKEN")?.       let { headerMap.put("TOKEN", it) }
                     headers.getString("START_TIME")?.    let { headerMap.put("START_TIME", it) }
@@ -183,7 +184,8 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     @ReactProp(name = "startPlay")
     fun start(hikVideoView: HikVideoView, phString: String?) {
         when (hikVideoView.getSdkVersion()) {
-            SdkVersion.HikVideo_V2_1_0 -> {
+            SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
+                hikVideoView.startHatom()
             }
 
             SdkVersion.PrimordialVideo -> {
@@ -206,7 +208,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     @ReactProp(name = "stopPlay")
     fun stop(hikVideoView: HikVideoView, phString: String?) {
         when (hikVideoView.getSdkVersion()) {
-            SdkVersion.HikVideo_V2_1_0 -> {
+            SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
             }
 
             SdkVersion.PrimordialVideo -> {
@@ -228,7 +230,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     @ReactProp(name = "release")
     fun release(hikVideoView: HikVideoView, phString: String?) {
         when (hikVideoView.getSdkVersion()) {
-            SdkVersion.HikVideo_V2_1_0 -> {
+            SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
             }
 
             SdkVersion.PrimordialVideo -> {
@@ -253,7 +255,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     @ReactProp(name = "startLocalRecord")
     fun startLocalRecord(hikVideoView: HikVideoView, configMap: ReadableMap) {
         when (hikVideoView.getSdkVersion()) {
-            SdkVersion.HikVideo_V2_1_0 -> {
+            SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
             }
 
             SdkVersion.PrimordialVideo -> {
@@ -278,7 +280,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     @ReactProp(name = "stopLocalRecord")
     fun stopLocalRecord(hikVideoView: HikVideoView, phString: String?) {
         when (hikVideoView.getSdkVersion()) {
-            SdkVersion.HikVideo_V2_1_0 -> {
+            SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
             }
 
             SdkVersion.PrimordialVideo -> {
@@ -301,7 +303,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     @ReactProp(name = "sound")
     fun sound(hikVideoView: HikVideoView, isOpen: Boolean) {
         when (hikVideoView.getSdkVersion()) {
-            SdkVersion.HikVideo_V2_1_0 -> {
+            SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
             }
 
             SdkVersion.PrimordialVideo -> {
@@ -331,7 +333,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     @ReactProp(name = "controlPtz")
     fun controlPtz(hikVideoView: HikVideoView, configMap: ReadableMap) {
         when (hikVideoView.getSdkVersion()) {
-            SdkVersion.HikVideo_V2_1_0 -> {
+            SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
             }
 
 
@@ -371,7 +373,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     @ReactProp(name = "voiceTalk")
     fun voiceTalk(hikVideoView: HikVideoView, configMap: ReadableMap) {
         when (hikVideoView.getSdkVersion()) {
-            SdkVersion.HikVideo_V2_1_0 -> {
+            SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
             }
 
 
@@ -401,7 +403,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     @ReactProp(name = "capturePicture")
     fun capturePicture(hikVideoView: HikVideoView, phString: String?) {
         when (hikVideoView.getSdkVersion()) {
-            SdkVersion.HikVideo_V2_1_0 -> {
+            SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
             }
 
 
@@ -429,7 +431,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     @ReactProp(name = "setVideoLevel")
     fun setVideoLevel(hikVideoView: HikVideoView, configMap: ReadableMap) {
         when (hikVideoView.getSdkVersion()) {
-            SdkVersion.HikVideo_V2_1_0 -> {
+            SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
             }
 
 
@@ -458,7 +460,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     @ReactProp(name = "getStreamFlow")
     fun getStreamFlow(hikVideoView: HikVideoView, phString: String?) {
         when (hikVideoView.getSdkVersion()) {
-            SdkVersion.HikVideo_V2_1_0 -> {
+            SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
             }
 
 

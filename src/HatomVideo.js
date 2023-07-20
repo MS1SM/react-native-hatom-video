@@ -189,8 +189,8 @@ export default class HatomVideo extends Component {
      * 
      * @param {object} data
      * 
-     * @param {string} data.indexCode     "cae76a527cc6415597547fad0a1b2fc8"
-     * @param {string} data.protocol      "hls"
+     * @param {string} data.indexCode     "a5a04f5e2c5a4e83a5180545f0cb898f"
+     * @param {string} data.protocol      "rtsp" or "hls"
      * @param {number} data.streamType    0
      * @param {string} data.expand        "transcode=1&videtype=h264"
      * 
@@ -289,7 +289,7 @@ export default class HatomVideo extends Component {
      * 
      * **************************************************
      * HikVideo and Primordial
-     * configk 可为空对象{}
+     * config 可为空对象{}
      * 
      * **************************************************
      * Ezviz
@@ -298,6 +298,9 @@ export default class HatomVideo extends Component {
      * @param {number} config.cameraNo      通道号
      */
     _initPlayer(config) {
+        if (!config) {
+            config = {}
+        }
         this.setNativeProps({initPlayer: config})
     }
 

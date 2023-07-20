@@ -92,7 +92,7 @@ class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : Re
         val printLog    = configMap.getBoolean("printLog")
 
         when(getSdkVersion(configMap)) {
-            SdkVersion.HikVideo_V2_1_0 -> {
+            SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
                 HatomPlayerSDK.init(currentActivity!!.application, appKey, printLog)
             }
 
@@ -109,10 +109,6 @@ class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : Re
                 EZOpenSDK.initLib(currentActivity!!.application, appKey)
                 // 设置 token
                 EZOpenSDK.getInstance().setAccessToken(configMap.getString("accessToken"))
-            }
-
-            SdkVersion.Imou -> {
-                Log.e(TAG, "initSdk: ${SdkVersion.Imou.name}")
             }
         }
     }
