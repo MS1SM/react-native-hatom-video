@@ -1,18 +1,18 @@
 import axios from 'axios-https-proxy-fix';
-import Config from "../utils/Config";
 import Log from '../utils/Log';
+import GlobalConfig from '../utils/GlobalConfig';
 
 const CLASS_NAME = "Http"
 
 const __instance = axios.create({
-  baseURL: Config.http.baseUrl,
-  timeout: Config.http.timeout
+  baseURL: GlobalConfig.http.baseUrl,
+  timeout: GlobalConfig.http.timeout
 });
 
 // 请求数据拦截处理
 __instance.interceptors.request.use(config => {
   // 当前请求的url
-  let url = Config.http.baseUrl + config.url
+  let url = GlobalConfig.http.baseUrl + config.url
   // 已有基础地址
   if (config.url.slice(0, 4) == "http") {
     url = config.url

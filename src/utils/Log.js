@@ -1,4 +1,4 @@
-import Config from './Config';
+import GlobalConfig from "./GlobalConfig";
 
 const Levels = {
 	OFF:    0,
@@ -10,39 +10,37 @@ const Levels = {
 };
 
 export default Log = {
-	level:      Config.log.level,
-	showTime:   Config.log.showTime,
 
 	spliceLog: function (className, funcName, msg) {
 		let tag = `${className}:${funcName}`;
 		return [
-			this.showTime ? `[${new Date().toJSON()}][${tag}]` : `[${tag}]`,
+			GlobalConfig.log.showTime ? `[${new Date().toJSON()}][${tag}]` : `[${tag}]`,
 			msg
 		];
 	},
 
 	error: function (className, funcName, msg) {
-		return ((this.level >= Levels.ERROR)
+		return ((GlobalConfig.log.level >= Levels.ERROR)
 			&& console.error.apply(console, this.spliceLog(className, funcName, msg)));
 	},
 
 	warn: function (className, funcName, msg) {
-		return ((this.level >= Levels.WARN)
+		return ((GlobalConfig.log.level >= Levels.WARN)
 			&& console.warn.apply(console, this.spliceLog(className, funcName, msg)));
 	},
 
 	info: function (className, funcName, msg) {
-		return ((this.level >= Levels.INFO)
+		return ((GlobalConfig.log.level >= Levels.INFO)
 			&& console.info.apply(console, this.spliceLog(className, funcName, msg)));
 	},
 
 	debug: function (className, funcName, msg) {
-		return ((this.level >= Levels.DEBUG)
+		return ((GlobalConfig.log.level >= Levels.DEBUG)
 			&& console.debug.apply(console, this.spliceLog(className, funcName, msg)));
 	},
 
 	log: function (className, funcName, msg) {
-		return ((this.level >= Levels.LOG)
+		return ((GlobalConfig.log.level >= Levels.LOG)
 			&& console.log.apply(console, this.spliceLog(className, funcName, msg)));
 	},
 

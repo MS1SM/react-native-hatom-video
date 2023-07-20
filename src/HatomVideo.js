@@ -7,9 +7,10 @@ import {
 } from 'react-native';
 import PropTypes from 'prop-types';
 import { SdkVersionEnum } from './common';
-import { getToken } from 'react-native-hatom-video/src/api/HikApi';
-import Log from 'react-native-hatom-video/src/utils/Log';
+import { getToken, preview } from './api/HikApi';
+import Log from './utils/Log';
 import Video from "react-native-video";
+import { setGlobalConfig } from './utils/GlobalConfig';
 
 const TAG = 'HatomVideo';
 
@@ -68,9 +69,9 @@ export default class HatomVideo extends Component {
     // 获取组件进行保存
     _assignRoot = (component) => {
         this._root = component
-        // 支持国标使用 GBVideo 单独存储一个播放器
-        if (this.supportGB()) {
-            that._gbVideo = component
+        // 使用 RnVideo 单独存储一个播放器
+        if (this.isUseRnVideo()) {
+            that._rnVideo = component
         }
     }
     // 调用这个组件的setNativeProps方法
@@ -89,14 +90,54 @@ export default class HatomVideo extends Component {
         switch (sdkParam) {
             case SdkVersion.Imou:
                 return true
-                break
             
             default:
                 return false
         }
     }
 
+    /**
+     * 是否使用RnVideo
+     * @param {String} sdkVersion? 可为空，空使用this._sdkVersion 判断
+     * @return {Boolean} 使用RnVideo：true
+     */
+    isUseRnVideo(sdkVersion) {
+        let sdkParam = sdkVersion ? sdkVersion : this._sdkVersion
+
+        switch (sdkParam) {
+            default:
+                return false
+        }
+    }
+
     /************************* public *************************/
+
+    /**
+     * 设置配置
+     * 参数皆可为空，未配置的使用默认配置
+     * 
+     * **************************************************
+     * @param {object} config? 配置
+     * 
+     * **************************************************
+     * http 配置
+     * @param {object} config.http?             http 配置
+     * @param {boolean} config.http.isTest?     是否启用测试地址
+     * @param {string} config.http.baseUrl?     基础地址，用于测试地址
+     * @param {string} config.http.hikUrl?      海康国标地址
+     * @param {number} config.http.timeout?     超时时间，单位：毫秒
+     * @param {string} config.http.hikToken?    海康国标token
+     * 
+     * **************************************************
+     * 日志配置
+     * @param {object} config.log?              日志配置
+     * @param {boolean} config.log.showTime?    是否显示时间
+     * @param {number} config.log.level?        日志控制级别，[0,5]，Levels = {OFF: 0, ERROR: 1, WARN: 2, INFO: 3, DEBUG: 4, LOG: 5}
+     */
+    setGlobalConfig(config) {
+        Log.info(TAG, "setGlobalConfig", config)
+        setGlobalConfig(config)
+    }
 
     /**
      * 初始化播放器
@@ -129,7 +170,7 @@ export default class HatomVideo extends Component {
      * @param {String} path 播放地址
      */
     setDataSource(path) {
-        if (this.supportGB()) {
+        if (this.isUseRnVideo()) {
             that.setState({
                 datasource: path,
             })
@@ -142,9 +183,34 @@ export default class HatomVideo extends Component {
         }
     }
 
-    /************************* HikApi *************************/
+    /**
+     * 获取预览播放串
+     * 仅国标可用
+     * 
+     * @param {object} data
+     * 
+     * @param {string} data.indexCode     "cae76a527cc6415597547fad0a1b2fc8"
+     * @param {string} data.protocol      "hls"
+     * @param {number} data.streamType    0
+     * @param {string} data.expand        "transcode=1&videtype=h264"
+     * 
+     * @return {Promise} 
+     */
+    getPreviewUrl(data) {
+        return this._getPreviewUrl(data)
+    }
+
+    /************************* HikGbApi *************************/
     _getToken() {
         getToken()
+    }
+
+    /**
+     * 获取预览播放串
+     * 请使用 getPreviewUrl
+     */
+    _getPreviewUrl(data) {
+        return preview(data)
     }
 
     /************************* NativeModules *************************/
@@ -174,7 +240,7 @@ export default class HatomVideo extends Component {
      * @param {string} config.deviceSerial   设备序列号
      * @param {string} config.deviceType     设备型号
      * 
-     * @return {object} promise.resolve      操作结果，返回数据对象。成功与失败都通过此方式返回结果，通过code判断。
+     * @return {Promise} promise.resolve      操作结果，返回数据对象。成功与失败都通过此方式返回结果，通过code判断。
      *         {number?} resolve.code        不存在时表示查询成功，需要添加对象；存在时根据错误码确定设备状态。参考 设备添加流程：https://open.ys7.com/help/36
      */
     static _probeDeviceInfo(config) {
@@ -206,9 +272,9 @@ export default class HatomVideo extends Component {
      * @param {string} config.routerSsid            路由器ssid
      * @param {string} config.routerPassword        路由器密码
      * 
-     * @return {object} promise.resolve             成功，无实际数据
+     * @return {Promise} promise.resolve            成功，无实际数据
      *
-     * @return {object} promise.reject              操作异常，返回异常内容
+     * @return {Promise} promise.reject             操作异常，返回异常内容
      *         {String} reject.message              异常编码code
      */
      static _startConfigWifi(config) {
@@ -404,7 +470,7 @@ export default class HatomVideo extends Component {
     }
 
     render() {
-        if (!this.supportGB()) {
+        if (!this.isUseRnVideo()) {
             // 不支持国标使用 sdk 封装的控件
 
             // 参数复制
