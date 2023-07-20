@@ -209,6 +209,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     fun stop(hikVideoView: HikVideoView, phString: String?) {
         when (hikVideoView.getSdkVersion()) {
             SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
+                hikVideoView.stopHatom()
             }
 
             SdkVersion.PrimordialVideo -> {

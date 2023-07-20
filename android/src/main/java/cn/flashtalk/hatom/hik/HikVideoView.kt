@@ -147,6 +147,21 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
             }
         }
     }
+
+    /**
+     * 停止播放
+     * 此方法需要在子线程中执行
+     */
+    fun stopHatom() {
+        CoroutineScope(Dispatchers.IO).launch {
+            flow<String> {
+                hatomPlayer.stop()
+            }.catch {
+                Log.e(TAG, "stopHatom: 操作异常", it)
+            }.collect {
+            }
+        }
+    }
     //endregion
 
     //region Android MediaPlayer 播放器
