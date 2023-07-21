@@ -49,6 +49,8 @@ function getHeaders() {
 /**
  * 海康国标平台 post 请求封装
  * 添加 headers.Authorization
+ * 
+ * 仅成功获取数据才resolve
  */
 function postHik (url, data, accessToken) {
   return new Promise((resolve, reject) => {
@@ -56,10 +58,19 @@ function postHik (url, data, accessToken) {
       getHikUrl(url),
       data,
       getHeaders()
+
     ).then(response => {
-      resolve(response)
+      if (response.code == 200) {
+        resolve(response.data)
+      } else {
+        reject(response)
+      }
+
     }).catch(error => {
-      reject(error);
+      reject({
+        code: -10000,
+        msg:  "请求异常"
+      });
     })
   })
 }
@@ -74,10 +85,19 @@ function getHik (url, params, accessToken) {
       getHikUrl(url),
       params,
       getHeaders()
+
     ).then(response => {
-      resolve(response);
+      if (response.code == 200) {
+        resolve(response.data)
+      } else {
+        reject(response)
+      }
+
     }).catch(error => {
-      reject(error);
+      reject({
+        code: -10000,
+        msg:  "请求异常"
+      });
     })
   })
 }
@@ -131,7 +151,5 @@ export function preview(data) {
   return postHik(
     url.artemis.preview,
     data
-  ).then(data => {
-    return Promise.resolve(data)
-  })
+  )
 }

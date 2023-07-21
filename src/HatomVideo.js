@@ -194,10 +194,29 @@ export default class HatomVideo extends Component {
      * @param {number} data.streamType    0
      * @param {string} data.expand        "transcode=1&videtype=h264"
      * 
-     * @return {Promise} 
+     * @return {Promise} Promise.resolve: 仅成功获取url才回调；Promise.reject：获取失败，或无法获取
+     * @return {string}  resolve.url        成功获取的url
+     * @return {string}  reject.message     失败信息         
      */
     getPreviewUrl(data) {
-        return this._getPreviewUrl(data)
+        return new Promise((resolve, reject) => {
+            if (this.supportGB()) {
+                this._getPreviewUrl(data)
+                .then(response => {
+                    resolve(response)
+                }).catch(error => {
+                    reject({
+                        message: error.msg
+                    });
+                })
+
+            }  else {
+                // 不支持国标无法获取播放串
+                reject({
+                    message: "非国标无法获取播放串"
+                })
+            }
+        })
     }
 
     /************************* HikGbApi *************************/
