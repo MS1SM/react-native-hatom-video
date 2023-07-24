@@ -183,6 +183,21 @@ export default class HatomVideo extends Component {
         }
     }
 
+    // 开始播放
+    start() {
+        this._start()
+    }
+
+    // 停止播放
+    stop() {
+        this._stop()
+    }
+
+    // 释放资源
+    release() {
+        this._release()
+    }
+
     /**
      * 获取预览播放串
      * 仅国标可用
@@ -217,6 +232,39 @@ export default class HatomVideo extends Component {
                 })
             }
         })
+    }
+
+    /**
+     * 截图
+     * 通过 onCapturePicture 回调结果
+     */
+    capturePicture() {
+        this._capturePicture()
+    }
+
+    /**
+     * 开启录像
+     */
+    startLocalRecord() {
+        this._startLocalRecord()
+    }
+
+    /**
+     * 结束本地直播流录像
+     * 与 startLocalRecord 成对使用
+     * 
+     * 通过 onLocalRecord 回调结果
+     */
+    stopLocalRecord() {
+        this._stopLocalRecord()
+    }
+
+    /**
+     * 对讲控制
+     * @param {object} config 参考 _voiceTalk
+     */
+     voiceTalk(config) {
+        this._voiceTalk(config)
     }
 
     /************************* HikGbApi *************************/
@@ -335,26 +383,33 @@ export default class HatomVideo extends Component {
         }})
     }
 
-    // 开始播放
+    /**
+     * 开始播放
+     * 请使用 start
+     */
     _start() {
         this.setNativeProps({startPlay: "phString"})
     }
 
-    // 停止播放
+    /**
+     * 停止播放
+     * 请使用 stop
+     */
     _stop() {
         this.setNativeProps({stopPlay: "phString"})
     }
 
-    // 释放资源
+    /**
+     * 释放资源
+     * 请使用 release
+     */
     _release() {
         this.setNativeProps({release: "phString"})
     }
 
     /**
      * 开启录像
-     *
-     ***************************************************
-     * Ezviz
+     * 请使用 startLocalRecord
      */
     _startLocalRecord() {
         let config = {}
@@ -366,6 +421,8 @@ export default class HatomVideo extends Component {
      * 与 _startLocalRecord 成对使用
      * 
      * 通过 _onLocalRecord 回调结果
+     * 
+     * 请使用 stopLocalRecord
      */
     _stopLocalRecord() {
         this.setNativeProps({stopLocalRecord: "phString"})
@@ -397,11 +454,17 @@ export default class HatomVideo extends Component {
 
     /**
      * 对讲控制
+     * 请使用 voiceTalk
+     * 
+     * @param  config.isStart            (Boolean)    是否开启对讲
+     *
+     ***************************************************
+     * HikVideo
+     * @param  config.talkUrl            (String)     对讲短链接，通过调用openApi获取
      *
      ***************************************************
      * Ezviz
      * 
-     * @param  config.isStart           (Boolean)    是否开启对讲
      * @param  config.isDeviceTalkBack  (Boolean)    可为空，默认true。用于判断对讲的设备，true表示与当前设备对讲，false表示与NVR设备下的IPC通道对讲。
      */
     _voiceTalk(config) {
@@ -410,6 +473,7 @@ export default class HatomVideo extends Component {
 
     /**
      * 截图
+     * 请使用 capturePicture
      * 通过 _onCapturePicture 回调结果
      */
     _capturePicture() {

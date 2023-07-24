@@ -1,6 +1,8 @@
 package cn.flashtalk.hatom.utils
 
 import android.content.Context
+import android.util.Log
+import java.io.File
 
 class Utils {
     companion object {
@@ -10,9 +12,13 @@ class Utils {
         private const val FOLDER = "/hatom"
         // 视频存储文件夹
         private const val FOLDER_RECORD = "$FOLDER/record"
+        // 图片存储文件夹
+        private const val FOLDER_PICTURE = "$FOLDER/picture"
 
         // 视频后缀
         private const val SUFFIX_VIDEO = ".mp4"
+        // 图片后缀
+        private const val SUFFIX_PICTURE = ".jpg"
 
         /**
          * 获取文件存储目录
@@ -20,7 +26,17 @@ class Utils {
          * @param folder 分类目录，使用本类定义常量
          */
         private fun getSaveFolder(context: Context, folder: String): String {
-            return "${context.externalCacheDir}$folder"
+            // 目录
+            val saveFolder = "${context.externalCacheDir}$folder"
+            // 创建目录
+            val directory = File(saveFolder)
+            if (!directory.exists()) {
+                if (!directory.mkdirs()){
+                    Log.e(TAG, "文件夹创建失败")
+                }
+            }
+            // 返回目录
+            return saveFolder
         }
 
         /**
@@ -45,6 +61,13 @@ class Utils {
          */
         fun generateRecordPath(context: Context): String {
             return generateSaveFolder(context, FOLDER_RECORD, SUFFIX_VIDEO)
+        }
+
+        /**
+         * 生成图片文件存储路径
+         */
+        fun generatePicturePath(context: Context): String {
+            return generateSaveFolder(context, FOLDER_PICTURE, SUFFIX_PICTURE)
         }
     }
 }

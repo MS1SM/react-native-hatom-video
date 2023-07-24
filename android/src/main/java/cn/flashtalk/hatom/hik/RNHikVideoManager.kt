@@ -257,6 +257,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     fun startLocalRecord(hikVideoView: HikVideoView, configMap: ReadableMap) {
         when (hikVideoView.getSdkVersion()) {
             SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
+                hikVideoView.startLocalRecordHatom()
             }
 
             SdkVersion.PrimordialVideo -> {
@@ -282,6 +283,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     fun stopLocalRecord(hikVideoView: HikVideoView, phString: String?) {
         when (hikVideoView.getSdkVersion()) {
             SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
+                hikVideoView.stopLocalRecordHatom()
             }
 
             SdkVersion.PrimordialVideo -> {
@@ -364,25 +366,30 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
 
     /**
      * 对讲控制
+     * @param  configMap.isStart            (Boolean)    是否开启对讲
+     *
+     ***************************************************
+     * HikVideo
+     * @param  configMap.talkUrl            (String)     对讲短链接，通过调用openApi获取
      *
      ***************************************************
      * Ezviz
-     *
-     * @param  configMap.isStart            (Boolean)    是否开启对讲
      * @param  configMap.isDeviceTalkBack   (Boolean)    可为空，默认true。用于判断对讲的设备，true表示与当前设备对讲，false表示与NVR设备下的IPC通道对讲。
      */
     @ReactProp(name = "voiceTalk")
     fun voiceTalk(hikVideoView: HikVideoView, configMap: ReadableMap) {
+        val isStart = configMap.getBoolean("isStart")
+
         when (hikVideoView.getSdkVersion()) {
             SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
+                val talkUrl = configMap.getString("talkUrl")!!
+                hikVideoView.voiceTalkHatom(isStart, talkUrl)
             }
-
 
             SdkVersion.PrimordialVideo -> {
             }
 
             SdkVersion.EzvizVideo -> {
-                val isStart = configMap.getBoolean("isStart")
                 var isDeviceTalkBack = true
                 if (configMap.hasKey("isDeviceTalkBack")) {
                     isDeviceTalkBack = configMap.getBoolean("isDeviceTalkBack")
@@ -405,6 +412,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     fun capturePicture(hikVideoView: HikVideoView, phString: String?) {
         when (hikVideoView.getSdkVersion()) {
             SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
+                hikVideoView.capturePictureHatom()
             }
 
 

@@ -60,6 +60,9 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
 
     companion object {
         private const val TAG = "HikVideoView"
+
+        // 海康操作成功返回码
+        private const val SUCCESS_HATOM = 0
     }
 
     //region 公用
@@ -91,6 +94,10 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
         DefaultHatomPlayer()
     }
 
+    private val talkHatomPlayer: HatomPlayer by lazy {
+        DefaultHatomPlayer()
+    }
+
     // 播放器回调
     private val hatomPlayCallback = PlayCallback.PlayStatusCallback { status: Status, errorCode: String ->
         run {
@@ -100,6 +107,19 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
             }
         }
     }
+
+    // 对讲回调
+    private val talkHatomCallback = PlayCallback.VoiceTalkCallback { status: Status, errorCode: String ->
+        run {
+            Log.i(TAG, "talkHatomCallback: $status")
+            if (!TextUtils.isEmpty(errorCode)) {
+                Log.e(TAG, "hatomPlayCallback: $errorCode")
+            }
+        }
+    }
+
+    // 本地录制文件地址
+    private var recordPathHatom = ""
 
     /**
      * 初始化播放器
@@ -162,6 +182,104 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
             }
         }
     }
+
+    /**
+     * 截图
+     * 通过 Events.onCapturePicture 通知结果
+     */
+    fun capturePictureHatom() {
+        // 截图
+        val filePath    = Utils.generatePicturePath(context)
+        val shotResult  = hatomPlayer.screenshot(filePath, null)
+        // 保存到相册
+        var saveResult = false
+        if (shotResult == SUCCESS_HATOM) {
+            saveResult = SaveUtils.saveImgFileToAlbum(context, filePath)
+        } else {
+            Log.e(TAG, "capturePictureHatom: $shotResult")
+        }
+
+        // 回调截图保存结果
+        val propMap = Arguments.createMap()
+        propMap.putBoolean(EventProp.success.name, saveResult)
+        eventEmitter.receiveEvent(id, Events.onCapturePicture.name, propMap)
+    }
+
+    /**
+     * 开启录像
+     * 通过 Events.onLocalRecord 通知结果。仅失败通知；成功由 stopLocalRecordHatom 调用后通知
+     */
+    fun startLocalRecordHatom() {
+        recordPathHatom = Utils.generateRecordPath(context)
+        val result = hatomPlayer.startRecordAndConvert(recordPathHatom)
+        if (result != SUCCESS_HATOM) {
+            Log.e(TAG, "startLocalRecordHatom: result")
+            recordPathHatom = ""
+
+            // 失败回调
+            val propMap = Arguments.createMap()
+            propMap.putBoolean(EventProp.success.name, false)
+            propMap.putString(EventProp.message.name, result.toString())
+            eventEmitter.receiveEvent(id, Events.onLocalRecord.name, propMap)
+        }
+    }
+
+    /**
+     * 结束本地直播流录像
+     * 与 startLocalRecordHatom 成对使用
+     * 通过 Events.onLocalRecord 通知结果
+     */
+    fun stopLocalRecordHatom() {
+        // 路径为空的错误信息
+        var result = -1
+        // 路径非空，停止录制
+        if (!TextUtils.isEmpty(recordPathHatom)) {
+            result = hatomPlayer.stopRecord()
+        }
+        // 回调结果
+        val propMap = Arguments.createMap()
+        propMap.putBoolean(EventProp.success.name, result == SUCCESS_HATOM)
+        propMap.putString(EventProp.message.name, result.toString())
+        propMap.putString(EventProp.data.name, recordPathHatom)
+        eventEmitter.receiveEvent(id, Events.onLocalRecord.name, propMap)
+        // 清理路径
+        recordPathHatom = ""
+    }
+
+    /**
+     * 对讲控制
+     * @param isStart  是否开启对讲
+     * @param talkUrl  对讲短链接，通过调用openApi获取
+     */
+    fun voiceTalkHatom(isStart: Boolean, talkUrl: String) {
+        if (isStart) {
+            // 设置参数
+            talkHatomPlayer.setVoiceDataSource(talkUrl, null)
+            // 设置回调
+            talkHatomPlayer.setVoiceStatusCallback(talkHatomCallback)
+            // 开启对讲
+            CoroutineScope(Dispatchers.IO).launch {
+                flow<String> {
+                    talkHatomPlayer.startVoiceTalk()
+                }.catch {
+                    Log.e(TAG, "talkHatomPlayer: 播放异常", it)
+                }.collect {
+                }
+            }
+
+        } else {
+            // 停止对讲
+            CoroutineScope(Dispatchers.IO).launch {
+                flow<String> {
+                    talkHatomPlayer.stopVoiceTalk()
+                }.catch {
+                    Log.e(TAG, "talkHatomPlayer: 操作异常", it)
+                }.collect {
+                }
+            }
+        }
+    }
+
     //endregion
 
     //region Android MediaPlayer 播放器
