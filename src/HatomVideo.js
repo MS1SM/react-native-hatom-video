@@ -11,6 +11,19 @@ import { getToken, preview } from './api/HikApi';
 import Log from './utils/Log';
 import Video from "react-native-video";
 import { setGlobalConfig } from './utils/GlobalConfig';
+import { 
+    recordSet, 
+    recordStatus,
+    info,
+    status,
+    mirror,
+    format,
+    defence,
+    encryptOn,
+    encryptOff,
+    version,
+    sound
+} from './api/EzvizApi';
 
 const TAG = 'HatomVideo';
 
@@ -110,6 +123,21 @@ export default class HatomVideo extends Component {
         }
     }
 
+    /**
+     * 是否支持萤石 Http
+     * @param {String} sdkVersion? 可为空，空使用this._sdkVersion 判断
+     * @return {Boolean} 是萤石环境：true
+     */
+    supportEzviz(sdkVersion) {
+        let sdkParam = sdkVersion ? sdkVersion : this._sdkVersion
+        if (sdkParam == SdkVersion.EzvizVideo) {
+            return true
+        } else {
+            Log.error(TAG, "supportEzviz 当前非萤石环境，未支持此功能", sdkParam)
+            return false
+        }
+    }
+
     /************************* public *************************/
 
     /**
@@ -124,9 +152,14 @@ export default class HatomVideo extends Component {
      * @param {object} config.http?             http 配置
      * @param {boolean} config.http.isTest?     是否启用测试地址
      * @param {string} config.http.baseUrl?     基础地址，用于测试地址
-     * @param {string} config.http.hikUrl?      海康国标地址
      * @param {number} config.http.timeout?     超时时间，单位：毫秒
-     * @param {string} config.http.hikToken?    海康国标token
+     * 
+     * @param {string} config.http.hikUrl?      海康国标地址
+     * @param {string} config.http.hikToken?    token
+     * 
+     * @param {string} config.http.ezvizUrl?    萤石地址
+     * @param {string} config.http.ezvizToken?  token
+     * @param {string} config.http.ezvizSerial? 设备序列号
      * 
      * **************************************************
      * 日志配置
@@ -159,7 +192,7 @@ export default class HatomVideo extends Component {
 
     getToken() {
         if (this.supportGB()) {
-            this._getToken()
+            getToken()
         } else {
             Log.debug(TAG, "getToken", "default")
         }
@@ -216,7 +249,7 @@ export default class HatomVideo extends Component {
     getPreviewUrl(data) {
         return new Promise((resolve, reject) => {
             if (this.supportGB()) {
-                this._getPreviewUrl(data)
+                preview(data)
                 .then(response => {
                     resolve(response)
                 }).catch(error => {
@@ -263,21 +296,214 @@ export default class HatomVideo extends Component {
      * 对讲控制
      * @param {object} config 参考 _voiceTalk
      */
-     voiceTalk(config) {
+    voiceTalk(config) {
         this._voiceTalk(config)
     }
 
-    /************************* HikGbApi *************************/
-    _getToken() {
-        getToken()
+    /**
+     * 全天录像开关状态
+     * 
+     * **************************************************
+     * Ezviz
+     * 
+     * @return {Promise}
+     * 
+     * @return {Object} resolve data
+     * @return {String} data.deviceSerial
+     * @return {Number} data.channelNo
+     * @return {Number} data.enable  状态，参考 EzSwitch
+     * 
+     * @return {Object} reject error{code, msg}
+     */
+    recordStatus() {
+        if (this.supportEzviz()) {
+            return recordStatus()
+        }
     }
 
     /**
-     * 获取预览播放串
-     * 请使用 getPreviewUrl
+     * 全天录像
+     * 
+     * **************************************************
+     * Ezviz
+     * @param {object} data
+     * 
+     * @param {Number} data.enable     状态，参考 EzSwitch
+     * @param {Number} data.channelNo  通道号，不传表示设备本身
+     * 
+     * @return {Promise}
+     * @return {null} resolve
+     * @return {Object} reject error{code, msg}
      */
-    _getPreviewUrl(data) {
-        return preview(data)
+    recordSet(data) {
+        if (this.supportEzviz()) {
+            return recordSet(data)
+        }
+    }
+
+    /**
+     * 设备信息
+     * 
+     * **************************************************
+     * Ezviz
+     * 单个设备信息：设备布撤防状态、是否加密、告警声音模式等
+     * 
+     * @return {Promise}
+     * 
+     * @return {Object} resolve data
+     * @return {Number} data.defence        设备布撤防状态，参考 EzSwitch
+     * @return {Number} data.isEncrypt      是否加密，参考 EzSwitch
+     * @return {Number} data.alarmSoundMode 告警声音模式，参考 EzAlarm
+     * 
+     * @return {Object} reject error{code, msg}
+     */
+    info() {
+        if (this.supportEzviz()) {
+            return info()
+        }
+    }
+
+    /**
+     * 设备状态
+     * 
+     * **************************************************
+     * Ezviz
+     * sd卡信息等
+     * @param {object} data
+     * @param {Number} data.channel?    通道号,默认为1
+     * 
+     * @return {Promise}
+     * 
+     * @return {Object} resolve data
+     * @return {Number} data.diskNum    挂载的sd硬盘数量,-1:设备没有上报或者设备不支持该状态
+     * @return {String} data.diskState  sd硬盘状态:0:正常;1:存储介质错;2:未格式化;3:正在格式化;返回形式:一个硬盘表示为"0---------------",两个硬盘表示为"00--------------",以此类推;-1:设备没有上报或者设备不支持该状态
+     * 
+     * @return {Object} reject error{code, msg}
+     */
+    status(data) {
+        if (this.supportEzviz()) {
+            return status(data)
+        }
+    }
+
+    /**
+     * 镜像翻转
+     * 
+     * **************************************************
+     * Ezviz
+     * @param {object} data
+     * @param {Number} data.channelNo   通道号
+     * @param {Number} data.command     镜像方向，参考 EzMirror
+     * 
+     * @return {Promise}
+     * @return {null} resolve
+     * @return {Object} reject error{code, msg}
+     */
+    mirror(data) {
+        if (this.supportEzviz()) {
+            return mirror(data)
+        }
+    }
+
+    /**
+     * TF卡格式化
+     * 
+     * **************************************************
+     * Ezviz
+     * 
+     * @return {Promise}
+     * @return {null} resolve
+     * @return {Object} reject error{code, msg}
+     */
+    format() {
+        if (this.supportEzviz()) {
+            return format()
+        }
+    }
+
+    /**
+     * 设备撤/布防
+     * 
+     * **************************************************
+     * Ezviz
+     * @param {object} data
+     * @param {Number} data.isDefence   设备布撤防状态，参考 EzSwitch
+     * 
+     * @return {Promise}
+     * @return {null} resolve
+     * @return {Object} reject error{code, msg}
+     */
+    defence(data) {
+        if (this.supportEzviz()) {
+            return defence(data)
+        }
+    }
+
+    /**
+     * 开启设备视频加密
+     * 
+     * **************************************************
+     * Ezviz
+     * 
+     * @return {Promise}
+     * @return {null} resolve
+     * @return {Object} reject error{code, msg}
+     */
+    encryptOn() {
+        if (this.supportEzviz()) {
+            return encryptOn()
+        }
+    }
+
+    /**
+     * 关闭设备视频加密
+     * 
+     * **************************************************
+     * Ezviz
+     * 
+     * @return {Promise}
+     * @return {null} resolve
+     * @return {Object} reject error{code, msg}
+     */
+    encryptOff() {
+        if (this.supportEzviz()) {
+            return encryptOff()
+        }
+    }
+
+    /**
+     * 获取设备版本信息
+     * 
+     * **************************************************
+     * Ezviz
+     * 
+     * @return {Promise}
+     * @return {Object} resolve data
+     * @return {String} data.currentVersion
+     * @return {Object} reject error{code, msg}
+     */
+    version() {
+        if (this.supportEzviz()) {
+            return version()
+        }
+    }
+
+    /**
+     * 设置告警声音模式
+     * 
+     * **************************************************
+     * Ezviz
+     * @param {object} data
+     * @param {Number} data.type   声音类型，参考 EzAlarm
+     * 
+     * @return {Promise}
+     * @return {null} resolve
+     * @return {Object} reject error{code, msg}
+     */
+    sound(data) {
+        if (this.supportEzviz()) {
+            return sound(data)
+        }
     }
 
     /************************* NativeModules *************************/

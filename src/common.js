@@ -99,3 +99,89 @@ export function EZVideoLevel() {
         this.VIDEO_LEVEL_FLUNET
     ]
 }
+
+// 萤石开关
+export function EzSwitch() {
+    /**
+     * 枚举
+     */
+    this.Open   = 1
+    this.Close  = 0
+
+    /**
+     * 枚举数组
+     */
+    this.enums = [
+        this.Open,
+        this.Close
+    ]
+}
+
+// 萤石镜像
+export function EzMirror() {
+    /**
+     * 枚举
+     */
+    // 垂直方向，上下镜像
+    this.Vertical   = 0
+    // 水平方向，左右镜像
+    this.Horizontal = 1
+    // 中心镜像
+    this.Center     = 2
+
+    /**
+     * 枚举数组
+     */
+    this.enums = [
+        this.Vertical,
+        this.Horizontal,
+        this.Center
+    ]
+}
+
+// 萤石告警声音模式
+export function EzAlarm() {
+    /**
+     * 枚举
+     */
+    // 短叫
+    this.Short  = 0
+    // 长叫
+    this.Long   = 1
+    // 静音
+    this.Silent = 2
+
+    /**
+     * 枚举数组
+     */
+    this.enums = [
+        this.Short,
+        this.Long,
+        this.Silent
+    ]
+}
+
+// 萤石 sd 状态
+export function EzSdStatus() {
+    /**
+     * 枚举
+     */
+    // 正常
+    this.Normal  = 0
+    // 存储介质错误
+    this.Error   = 1
+    // 未格式化
+    this.Unformat = 2
+    // 正在格式化
+    this.Formatting = 3
+
+    /**
+     * 枚举数组
+     */
+    this.enums = [
+        this.Normal,
+        this.Error,
+        this.Unformat,
+        this.Formatting
+    ]
+}

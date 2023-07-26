@@ -90,9 +90,9 @@ export default HttpService = {
   /**
    *
    * @param {string} url
-   * @param {object} params
    * @param {object} data
    * @param {object} headers
+   * @param {object} params
    * @returns {Promise<any> | Promise}
    *
    * 实例
@@ -107,7 +107,12 @@ export default HttpService = {
       console.log(error);
     });
    */
-  post: (url, data, headers) => {
+  post: (url, data, headers, params) => {
+    // 将参数编码到链接中，去除第一位多余的 & 符号
+    if (params) {
+      url = `${url}?${urlEncode(params).substring(1)}`
+    }
+
     return new Promise((resolve, reject) => {
       __instance({
         method: 'post',

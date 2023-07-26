@@ -6,13 +6,15 @@ import GlobalConfig from '../utils/GlobalConfig';
 /**
  * 海康国标平台 api
  */
-const CLASS_NAME = "HikApi"
+const TAG = "HikApi"
 
 /**
  * 模块地址
  *
  * 模块地址没有域名地址，将自动在前面添加 GlobalConfig.http.baseUrl
  * 模块地址带有域名地址，将不再使用 GlobalConfig.http.baseUrl
+ * 
+ * getHikUrl 已赋予域名地址
  */
 const modelUrl = {
   artemis: "/artemis/api"

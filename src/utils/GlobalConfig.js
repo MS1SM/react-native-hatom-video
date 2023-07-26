@@ -20,13 +20,20 @@ let GlobalConfig = {
 		isTest: true,
 		// 基础地址，用于测试地址
 		baseUrl: 'http://192.168.1.101:4523/m1/2947114-0-default',
-		// 海康国标地址
-		hikUrl: 'https://10.26.0.13:1443',
 		// 超时时间
 		timeout: 5 * 1000,
 
-		// 海康国标token
-		hikToken: ""
+		// 海康国标地址
+		hikUrl: 'https://10.26.0.13:1443',
+		// token
+		hikToken: "",
+
+		// 萤石地址
+		ezvizUrl: 'https://open.ys7.com',
+		// token
+		ezvizToken: "",
+		// 设备序列号
+		ezvizSerial: ""
 	}
 };
 
@@ -45,9 +52,14 @@ export function setGlobalConfig(config) {
 		if (config.http.hasOwnProperty("isTest")) GlobalConfig.http.isTest = config.http.isTest
 		// 其他参数
 		GlobalConfig.http.baseUrl     = config.http.baseUrl  || GlobalConfig.http.baseUrl
-		GlobalConfig.http.hikUrl      = config.http.HikUrl   || GlobalConfig.http.hikUrl
 		GlobalConfig.http.timeout     = config.http.timeout  || GlobalConfig.http.timeout
+
+		GlobalConfig.http.hikUrl      = config.http.hikUrl   || GlobalConfig.http.hikUrl
 		GlobalConfig.http.hikToken    = config.http.hikToken || GlobalConfig.http.hikToken
+		
+		GlobalConfig.http.ezvizUrl    = config.http.ezvizUrl   || GlobalConfig.http.ezvizUrl
+		GlobalConfig.http.ezvizToken  = config.http.ezvizToken || GlobalConfig.http.ezvizToken
+		GlobalConfig.http.ezvizSerial = config.http.ezvizSerial || GlobalConfig.http.ezvizSerial
 	}
 
 	// 日志
