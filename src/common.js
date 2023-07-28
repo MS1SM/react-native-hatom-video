@@ -166,6 +166,8 @@ export function EzSdStatus() {
     /**
      * 枚举
      */
+    // 不存在
+    this.notExist = -1
     // 正常
     this.Normal  = 0
     // 存储介质错误
@@ -179,6 +181,7 @@ export function EzSdStatus() {
      * 枚举数组
      */
     this.enums = [
+        this.notExist,
         this.Normal,
         this.Error,
         this.Unformat,

@@ -375,8 +375,9 @@ export default class HatomVideo extends Component {
      * @return {Promise}
      * 
      * @return {Object} resolve data
-     * @return {Number} data.diskNum    挂载的sd硬盘数量,-1:设备没有上报或者设备不支持该状态
-     * @return {String} data.diskState  sd硬盘状态:0:正常;1:存储介质错;2:未格式化;3:正在格式化;返回形式:一个硬盘表示为"0---------------",两个硬盘表示为"00--------------",以此类推;-1:设备没有上报或者设备不支持该状态
+     * @return {Number} data.diskNum            挂载的sd硬盘数量,-1:设备没有上报或者设备不支持该状态
+     * @return {String} data.diskState          sd硬盘状态:0:正常;1:存储介质错;2:未格式化;3:正在格式化;返回形式:一个硬盘表示为"0---------------",两个硬盘表示为"00--------------",以此类推;-1:设备没有上报或者设备不支持该状态
+     * @return {Number} data.firstDiskState     第一个sd硬盘状态，状态参考 EzSdStatus
      * 
      * @return {Object} reject error{code, msg}
      */

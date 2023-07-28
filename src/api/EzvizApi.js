@@ -19,8 +19,8 @@ const TAG = "EzvizApi"
 const modelUrl = {
     // 设备
     device: "/api/lapp/device",
-    // 编译
-    build: "/api/lapp/building"
+    // otap
+    otap: "/api/v3/otap"
 }
 
 // 请求地址
@@ -90,13 +90,13 @@ const url = {
         sound: modelUrl.device + "/alarm/sound/set"
     },
 
-    // 编译 模块
-    build: {
+    // otap 模块
+    otap: {
         /**
-         * TF卡 格式化
-         * https://open.ys7.com/help/1342
+         * 格式化指定本地硬盘
+         * https://open.ys7.com/help/862
          */
-        format: modelUrl.build + "/device/storage/format"
+        format: modelUrl.otap + "/action/{deviceSerial}/Default/0/HDD/FormatSpecifyHDD"
     }
 }
 
@@ -113,7 +113,7 @@ function getEzvizUrl(url) {
  */
 function getHeaders() {
     return {
-        access_token: GlobalConfig.http.hikToken
+        accessToken: GlobalConfig.http.ezvizToken
     }
 }
 
@@ -209,6 +209,47 @@ function getEzviz (url, params) {
 }
 
 /**
+ * 萤石 meta put 请求封装
+ * 
+ * 仅成功获取数据才resolve
+ * 
+ * @return {Promise} 
+ * 
+ * @return {Object} resolve data
+ * 
+ * @return {Object} reject error
+ * @return {Number} error.code
+ * @return {String} error.msg
+ */
+function putMeta (url, data, params, variables) {
+    return new Promise((resolve, reject) => {
+        HttpService.put(
+            getEzvizUrl(url),
+            getBody(data),
+            getHeaders(),
+            params,
+            getBody(variables)
+        )
+        .then(response => {
+            let meta = response.meta
+            if (meta.code == 200) {
+                resolve(response.meta.moreInfo)
+            } else {
+                meta.msg = meta.message
+                reject(meta)
+            }
+        })
+        .catch(error => {
+            reject({
+                code: -10000,
+                msg:  "请求异常"
+            });
+        })
+    })
+}
+
+
+/**
  * 全天录像开关状态
  * 
  * @return {Promise}
@@ -262,14 +303,27 @@ export function info() {
  * 
  * @return {Promise}
  * @return {Object} resolve data
- * @return {Number} data.diskNum    挂载的sd硬盘数量,-1:设备没有上报或者设备不支持该状态
- * @return {String} data.diskState  sd硬盘状态:0:正常;1:存储介质错;2:未格式化;3:正在格式化;返回形式:一个硬盘表示为"0---------------",两个硬盘表示为"00--------------",以此类推;-1:设备没有上报或者设备不支持该状态
+ * @return {Number} data.diskNum        挂载的sd硬盘数量,-1:设备没有上报或者设备不支持该状态
+ * @return {String} data.diskState      sd硬盘状态:0:正常;1:存储介质错;2:未格式化;3:正在格式化;返回形式:一个硬盘表示为"0---------------",两个硬盘表示为"00--------------",以此类推;-1:设备没有上报或者设备不支持该状态
+ * @return {Number} data.firstDiskState 第一个sd硬盘状态，状态type同上
  */
 export function status(data) {
     return postEzviz(
         url.device.status,
         data
-    )
+    ).then(data => {
+        // 数据处理
+        return new Promise((resolve, reject) => {
+            // 提取第一个sd卡状态
+            let firstDiskState = data.diskState.charAt(0)
+            if (firstDiskState == '-') {
+                firstDiskState = -1
+            }
+            data.firstDiskState = firstDiskState
+
+            resolve(data)
+        })
+    })
 }
 
 /**
@@ -286,11 +340,11 @@ export function mirror(data) {
 }
 
 /**
- * TF卡格式化
+ * 格式化指定本地硬盘
  */
 export function format() {
-    return postEzviz(
-        url.build.format
+    return putMeta(
+        url.otap.format
     )
 }
 
