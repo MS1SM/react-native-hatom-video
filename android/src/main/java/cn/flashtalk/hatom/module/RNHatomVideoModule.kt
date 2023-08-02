@@ -161,6 +161,7 @@ class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : Re
                         promise.resolve(propMap)
 
                     }.catch {
+                        Log.e(TAG, "probeDeviceInfo ${it.message}", it)
                         val propMap = Arguments.createMap()
                         propMap.putInt(EventProp.code.name, -1)
                         promise.resolve(propMap)

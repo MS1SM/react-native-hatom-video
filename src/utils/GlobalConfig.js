@@ -34,6 +34,11 @@ let GlobalConfig = {
 		ezvizToken: "",
 		// 设备序列号
 		ezvizSerial: ""
+	},
+
+	// sdk 配置
+	sdk: {
+		version: "EzvizVideo"
 	}
 };
 
@@ -67,5 +72,10 @@ export function setGlobalConfig(config) {
 		if (config.log.hasOwnProperty("showTime")) GlobalConfig.log.showTime = config.log.showTime
 		// 其他参数
 		GlobalConfig.log.level = config.log.level  || GlobalConfig.log.level
+	}
+
+	// sdk
+	if (config.sdk) {
+		GlobalConfig.sdk.version = config.sdk.version  || GlobalConfig.sdk.version
 	}
 }

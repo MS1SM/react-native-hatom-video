@@ -84,6 +84,18 @@ const url = {
         version: modelUrl.device + "/version/info",
         
         /**
+         * 设备升级固件
+         * https://open.ys7.com/help/735
+         */
+        upgrade: modelUrl.device + "/upgrade",
+        
+        /**
+         * 获取设备升级状态
+         * https://open.ys7.com/help/736
+         */
+        upgradeStatus: modelUrl.device + "/upgrade/status",
+        
+        /**
          * 告警音
          * https://open.ys7.com/help/717
          */
@@ -389,6 +401,40 @@ export function version() {
     return postEzviz(
         url.device.version
     )
+}
+
+/**
+ * 设备升级固件
+ */
+export function upgrade() {
+    return postEzviz(
+        url.device.upgrade
+    )
+}
+
+/**
+ * 获取设备升级状态
+ * 
+ * @return {Promise}
+ * @return {Object} resolve data
+ * @return {number} data.progress   升级进度，仅status为正在升级状态时有效，取值范围为1-100
+ * @return {number} data.status     升级状态： 0-正在升级，1-设备重启，2-升级成功，大于2-升级失败
+ */
+export function upgradeStatus() {
+    return postEzviz(
+        url.device.upgradeStatus
+    ).then(data => {
+        // 数据处理
+        return new Promise((resolve, reject) => {
+            // 升级状态，大于2为失败，统一为3，便于枚举处理
+            if (data.status > 2) {
+                Log.error(TAG, "upgradeStatus status", data.status)
+                data.status = 3
+            }
+
+            resolve(data)
+        })
+    })
 }
 
 /**

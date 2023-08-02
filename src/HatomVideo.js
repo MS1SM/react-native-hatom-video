@@ -10,7 +10,7 @@ import { SdkVersionEnum } from './common';
 import { getToken, preview } from './api/HikApi';
 import Log from './utils/Log';
 import Video from "react-native-video";
-import { setGlobalConfig } from './utils/GlobalConfig';
+import GlobalConfig, { setGlobalConfig } from './utils/GlobalConfig';
 import { 
     recordSet, 
     recordStatus,
@@ -22,7 +22,9 @@ import {
     encryptOn,
     encryptOff,
     version,
-    sound
+    sound,
+    upgradeStatus,
+    upgrade
 } from './api/EzvizApi';
 
 const TAG = 'HatomVideo';
@@ -35,6 +37,8 @@ let that;
 const windowSize = Dimensions.get("window");
 
 export default class HatomVideo extends Component {
+
+    //#region 内部
 
     constructor(props) {
         super(props)
@@ -125,11 +129,11 @@ export default class HatomVideo extends Component {
 
     /**
      * 是否支持萤石 Http
-     * @param {String} sdkVersion? 可为空，空使用this._sdkVersion 判断
+     * @param {String} sdkVersion? 可为空，空使用GlobalConfig.sdk.version 判断
      * @return {Boolean} 是萤石环境：true
      */
-    supportEzviz(sdkVersion) {
-        let sdkParam = sdkVersion ? sdkVersion : this._sdkVersion
+    static supportEzviz(sdkVersion) {
+        let sdkParam = sdkVersion ? sdkVersion : GlobalConfig.sdk.version
         if (sdkParam == SdkVersion.EzvizVideo) {
             return true
         } else {
@@ -137,40 +141,10 @@ export default class HatomVideo extends Component {
             return false
         }
     }
+    //#endregion
 
+    //#region public
     /************************* public *************************/
-
-    /**
-     * 设置配置
-     * 参数皆可为空，未配置的使用默认配置
-     * 
-     * **************************************************
-     * @param {object} config? 配置
-     * 
-     * **************************************************
-     * http 配置
-     * @param {object} config.http?             http 配置
-     * @param {boolean} config.http.isTest?     是否启用测试地址
-     * @param {string} config.http.baseUrl?     基础地址，用于测试地址
-     * @param {number} config.http.timeout?     超时时间，单位：毫秒
-     * 
-     * @param {string} config.http.hikUrl?      海康国标地址
-     * @param {string} config.http.hikToken?    token
-     * 
-     * @param {string} config.http.ezvizUrl?    萤石地址
-     * @param {string} config.http.ezvizToken?  token
-     * @param {string} config.http.ezvizSerial? 设备序列号
-     * 
-     * **************************************************
-     * 日志配置
-     * @param {object} config.log?              日志配置
-     * @param {boolean} config.log.showTime?    是否显示时间
-     * @param {number} config.log.level?        日志控制级别，[0,5]，Levels = {OFF: 0, ERROR: 1, WARN: 2, INFO: 3, DEBUG: 4, LOG: 5}
-     */
-    setGlobalConfig(config) {
-        Log.info(TAG, "setGlobalConfig", config)
-        setGlobalConfig(config)
-    }
 
     /**
      * 初始化播放器
@@ -299,6 +273,47 @@ export default class HatomVideo extends Component {
     voiceTalk(config) {
         this._voiceTalk(config)
     }
+    //#endregion
+
+    // #region static 
+    /************************* static *************************/
+
+    /**
+     * 设置配置
+     * 参数皆可为空，未配置的使用默认配置
+     * 
+     * **************************************************
+     * @param {object} config? 配置
+     * 
+     * **************************************************
+     * http 配置
+     * @param {object} config.http?             http 配置
+     * @param {boolean} config.http.isTest?     是否启用测试地址
+     * @param {string} config.http.baseUrl?     基础地址，用于测试地址
+     * @param {number} config.http.timeout?     超时时间，单位：毫秒
+     * 
+     * @param {string} config.http.hikUrl?      海康国标地址
+     * @param {string} config.http.hikToken?    token
+     * 
+     * @param {string} config.http.ezvizUrl?    萤石地址
+     * @param {string} config.http.ezvizToken?  token
+     * @param {string} config.http.ezvizSerial? 设备序列号
+     * 
+     * **************************************************
+     * 日志配置
+     * @param {object} config.log?              日志配置
+     * @param {boolean} config.log.showTime?    是否显示时间
+     * @param {number} config.log.level?        日志控制级别，[0,5]，Levels = {OFF: 0, ERROR: 1, WARN: 2, INFO: 3, DEBUG: 4, LOG: 5}
+     * 
+     * **************************************************
+     * sdk配置
+     * @param {object} config.sdk?              sdk配置
+     * @param {string} config.sdk.version?      sdk版本，参考：SdkVersionEnum
+     */
+    static setGlobalConfig(config) {
+        Log.info(TAG, "setGlobalConfig", config)
+        setGlobalConfig(config)
+    }
 
     /**
      * 全天录像开关状态
@@ -315,8 +330,8 @@ export default class HatomVideo extends Component {
      * 
      * @return {Object} reject error{code, msg}
      */
-    recordStatus() {
-        if (this.supportEzviz()) {
+    static recordStatus() {
+        if (HatomVideo.supportEzviz()) {
             return recordStatus()
         }
     }
@@ -335,8 +350,8 @@ export default class HatomVideo extends Component {
      * @return {null} resolve
      * @return {Object} reject error{code, msg}
      */
-    recordSet(data) {
-        if (this.supportEzviz()) {
+    static recordSet(data) {
+        if (HatomVideo.supportEzviz()) {
             return recordSet(data)
         }
     }
@@ -357,8 +372,8 @@ export default class HatomVideo extends Component {
      * 
      * @return {Object} reject error{code, msg}
      */
-    info() {
-        if (this.supportEzviz()) {
+    static info() {
+        if (HatomVideo.supportEzviz()) {
             return info()
         }
     }
@@ -381,8 +396,8 @@ export default class HatomVideo extends Component {
      * 
      * @return {Object} reject error{code, msg}
      */
-    status(data) {
-        if (this.supportEzviz()) {
+    static status(data) {
+        if (HatomVideo.supportEzviz()) {
             return status(data)
         }
     }
@@ -400,8 +415,8 @@ export default class HatomVideo extends Component {
      * @return {null} resolve
      * @return {Object} reject error{code, msg}
      */
-    mirror(data) {
-        if (this.supportEzviz()) {
+    static mirror(data) {
+        if (HatomVideo.supportEzviz()) {
             return mirror(data)
         }
     }
@@ -416,8 +431,8 @@ export default class HatomVideo extends Component {
      * @return {null} resolve
      * @return {Object} reject error{code, msg}
      */
-    format() {
-        if (this.supportEzviz()) {
+    static format() {
+        if (HatomVideo.supportEzviz()) {
             return format()
         }
     }
@@ -434,8 +449,8 @@ export default class HatomVideo extends Component {
      * @return {null} resolve
      * @return {Object} reject error{code, msg}
      */
-    defence(data) {
-        if (this.supportEzviz()) {
+    static defence(data) {
+        if (HatomVideo.supportEzviz()) {
             return defence(data)
         }
     }
@@ -450,8 +465,8 @@ export default class HatomVideo extends Component {
      * @return {null} resolve
      * @return {Object} reject error{code, msg}
      */
-    encryptOn() {
-        if (this.supportEzviz()) {
+    static encryptOn() {
+        if (HatomVideo.supportEzviz()) {
             return encryptOn()
         }
     }
@@ -466,8 +481,8 @@ export default class HatomVideo extends Component {
      * @return {null} resolve
      * @return {Object} reject error{code, msg}
      */
-    encryptOff() {
-        if (this.supportEzviz()) {
+    static encryptOff() {
+        if (HatomVideo.supportEzviz()) {
             return encryptOff()
         }
     }
@@ -483,9 +498,43 @@ export default class HatomVideo extends Component {
      * @return {String} data.currentVersion
      * @return {Object} reject error{code, msg}
      */
-    version() {
-        if (this.supportEzviz()) {
+    static version() {
+        if (HatomVideo.supportEzviz()) {
             return version()
+        }
+    }
+
+    /**
+     * 设备升级固件
+     * 
+     * **************************************************
+     * Ezviz
+     * 
+     * @return {Promise}
+     * @return {null} resolve
+     * @return {Object} reject error{code, msg}
+     */
+    static upgrade() {
+        if (HatomVideo.supportEzviz()) {
+            return upgrade()
+        }
+    }
+
+    /**
+     * 获取设备升级状态
+     * 
+     * **************************************************
+     * Ezviz
+     * 
+     * @return {Promise}
+     * @return {Object} resolve data
+     * @return {number} data.progress   升级进度，仅status为正在升级状态时有效，取值范围为1-100
+     * @return {number} data.status     升级状态，参考 EzUpgradeStatus
+     * @return {Object} reject error{code, msg}
+     */
+    static upgradeStatus() {
+        if (HatomVideo.supportEzviz()) {
+            return upgradeStatus()
         }
     }
 
@@ -501,12 +550,14 @@ export default class HatomVideo extends Component {
      * @return {null} resolve
      * @return {Object} reject error{code, msg}
      */
-    sound(data) {
-        if (this.supportEzviz()) {
+    static sound(data) {
+        if (HatomVideo.supportEzviz()) {
             return sound(data)
         }
     }
-
+    // #endregion
+    
+    // #region NativeModules
     /************************* NativeModules *************************/
 
     /**
@@ -574,7 +625,9 @@ export default class HatomVideo extends Component {
      static _startConfigWifi(config) {
         return NativeModules.RNHatomVideo.startConfigWifi(config)
     }
+    // #endregion
 
+    // #region setNativeProps
     /************************* setNativeProps *************************/
 
     /**
@@ -726,7 +779,9 @@ export default class HatomVideo extends Component {
      _getStreamFlow() {
         this.setNativeProps({getStreamFlow: "phString"})
     }
+    // #endregion
 
+    // #region event
     /************************* event *************************/
 
     /**
@@ -781,6 +836,7 @@ export default class HatomVideo extends Component {
         // 重置当前流量
         this._streamFlow = data
     }
+    //#endregion
 
     render() {
         if (!this.isUseRnVideo()) {

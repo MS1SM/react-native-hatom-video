@@ -8,7 +8,8 @@ import {
     EzSwitch, 
     EzMirror, 
     EzAlarm,
-    EzSdStatus
+    EzSdStatus,
+    EzUpgradeStatus
 } from './src/common';
 
 module.exports.HatomVideo = HatomVideo;
@@ -22,5 +23,6 @@ module.exports.EzSwitch = new EzSwitch();
 module.exports.EzMirror = new EzMirror();
 module.exports.EzAlarm = new EzAlarm();
 module.exports.EzSdStatus = new EzSdStatus();
+module.exports.EzUpgradeStatus = new EzUpgradeStatus();
 
 module.exports.default = HatomVideo;

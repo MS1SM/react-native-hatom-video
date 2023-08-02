@@ -167,7 +167,7 @@ export function EzSdStatus() {
      * 枚举
      */
     // 不存在
-    this.notExist = -1
+    this.NotExist = -1
     // 正常
     this.Normal  = 0
     // 存储介质错误
@@ -181,10 +181,35 @@ export function EzSdStatus() {
      * 枚举数组
      */
     this.enums = [
-        this.notExist,
+        this.NotExist,
         this.Normal,
         this.Error,
         this.Unformat,
         this.Formatting
+    ]
+}
+
+// 萤石固件升级状态
+export function EzUpgradeStatus() {
+    /**
+     * 枚举
+     */
+    // 正在升级
+    this.Upgrading = 0
+    // 设备重启
+    this.Reboot = 1
+    // 升级成功
+    this.Success = 2
+    // 升级失败
+    this.Error = 3
+
+    /**
+     * 枚举数组
+     */
+    this.enums = [
+        this.Upgrading,
+        this.Reboot,
+        this.Success,
+        this.Error
     ]
 }
