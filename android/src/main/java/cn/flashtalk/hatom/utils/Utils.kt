@@ -1,6 +1,7 @@
 package cn.flashtalk.hatom.utils
 
 import android.content.Context
+import android.text.TextUtils
 import android.util.Log
 import java.io.File
 
@@ -24,14 +25,19 @@ class Utils {
          * 获取文件存储目录
          *
          * @param folder 分类目录，使用本类定义常量
+         * @param custom 自定义目录，是分类目录的下级目录，例：aaa/ccc
          */
-        private fun getSaveFolder(context: Context, folder: String): String {
+        private fun getSaveFolder(context: Context, folder: String, custom: String? = ""): String {
             // 目录
-            val saveFolder = "${context.externalCacheDir}$folder"
+            var saveFolder = "${context.externalCacheDir}$folder"
+            // 自定义目录
+            if (!TextUtils.isEmpty(custom)) {
+                saveFolder = "$saveFolder/$custom"
+            }
             // 创建目录
             val directory = File(saveFolder)
             if (!directory.exists()) {
-                if (!directory.mkdirs()){
+                if (!directory.mkdirs()) {
                     Log.e(TAG, "文件夹创建失败")
                 }
             }
@@ -41,9 +47,10 @@ class Utils {
 
         /**
          * 获取视频文件存储文件夹
+         * @param custom 自定义目录，视频文件夹下级目录
          */
-        fun getRecordFolder(context: Context): String {
-            return getSaveFolder(context, FOLDER_RECORD)
+        fun getRecordFolder(context: Context, custom: String? = ""): String {
+            return getSaveFolder(context, FOLDER_RECORD, custom)
         }
 
         /**
@@ -51,23 +58,26 @@ class Utils {
          *
          * @param folder 分类目录，使用本类定义常量
          * @param suffix 文件后缀类型，使用本类定义常量
+         * @param custom 自定义目录，folder 下级目录
          */
-        private fun generateSaveFolder(context: Context, folder: String, suffix: String): String {
-            return "${getSaveFolder(context, folder)}/${System.currentTimeMillis()}$suffix"
+        private fun generateSaveFolder(context: Context, folder: String, suffix: String, custom: String? = ""): String {
+            return "${getSaveFolder(context, folder, custom)}/${System.currentTimeMillis()}$suffix"
         }
 
         /**
          * 生成视频文件存储路径
+         * @param custom 自定义目录，视频文件夹 下级目录
          */
-        fun generateRecordPath(context: Context): String {
-            return generateSaveFolder(context, FOLDER_RECORD, SUFFIX_VIDEO)
+        fun generateRecordPath(context: Context, custom: String? = ""): String {
+            return generateSaveFolder(context, FOLDER_RECORD, SUFFIX_VIDEO, custom)
         }
 
         /**
          * 生成图片文件存储路径
+         * @param custom 自定义目录，图片文件夹 下级目录
          */
-        fun generatePicturePath(context: Context): String {
-            return generateSaveFolder(context, FOLDER_PICTURE, SUFFIX_PICTURE)
+        fun generatePicturePath(context: Context, custom: String? = ""): String {
+            return generateSaveFolder(context, FOLDER_PICTURE, SUFFIX_PICTURE, custom)
         }
     }
 }

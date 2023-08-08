@@ -10,6 +10,7 @@ import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.hikvision.hatomplayer.PlayConfig
+import com.hikvision.hatomplayer.core.Quality
 import com.videogo.openapi.EZConstants
 
 /**
@@ -249,22 +250,28 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
 
     /**
      * 开启录像
+     * @param  configMap.deviceSerial     (String？) 设备序列号，用于细分存储目录
      *
      ***************************************************
      * Ezviz
      */
     @ReactProp(name = "startLocalRecord")
     fun startLocalRecord(hikVideoView: HikVideoView, configMap: ReadableMap) {
+        var deviceSerial = ""
+        if (configMap.hasKey("deviceSerial")) {
+            deviceSerial = configMap.getString("deviceSerial").toString()
+        }
+
         when (hikVideoView.getSdkVersion()) {
             SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
-                hikVideoView.startLocalRecordHatom()
+                hikVideoView.startLocalRecordHatom(deviceSerial)
             }
 
             SdkVersion.PrimordialVideo -> {
             }
 
             SdkVersion.EzvizVideo -> {
-                hikVideoView.startLocalRecordEzviz()
+                hikVideoView.startLocalRecordEzviz(deviceSerial)
             }
 
             SdkVersion.Unknown -> {
@@ -307,6 +314,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     fun sound(hikVideoView: HikVideoView, isOpen: Boolean) {
         when (hikVideoView.getSdkVersion()) {
             SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
+                hikVideoView.enableAudioHatom(isOpen)
             }
 
             SdkVersion.PrimordialVideo -> {
@@ -433,6 +441,11 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
      * 设置视频清晰度
      *
      ***************************************************
+     * Hatom
+     * @param configMap.path        (String?)   播放url，可为空，如果为空，需要自行调用 setDataSource 设置新的取流url
+     * @param configMap.videoLevel  (String)    参考 enum hatomplayer.core.Quality
+     *
+     ***************************************************
      * Ezviz
      *
      * @param  configMap.videoLevel     (String)    参考 enum EZConstants.EZVideoLevel
@@ -441,6 +454,17 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     fun setVideoLevel(hikVideoView: HikVideoView, configMap: ReadableMap) {
         when (hikVideoView.getSdkVersion()) {
             SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
+                // setDataSource
+                if (configMap.hasKey("path")) {
+                    hikVideoView.setDataSourceHatom(configMap.getString("path").toString(), null)
+                }
+                // changeStream
+                try {
+                    val videoLevel = Quality.valueOf(configMap.getString("videoLevel")!!)
+                    hikVideoView.changeStreamHatom(videoLevel)
+                } catch (e: Exception) {
+                    Log.e(TAG, "setVideoLevel: ${hikVideoView.getSdkVersion().name} 参数配置异常，请核对")
+                }
             }
 
 
@@ -470,6 +494,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     fun getStreamFlow(hikVideoView: HikVideoView, phString: String?) {
         when (hikVideoView.getSdkVersion()) {
             SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
+                hikVideoView.totalTrafficHatom()
             }
 
 
@@ -478,6 +503,29 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
 
             SdkVersion.EzvizVideo -> {
                 hikVideoView.getStreamFlowEzviz()
+            }
+
+            SdkVersion.Unknown -> {
+                Log.e(TAG, "未 initSdkVersion")
+            }
+        }
+    }
+
+    /**
+     * 设置播放验证码
+     */
+    @ReactProp(name = "setVerifyCode")
+    fun setVerifyCode(hikVideoView: HikVideoView, verifyCode: String) {
+        when (hikVideoView.getSdkVersion()) {
+            SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
+            }
+
+
+            SdkVersion.PrimordialVideo -> {
+            }
+
+            SdkVersion.EzvizVideo -> {
+                hikVideoView.setVerifyCodeEzviz(verifyCode)
             }
 
             SdkVersion.Unknown -> {

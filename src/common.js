@@ -213,3 +213,24 @@ export function EzUpgradeStatus() {
         this.Error
     ]
 }
+
+// 国标/海康 视频画质
+export function HikVideoLevel() {
+    /**
+     * 枚举
+     */
+    this.MAIN_STREAM_HIGH       = "MAIN_STREAM_HIGH"
+    this.SUB_STREAM_STANDARD    = "SUB_STREAM_STANDARD"
+    this.SUB_STREAM_LOW         = "SUB_STREAM_LOW"
+    this.STREAM_SUPER_CLEAR     = "STREAM_SUPER_CLEAR"
+
+    /**
+     * 枚举数组
+     */
+    this.enums = [
+        this.MAIN_STREAM_HIGH,
+        this.SUB_STREAM_STANDARD,
+        this.SUB_STREAM_LOW,
+        this.STREAM_SUPER_CLEAR
+    ]
+}

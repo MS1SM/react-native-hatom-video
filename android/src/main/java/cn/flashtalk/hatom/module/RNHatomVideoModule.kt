@@ -3,6 +3,7 @@ package cn.flashtalk.hatom.module
 import android.util.Log
 import cn.flashtalk.hatom.common.EventProp
 import cn.flashtalk.hatom.common.SdkVersion
+import cn.flashtalk.hatom.utils.Utils
 import com.ezviz.sdk.configwifi.EZConfigWifiInfoEnum
 import com.ezviz.sdk.configwifi.EZWiFiConfigManager
 import com.ezviz.sdk.configwifi.ap.ApConfigParam
@@ -232,6 +233,27 @@ class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : Re
                 )
             }
         }
+    }
+
+    /**
+     * 获取常量
+     * @param  configMap.deviceSerial     (String？) 设备序列号，用于获取细分存储目录的地址
+     *
+     * @param  promise              (Promise)       使用 Promise 回调结果
+     * @return promise.resolve      (WritableMap)   操作结果，返回数据对象。
+     *         resolve.recordPath   (String)        录像存储路径
+     */
+    @ReactMethod
+    fun getConstants(configMap: ReadableMap, promise: Promise) {
+        // 序列号
+        var deviceSerial = ""
+        if (configMap.hasKey("deviceSerial")) {
+            deviceSerial = configMap.getString("deviceSerial").toString()
+        }
+        // 返回值
+        val propMap = Arguments.createMap()
+        propMap.putString(EventProp.recordPath.name, Utils.getRecordFolder(currentActivity!!.application, deviceSerial))
+        promise.resolve(propMap)
     }
     //endregion
 }

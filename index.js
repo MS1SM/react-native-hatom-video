@@ -9,7 +9,8 @@ import {
     EzMirror, 
     EzAlarm,
     EzSdStatus,
-    EzUpgradeStatus
+    EzUpgradeStatus,
+    HikVideoLevel
 } from './src/common';
 
 module.exports.HatomVideo = HatomVideo;
@@ -24,5 +25,6 @@ module.exports.EzMirror = new EzMirror();
 module.exports.EzAlarm = new EzAlarm();
 module.exports.EzSdStatus = new EzSdStatus();
 module.exports.EzUpgradeStatus = new EzUpgradeStatus();
+module.exports.HikVideoLevel = new HikVideoLevel();
 
 module.exports.default = HatomVideo;

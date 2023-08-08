@@ -251,9 +251,11 @@ export default class HatomVideo extends Component {
 
     /**
      * 开启录像
+     * 
+     * @param {*} config 参考 _startLocalRecord
      */
-    startLocalRecord() {
-        this._startLocalRecord()
+    startLocalRecord(config) {
+        this._startLocalRecord(config)
     }
 
     /**
@@ -273,10 +275,59 @@ export default class HatomVideo extends Component {
     voiceTalk(config) {
         this._voiceTalk(config)
     }
+
+    /**
+     * 声音控制
+     * @param isOpen 是否打开
+     */
+    sound(isOpen) {
+        this._sound(isOpen)
+    }
+
+    /**
+     * 设置视频清晰度
+     * @param {object} config 参考 _setVideoLevel
+     */
+    setVideoLevel(config) {
+        this._setVideoLevel(config)
+    }
+
+    /**
+     * 设置播放验证码
+     * @param {string} verifyCode 播放验证码
+     */
+    setVerifyCode(verifyCode) {
+        this._setVerifyCode(verifyCode)
+    }
     //#endregion
 
-    // #region static 
+    // #region static
     /************************* static *************************/
+    
+    /**
+     * 初始化SDK
+     * @param {object} config 参考 _initSdk
+     */
+    static initSdk(config) {
+        HatomVideo._initSdk(config)
+    }
+
+    /**
+     * 获取常量
+     * @param {object | null} config 参考 _getConstants
+     * 
+     * @return {Promise} promise                参考 _getConstants
+     *                   resolve.globalConfig   附加 globalConfig 信息
+     */
+    static getConstants(config) {
+        return new Promise((resolve, reject) => {
+            HatomVideo._getConstants(config)
+            .then(data => {
+                data.globalConfig = GlobalConfig
+                resolve(data)
+            })
+        })
+    }
 
     /**
      * 设置配置
@@ -562,6 +613,8 @@ export default class HatomVideo extends Component {
 
     /**
      * 初始化SDK
+     * 请使用 initSdk
+     *  
      * @param {object}      config
      * @param {string}      config.sdkVersion 
      * @param {string}      config.appKey 
@@ -624,6 +677,24 @@ export default class HatomVideo extends Component {
      */
      static _startConfigWifi(config) {
         return NativeModules.RNHatomVideo.startConfigWifi(config)
+     }
+    
+    /**
+     * 获取常量
+     * 请使用 getConstants
+     * 
+     * @param {object | null} config
+     * @param  config.deviceSerial     (String？) 设备序列号，用于获取细分存储目录的地址
+     *
+     * @param  promise              (Promise)       使用 Promise 回调结果
+     * @return promise.resolve      (Object)        操作结果
+     *         resolve.recordPath   (String)        录像存储路径
+     */
+    static _getConstants(config) {
+        if (!config) {
+            config = {}
+        }
+        return NativeModules.RNHatomVideo.getConstants(config)
     }
     // #endregion
 
@@ -690,9 +761,15 @@ export default class HatomVideo extends Component {
     /**
      * 开启录像
      * 请使用 startLocalRecord
+     * config 可为空对象{}
+     * 
+     * @param {object} config
+     * @param {string} config.deviceSerial?  设备序列号，用于细分存储目录
      */
-    _startLocalRecord() {
-        let config = {}
+    _startLocalRecord(config) {
+        if (!config) {
+            config = {}
+        }
         this.setNativeProps({startLocalRecord: config})
     }
 
@@ -711,6 +788,8 @@ export default class HatomVideo extends Component {
     /**
      * 声音控制
      * @param isOpen 是否打开
+     * 
+     * 请使用 sound
      */
     _sound(isOpen) {
         this.setNativeProps({sound: isOpen})
@@ -762,6 +841,13 @@ export default class HatomVideo extends Component {
 
     /**
      * 设置视频清晰度
+     * 
+     * 请使用 setVideoLevel
+     *
+     ***************************************************
+     * Hatom
+     * @param configMap.path        (String?)           播放url，可为空，如果为空，需要自行调用 setDataSource 设置新的取流url
+     * @param configMap.videoLevel  (HikVideoLevel)     清晰度
      *
      ***************************************************
      * Ezviz
@@ -778,6 +864,15 @@ export default class HatomVideo extends Component {
      */
      _getStreamFlow() {
         this.setNativeProps({getStreamFlow: "phString"})
+     }
+    
+    /**
+     * 设置播放验证码
+     * 请使用 setVerifyCode
+     * @param {string} verifyCode 播放验证码
+     */
+    _setVerifyCode(verifyCode) {
+        this.setNativeProps({setVerifyCode: verifyCode})
     }
     // #endregion
 
@@ -836,6 +931,45 @@ export default class HatomVideo extends Component {
         // 重置当前流量
         this._streamFlow = data
     }
+
+    /**
+     * 播放器状态回调
+     *
+     ***************************************************
+     * HikVideo
+     * code: (String) (code == '-1') 成功，(code == 其他) 错误码。参考海康文档
+     *
+     ***************************************************
+     * Ezviz
+     * code: (Int)          状态。参考萤石文档，EZConstants.EZRealPlayConstants
+     *
+     * data: (Object?)      (code == MSG_REALPLAY_PLAY_FAIL<103>) data = { code, message }
+     *                          (data.code = 400035 || 400036) 需要输入验证码 || 验证码错误
+     *
+     *                      (code == 其他) data 暂无数据
+     */
+    _onPlayStatus = (event) => {
+        if (this.props.onPlayStatus) {
+            this.props.onPlayStatus(event.nativeEvent)
+        }
+    }
+
+    /**
+     * 对讲状态回调
+     *
+     ***************************************************
+     * HikVideo
+     * code: (String) (code == '-1') 成功，(code == 其他) 错误码。参考海康文档
+     *
+     ***************************************************
+     * Ezviz
+     * code: (Int) 状态。参考萤石文档，EZConstants.EZRealPlayConstants
+     */
+    _onTalkStatus = (event) => {
+        if (this.props.onTalkStatus) {
+            this.props.onTalkStatus(event.nativeEvent)
+        }
+    }
     //#endregion
 
     render() {
@@ -852,7 +986,9 @@ export default class HatomVideo extends Component {
                 onCapturePicture:   this._onCapturePicture,
                 onLocalRecord:      this._onLocalRecord,
                 onPtzControl:       this._onPtzControl,
-                onStreamFlow:       this._onStreamFlow
+                onStreamFlow:       this._onStreamFlow,
+                onPlayStatus:       this._onPlayStatus,
+                onTalkStatus:       this._onTalkStatus,
             });
 
             // 获取RN播放器
@@ -927,7 +1063,11 @@ HatomVideo.propTypes = {
      * params.streamFlow    (number) 总流量，单位：B
      * params.speed         (number) 网速，单位：B/s
      */
-    onStreamFlow:       PropTypes.func,
+    onStreamFlow: PropTypes.func,
+    // 播放器状态回调
+    onPlayStatus: PropTypes.func,
+    // 对讲状态回调
+    onTalkStatus: PropTypes.func,
 
     // 继承页面
     scaleX:         PropTypes.number,
@@ -942,13 +1082,10 @@ HatomVideo.propTypes = {
 let RnHatonVideoList = []
 
 const getRnHatonVideo = (sdkVersion) => {
-    Log.info(TAG, "getRnHatonVideo", sdkVersion)
-    
     // 寻找已注册组件
     for (let i=0; i<RnHatonVideoList.length; i++) {
         let item = RnHatonVideoList[i]
         if (item.version == sdkVersion) {
-            Log.info(TAG, "getRnHatonVideo", "已注册")
             return item.video
         }
     }
@@ -956,6 +1093,8 @@ const getRnHatonVideo = (sdkVersion) => {
     let video = requireNativeComponent(sdkVersion, HatomVideo)
 
     // 尚未注册，需要注册并添加
+    Log.info(TAG, "getRnHatonVideo", sdkVersion)
+    Log.info(TAG, "getRnHatonVideo", that._sdkVersion)
     RnHatonVideoList.push({
         version: sdkVersion,
         video: video

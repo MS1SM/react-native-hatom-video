@@ -30,7 +30,38 @@ enum class Events {
      * 流量使用回调，总流量
      * data:    (Double)  总流量值，单位：B
      */
-    onStreamFlow
+    onStreamFlow,
+
+    /**
+     * 播放器状态回调
+     *
+     ***************************************************
+     * HikVideo
+     * code: (String) (code == '-1') 成功，(code == 其他) 错误码。参考海康文档
+     *
+     ***************************************************
+     * Ezviz
+     * code: (Int)          状态。参考萤石文档，EZConstants.EZRealPlayConstants
+     *
+     * data: (Object?)      (code == MSG_REALPLAY_PLAY_FAIL<103>) data = { code, message }
+     *                          (data.code = 400035 || 400036) 需要输入验证码 || 验证码错误
+     *
+     *                      (code == 其他) data 暂无数据
+     */
+    onPlayStatus,
+
+    /**
+     * 对讲状态回调
+     *
+     ***************************************************
+     * HikVideo
+     * code: (String) (code == '-1') 成功，(code == 其他) 错误码。参考海康文档
+     *
+     ***************************************************
+     * Ezviz
+     * code: (Int)          状态。参考萤石文档，EZConstants.EZRealPlayConstants
+     */
+    onTalkStatus
 }
 //endregion
 
@@ -56,9 +87,14 @@ enum class EventProp {
 
     /**
      * 编码
-     * Int
+     * Int | String
      */
-    code
+    code,
+
+    /**
+     * 录像路径
+     */
+    recordPath
 }
 //endregion
 

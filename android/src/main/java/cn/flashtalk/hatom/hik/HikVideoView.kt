@@ -22,6 +22,8 @@ import com.hikvision.hatomplayer.HatomPlayer
 import com.hikvision.hatomplayer.PlayCallback
 import com.hikvision.hatomplayer.PlayCallback.Status
 import com.hikvision.hatomplayer.PlayConfig
+import com.hikvision.hatomplayer.core.Quality
+import com.videogo.errorlayer.ErrorInfo
 import com.videogo.openapi.EZConstants
 import com.videogo.openapi.EZOpenSDK
 import com.videogo.openapi.EZOpenSDKListener
@@ -101,20 +103,36 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
     // 播放器回调
     private val hatomPlayCallback = PlayCallback.PlayStatusCallback { status: Status, errorCode: String ->
         run {
+            val propMap = Arguments.createMap()
+
             Log.i(TAG, "hatomPlayCallback: $status")
             if (!TextUtils.isEmpty(errorCode)) {
                 Log.e(TAG, "hatomPlayCallback: $errorCode")
+                propMap.putString(EventProp.code.name, errorCode)
+            } else {
+                propMap.putString(EventProp.code.name, "-1")
             }
+
+            // 回调
+            eventEmitter.receiveEvent(id, Events.onPlayStatus.name, propMap)
         }
     }
 
     // 对讲回调
     private val talkHatomCallback = PlayCallback.VoiceTalkCallback { status: Status, errorCode: String ->
         run {
+            val propMap = Arguments.createMap()
+
             Log.i(TAG, "talkHatomCallback: $status")
             if (!TextUtils.isEmpty(errorCode)) {
                 Log.e(TAG, "hatomPlayCallback: $errorCode")
+                propMap.putString(EventProp.code.name, errorCode)
+            } else {
+                propMap.putString(EventProp.code.name, "-1")
             }
+
+            // 回调
+            eventEmitter.receiveEvent(id, Events.onTalkStatus.name, propMap)
         }
     }
 
@@ -209,8 +227,8 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
      * 开启录像
      * 通过 Events.onLocalRecord 通知结果。仅失败通知；成功由 stopLocalRecordHatom 调用后通知
      */
-    fun startLocalRecordHatom() {
-        recordPathHatom = Utils.generateRecordPath(context)
+    fun startLocalRecordHatom(deviceSerial: String?) {
+        recordPathHatom = Utils.generateRecordPath(context, deviceSerial)
         val result = hatomPlayer.startRecordAndConvert(recordPathHatom)
         if (result != SUCCESS_HATOM) {
             Log.e(TAG, "startLocalRecordHatom: result")
@@ -280,6 +298,39 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
         }
     }
 
+    /**
+     * 声音控制
+     * @param isOpen 是否打开
+     */
+    fun enableAudioHatom(isOpen: Boolean) {
+        val result = hatomPlayer.enableAudio(isOpen)
+        if (result != SUCCESS_HATOM) {
+            Log.e(TAG, "soundHatom: $result")
+        }
+    }
+
+    /**
+     * 预览码流平滑切换
+     * 必须先调用 setDataSource 接口,设置新的取流url
+     */
+    fun changeStreamHatom(quality: Quality) {
+        val result = hatomPlayer.changeStream(quality)
+        if (result != SUCCESS_HATOM) {
+            Log.e(TAG, "changeStreamHatom: $result")
+        }
+    }
+
+    /**
+     * 获取总流量值
+     *
+     * 通过 Events.onStreamFlow 通知结果
+     */
+    fun totalTrafficHatom() {
+        val propMap = Arguments.createMap()
+        propMap.putDouble(EventProp.data.name, hatomPlayer.totalTraffic.toDouble())
+        eventEmitter.receiveEvent(id, Events.onStreamFlow.name, propMap)
+    }
+
     //endregion
 
     //region Android MediaPlayer 播放器
@@ -337,9 +388,11 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
 
     // 萤石播放器 Handler
     private val ezHandler = EzHandler(WeakReference(this))
+    // 萤石对讲播放器 Handler
+    private val talkEzHandler = TalkEzHandler(WeakReference(this))
 
     /**
-     * 萤石播放器Handler处理
+     * 萤石播放器 Handler 处理
      * 使用弱引用实现，避免内存泄漏
      */
     private class EzHandler(val hikVideoView: WeakReference<HikVideoView>): Handler(Looper.getMainLooper()) {
@@ -347,11 +400,48 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
             super.handleMessage(msg)
 
             hikVideoView.get()?.run {
+                Log.i(TAG, "EzHandler: $msg")
+                val propMap = Arguments.createMap()
+
                 when (msg.what) {
+                    // 播放失败
+                    EZConstants.EZRealPlayConstants.MSG_REALPLAY_PLAY_FAIL -> {
+                        val dataMap = Arguments.createMap()
+                        val errorInfo = msg.obj as ErrorInfo
+                        dataMap.putInt(EventProp.code.name, errorInfo.errorCode)
+                        dataMap.putString(EventProp.message.name, errorInfo.toString())
+                        propMap.putMap(EventProp.data.name, dataMap)
+                    }
+
                     else -> {
-                        Log.i(TAG, "EzHandler: $msg")
                     }
                 }
+
+                // 回调
+                propMap.putInt(EventProp.code.name, msg.what)
+                eventEmitter.receiveEvent(id, Events.onPlayStatus.name, propMap)
+            }
+        }
+    }
+
+    /**
+     * 萤石对讲播放器 Handler 处理
+     * 使用弱引用实现，避免内存泄漏
+     */
+    private class TalkEzHandler(val hikVideoView: WeakReference<HikVideoView>): Handler(Looper.getMainLooper()) {
+        override fun handleMessage(msg: Message) {
+            super.handleMessage(msg)
+
+            hikVideoView.get()?.run {
+                when (msg.what) {
+                    else -> {
+                        Log.i(TAG, "TalkEzHandler: $msg")
+                    }
+                }
+                // 回调
+                val propMap = Arguments.createMap()
+                propMap.putInt(EventProp.code.name, msg.what)
+                eventEmitter.receiveEvent(id, Events.onTalkStatus.name, propMap)
             }
         }
     }
@@ -414,14 +504,14 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
     /**
      * 开启录像
      */
-    fun startLocalRecordEzviz() {
+    fun startLocalRecordEzviz(deviceSerial: String?) {
         /**
          * 录像结果回调接口
          * 通过 Events.onLocalRecord 通知 js
          */
         ezPlayer.setStreamDownloadCallback(ezLocalRecordCallback)
 
-        val recordFile = Utils.generateRecordPath(context)
+        val recordFile = Utils.generateRecordPath(context, deviceSerial)
         ezPlayer.startLocalRecordWithFile(recordFile)
     }
 
@@ -512,6 +602,7 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
     fun voiceTalkEzviz(isStart: Boolean, isDeviceTalkBack: Boolean = true) {
         if (isStart) {
             talkEzPlayer.startVoiceTalk(isDeviceTalkBack)
+            talkEzPlayer.setHandler(talkEzHandler)
         } else {
             talkEzPlayer.stopVoiceTalk()
         }
@@ -535,6 +626,13 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
         val propMap = Arguments.createMap()
         propMap.putDouble(EventProp.data.name, ezPlayer.streamFlow.toDouble())
         eventEmitter.receiveEvent(id, Events.onStreamFlow.name, propMap)
+    }
+
+    /**
+     * 设置播放验证码
+     */
+    fun setVerifyCodeEzviz(verifyCode: String) {
+        ezPlayer.setPlayVerifyCode(verifyCode)
     }
     //endregion
 }
