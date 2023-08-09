@@ -230,6 +230,12 @@ RCT_EXPORT_VIEW_PROPERTY(setVideoLevel, NSDictionary)
  */
 RCT_EXPORT_VIEW_PROPERTY(getStreamFlow, NSString)
 
+/**
+ * 设置播放验证码
+ * NSString verifyCode
+ */
+RCT_EXPORT_VIEW_PROPERTY(setVerifyCode, NSString)
+
 #pragma mark Events
 
 /**
@@ -259,4 +265,35 @@ RCT_EXPORT_VIEW_PROPERTY(onPtzControl, RCTDirectEventBlock)
  * data:    (Double)  总流量值，单位：B
  */
 RCT_EXPORT_VIEW_PROPERTY(onStreamFlow, RCTDirectEventBlock)
+
+/**
+ * 播放器状态回调
+ *
+ ***************************************************
+ * HikVideo
+ * code: (String) (code == '-1') 成功，(code == 其他) 错误码。参考海康文档
+ *
+ ***************************************************
+ * Ezviz
+ * code: (Int)          状态。参考萤石文档，EZConstants.EZRealPlayConstants
+ *
+ * data: (Object?)      (code == MSG_REALPLAY_PLAY_FAIL<103>) data = { code, message }
+ *                          (data.code = 400035 || 400036) 需要输入验证码 || 验证码错误
+ *
+ *                      (code == 其他) data 暂无数据
+ */
+RCT_EXPORT_VIEW_PROPERTY(onPlayStatus, RCTDirectEventBlock)
+
+/**
+ * 对讲状态回调
+ *
+ ***************************************************
+ * HikVideo
+ * code: (String) (code == '-1') 成功，(code == 其他) 错误码。参考海康文档
+ *
+ ***************************************************
+ * Ezviz
+ * code: (Int)          状态。参考萤石文档，EZConstants.EZRealPlayConstants
+ */
+RCT_EXPORT_VIEW_PROPERTY(onTalkStatus, RCTDirectEventBlock)
 @end

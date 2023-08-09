@@ -31,9 +31,14 @@ enum EventProp: String {
     
     /**
      * 编码
-     * Int
+     * Int | String
      */
     case code = "code"
+    
+    /**
+     * 录像路径
+     */
+    case recordPath = "recordPath"
 }
 
 // MARK: - sdk 版本枚举

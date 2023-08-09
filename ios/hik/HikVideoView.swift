@@ -68,6 +68,8 @@ class HikVideoView: UITextView, EZPlayerDelegate {
     @objc var onLocalRecord: RCTDirectEventBlock?
     @objc var onPtzControl: RCTDirectEventBlock?
     @objc var onStreamFlow: RCTDirectEventBlock?
+    @objc var onPlayStatus: RCTDirectEventBlock?
+    @objc var onTalkStatus: RCTDirectEventBlock?
     
     // MARK: - 属性入口配置
     
@@ -282,6 +284,25 @@ class HikVideoView: UITextView, EZPlayerDelegate {
         }
     }
     
+    // 设置播放验证码
+    @objc var setVerifyCode: NSString? {
+        didSet {
+            switch sdkVersion {
+            case .Unknown:
+                print(TAG, "error 未 initSdkVersion")
+                
+            case .HikVideo_V2_1_0:
+                print(TAG, "HikVideo setVerifyCode")
+                
+            case .PrimordialVideo:
+                print(TAG, "PrimordialVideo setVerifyCode")
+                
+            case .EzvizVideo:
+                setVerifyCodeEzviz(verifyCode: setVerifyCode as! String)
+            }
+        }
+    }
+    
     // MARK: - 海康 SDK V2.1.0 播放器
     /**
      * 初始化SDK
@@ -400,15 +421,29 @@ class HikVideoView: UITextView, EZPlayerDelegate {
     /**
      播放器播放失败错误回调
      */
-    func didPlayFailed(error: NSError) {
+    @objc func player(_ player: EZPlayer, didPlayFailed error: NSError) {
         print(TAG, "error didPlayFailed", error)
+        onPlayStatus!([
+            // 103 对应 Android MSG_REALPLAY_PLAY_FAIL
+            EventProp.code.rawValue: 103,
+            EventProp.data.rawValue: [
+                EventProp.code.rawValue: error.code,
+                EventProp.message.rawValue: error.userInfo
+            ]
+        ])
     }
-    
+
     /**
      播放器消息回调
      */
-    func didReceivedMessage(messageCode: NSInteger) {
+    @objc func player(_ player: EZPlayer, didReceivedMessage messageCode: NSInteger) {
         print(TAG, "didReceivedMessage", messageCode)
+        var code = messageCode as Int
+        if code == EZMessageCode.PLAYER_REALPLAY_START.rawValue {
+            // 102 对应 Android MSG_REALPLAY_PLAY_SUCCESS
+            code = 102
+        }
+        onPlayStatus!([EventProp.code.rawValue: code])
     }
     
     // MARK: 播放器方法
@@ -550,5 +585,12 @@ class HikVideoView: UITextView, EZPlayerDelegate {
         } else {
             talkEzPlayer.stopVoiceTalk()
         }
+    }
+    
+    /**
+     * 设置播放验证码
+     */
+    func setVerifyCodeEzviz(verifyCode: String) {
+        ezPlayer.setPlayVerifyCode(verifyCode)
     }
 }
