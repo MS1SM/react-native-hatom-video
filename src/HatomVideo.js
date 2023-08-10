@@ -684,7 +684,7 @@ export default class HatomVideo extends Component {
      * 请使用 getConstants
      * 
      * @param {object | null} config
-     * @param  config.deviceSerial     (String？) 设备序列号，用于获取细分存储目录的地址
+     * @param  config.deviceSerial     (String？) 设备序列号，用于获取细分存储目录的地址。仅安卓有效，ios已存储到系统相册
      *
      * @param  promise              (Promise)       使用 Promise 回调结果
      * @return promise.resolve      (Object)        操作结果
@@ -764,7 +764,7 @@ export default class HatomVideo extends Component {
      * config 可为空对象{}
      * 
      * @param {object} config
-     * @param {string} config.deviceSerial?  设备序列号，用于细分存储目录
+     * @param {string} config.deviceSerial?  设备序列号，用于细分存储目录。仅安卓有效，ios直接存放到系统相册
      */
     _startLocalRecord(config) {
         if (!config) {

@@ -68,6 +68,18 @@ RCT_EXTERN_METHOD(
                   reject: (RCTPromiseRejectBlock)reject
 )
 
+/**
+ * 获取常量
+ *
+ * @param  promise              (Promise)       使用 Promise 回调结果
+ * @return promise.resolve      (WritableMap)   操作结果，返回数据对象
+ */
+RCT_EXTERN_METHOD(
+                    getConstants: (NSDictionary*)config
+                    resolve: (RCTPromiseResolveBlock)resolve
+                    reject: (RCTPromiseRejectBlock)reject
+)
+
 @end
 
 #pragma mark - UI
@@ -180,7 +192,7 @@ RCT_EXPORT_VIEW_PROPERTY(stopLocalRecord, NSString)
  * 声音控制
  * @param BOOL 是否打开
  */
-RCT_EXPORT_VIEW_PROPERTY(sound, BOOL)
+RCT_EXPORT_VIEW_PROPERTY(sound, NSNumber)
 
 /**
  * 云台 PTZ 控制接口

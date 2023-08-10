@@ -29,7 +29,7 @@ class RNHatomVideoModule: NSObject {
         let printLog    = configDic["printLog"]     as! Bool
         
         switch getSdkVersion(config: configDic) {
-        case .HikVideo_V2_1_0:
+        case .HikVideo_V2_1_0, .Imou:
             let _ = HatomPlayerSDK.init(appKey, printLog: true)
             
         case .PrimordialVideo:
@@ -56,7 +56,7 @@ class RNHatomVideoModule: NSObject {
         let configDic   = config as! Dictionary<String, Any>
         
         switch getSdkVersion(config: configDic) {
-        case .HikVideo_V2_1_0:
+        case .HikVideo_V2_1_0, .Imou:
             print(TAG, "probeDeviceInfo: HikVideo_V2_1_0")
             
         case .PrimordialVideo:
@@ -96,7 +96,7 @@ class RNHatomVideoModule: NSObject {
         let configDic   = config as! Dictionary<String, Any>
         
         switch getSdkVersion(config: configDic) {
-        case .HikVideo_V2_1_0:
+        case .HikVideo_V2_1_0, .Imou:
             print(TAG, "startConfigWifi: probeDeviceInfo")
             
         case .PrimordialVideo:
@@ -131,5 +131,15 @@ class RNHatomVideoModule: NSObject {
         case .Unknown:
             print(TAG, "startConfigWifi: Unknown")
         }
+    }
+    
+    @objc
+    func getConstants(
+        _ config: NSDictionary,
+        resolve: @escaping RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) {
+        let configDic = config as! Dictionary<String, Any>
+        resolve([])
     }
 }

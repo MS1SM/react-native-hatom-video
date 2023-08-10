@@ -601,8 +601,8 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
      */
     fun voiceTalkEzviz(isStart: Boolean, isDeviceTalkBack: Boolean = true) {
         if (isStart) {
-            talkEzPlayer.startVoiceTalk(isDeviceTalkBack)
             talkEzPlayer.setHandler(talkEzHandler)
+            talkEzPlayer.startVoiceTalk(isDeviceTalkBack)
         } else {
             talkEzPlayer.stopVoiceTalk()
         }

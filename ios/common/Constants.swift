@@ -8,6 +8,7 @@
 
 import Foundation
 import EZOpenSDKFramework
+import hatomplayer_core
 
 // MARK: - 与 js 交互时事件携带的参数
 enum EventProp: String {
@@ -51,6 +52,8 @@ enum SdkVersion: String {
     case PrimordialVideo = "PrimordialVideo"
     // 支持萤石 SDK。萤石使用 pod 获得，不强调版本。
     case EzvizVideo = "EzvizVideo"
+    // 乐橙云
+    case Imou = "Imou"
     
     static func nameToEnum(name: String) -> SdkVersion {
         let TAG = "SdkVersion"
@@ -100,5 +103,18 @@ final class EZConstants {
         "VIDEO_LEVEL_BALANCED":     .middle,
         "VIDEO_LEVEL_HD":           .high,
         "VIDEO_LEVEL_SUPERCLEAR":   .superHigh
+    ]
+}
+
+// MARK: - 海康常量
+final class HikConstants {
+    private init() {}
+    
+    // 视频清晰度
+    static let QualityType: [String: QualityType] = [
+        "MAIN_STREAM_HIGH":     .HD,
+        "SUB_STREAM_STANDARD":  .SD,
+        "SUB_STREAM_LOW":       .FL,
+        "STREAM_SUPER_CLEAR":   .HD
     ]
 }

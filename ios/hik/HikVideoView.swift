@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 import AVKit
 import EZOpenSDKFramework
+import hatomplayer_core
 
 /**
  * 集成版 View
@@ -30,7 +31,7 @@ import EZOpenSDKFramework
  */
 @available(iOS 8.0, *)
 @objc(HikVideoView)
-class HikVideoView: UITextView, EZPlayerDelegate {
+class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
     let TAG = "HikVideoView"
     
     var sdkVersion = SdkVersion.Unknown
@@ -89,7 +90,7 @@ class HikVideoView: UITextView, EZPlayerDelegate {
             case .Unknown:
                 print(TAG, "error 未 initSdkVersion")
                 
-            case .HikVideo_V2_1_0:
+            case .HikVideo_V2_1_0, .Imou:
                 initPlayerHatom()
                 
             case .PrimordialVideo:
@@ -119,9 +120,9 @@ class HikVideoView: UITextView, EZPlayerDelegate {
             case .Unknown:
                 print(TAG, "error 未 initSdkVersion")
                 
-            case .HikVideo_V2_1_0:
+            case .HikVideo_V2_1_0, .Imou:
                 let sourceDic = setDataSource as! Dictionary<String, Any>
-                print(TAG, "setDataSource", sourceDic["path"] as! String)
+                setDataSourceHatom(path: sourceDic["path"] as! String)
                 
             case .PrimordialVideo:
                 let sourceDic = setDataSource as! Dictionary<String, Any>
@@ -140,8 +141,8 @@ class HikVideoView: UITextView, EZPlayerDelegate {
             case .Unknown:
                 print(TAG, "error 未 initSdkVersion")
                 
-            case .HikVideo_V2_1_0:
-                print(TAG, "HikVideo startPlay")
+            case .HikVideo_V2_1_0, .Imou:
+                startHatom()
                 
             case .PrimordialVideo:
                 startPrimordial()
@@ -159,14 +160,35 @@ class HikVideoView: UITextView, EZPlayerDelegate {
             case .Unknown:
                 print(TAG, "error 未 initSdkVersion")
                 
-            case .HikVideo_V2_1_0:
-                print(TAG, "HikVideo getStreamFlow")
+            case .HikVideo_V2_1_0, .Imou:
+                totalTrafficHatom()
                 
             case .PrimordialVideo:
                 print(TAG, "PrimordialVideo getStreamFlow")
                 
             case .EzvizVideo:
                 getStreamFlowEzviz()
+            }
+        }
+    }
+    
+    // 声音控制
+    @objc var sound: NSNumber? {
+        didSet {
+            let isOpen = sound != 0
+            
+            switch sdkVersion {
+            case .Unknown:
+                print(TAG, "error 未 initSdkVersion")
+                
+            case .HikVideo_V2_1_0, .Imou:
+                enableAudioHatom(isOpen: isOpen)
+                
+            case .PrimordialVideo:
+                print(TAG, "PrimordialVideo sound")
+                
+            case .EzvizVideo:
+                soundEzviz(isOpen: isOpen)
             }
         }
     }
@@ -179,7 +201,7 @@ class HikVideoView: UITextView, EZPlayerDelegate {
             case .Unknown:
                 print(TAG, "error 未 initSdkVersion")
                 
-            case .HikVideo_V2_1_0:
+            case .HikVideo_V2_1_0, .Imou:
                 print(TAG, "HikVideo controlPtz")
                 
             case .PrimordialVideo:
@@ -205,14 +227,41 @@ class HikVideoView: UITextView, EZPlayerDelegate {
             case .Unknown:
                 print(TAG, "error 未 initSdkVersion")
                 
-            case .HikVideo_V2_1_0:
-                print(TAG, "HikVideo capturePicture")
+            case .HikVideo_V2_1_0, .Imou:
+                capturePictureHatom()
                 
             case .PrimordialVideo:
                 print(TAG, "PrimordialVideo capturePicture")
                 
             case .EzvizVideo:
                 capturePictureEzviz()
+            }
+        }
+    }
+    
+    // 设置视频清晰度
+    @objc var setVideoLevel: NSDictionary? {
+        didSet {
+            let configDic = controlPtz as! Dictionary<String, Any>
+            switch sdkVersion {
+            case .Unknown:
+                print(TAG, "error 未 initSdkVersion")
+                
+            case .HikVideo_V2_1_0, .Imou:
+                // setDataSource
+                if configDic.keys.contains("path") {
+                    setDataSourceHatom(path: configDic["path"] as! String)
+                }
+                // changeStream
+                let videoLevel = HikConstants.QualityType[configDic["videoLevel"] as! String]!
+                changeStreamHatom(quality: videoLevel)
+                
+            case .PrimordialVideo:
+                print(TAG, "PrimordialVideo setVideoLevel")
+                
+            case .EzvizVideo:
+                let videoLevel = EZConstants.VideoLevel[configDic["videoLevel"] as! String]!
+                setVideoLevelEzviz(videoLevel: videoLevel)
             }
         }
     }
@@ -224,8 +273,8 @@ class HikVideoView: UITextView, EZPlayerDelegate {
             case .Unknown:
                 print(TAG, "error 未 initSdkVersion")
                 
-            case .HikVideo_V2_1_0:
-                print(TAG, "HikVideo startLocalRecord")
+            case .HikVideo_V2_1_0, .Imou:
+                startLocalRecordHatom()
                 
             case .PrimordialVideo:
                 print(TAG, "PrimordialVideo startLocalRecord")
@@ -243,8 +292,8 @@ class HikVideoView: UITextView, EZPlayerDelegate {
             case .Unknown:
                 print(TAG, "error 未 initSdkVersion")
                 
-            case .HikVideo_V2_1_0:
-                print(TAG, "HikVideo stopLocalRecord")
+            case .HikVideo_V2_1_0, .Imou:
+                stopLocalRecordHatom()
                 
             case .PrimordialVideo:
                 print(TAG, "PrimordialVideo stopLocalRecord")
@@ -259,18 +308,20 @@ class HikVideoView: UITextView, EZPlayerDelegate {
     @objc var voiceTalk: NSDictionary? {
         didSet {
             let configDic = voiceTalk as! Dictionary<String, Any>
+            let isStart = configDic["isStart"] as! Bool
+            
             switch sdkVersion {
             case .Unknown:
                 print(TAG, "error 未 initSdkVersion")
                 
-            case .HikVideo_V2_1_0:
-                print(TAG, "HikVideo voiceTalk")
+            case .HikVideo_V2_1_0, .Imou:
+                let talkUrl = configDic["talkUrl"] as! String
+                voiceTalkHatom(isStart: isStart, talkUrl: talkUrl)
                 
             case .PrimordialVideo:
                 print(TAG, "PrimordialVideo voiceTalk")
                 
             case .EzvizVideo:
-                let isStart = configDic["isStart"] as! Bool
                 var isDeviceTalkBack = true
                 if configDic.keys.contains("isDeviceTalkBack") {
                     isDeviceTalkBack = configDic["isDeviceTalkBack"] as! Bool
@@ -291,7 +342,7 @@ class HikVideoView: UITextView, EZPlayerDelegate {
             case .Unknown:
                 print(TAG, "error 未 initSdkVersion")
                 
-            case .HikVideo_V2_1_0:
+            case .HikVideo_V2_1_0, .Imou:
                 print(TAG, "HikVideo setVerifyCode")
                 
             case .PrimordialVideo:
@@ -304,6 +355,35 @@ class HikVideoView: UITextView, EZPlayerDelegate {
     }
     
     // MARK: - 海康 SDK V2.1.0 播放器
+    
+    // 海康操作成功返回码
+    let SUCCESS_HATOM = 0
+    // 录像文件地址
+    var recordPathHatom = ""
+    
+    // 海康视频播放器
+    lazy var hatomPlayer: HatomPlayer = {
+        return DefaultHatomPlayer.init()
+    }()
+    // 海康对讲播放器
+    lazy var talkHatomPlayer: HatomPlayer = {
+        return DefaultHatomPlayer.init()
+    }()
+    
+    // MARK: HatomPlayerDelegate
+    // 播放状态回调
+    @objc func onPlayerStatus(_ status: PlayStatus, errorCode: String) {
+        print(TAG, "onPlayerStatus", status, errorCode)
+        onPlayStatus!([EventProp.code.rawValue: errorCode])
+    }
+    
+    // 对讲状态回调
+    @objc func onTalk(_ status: PlayStatus, errorCode: String) {
+        print(TAG, "onTalkStatus", status, errorCode)
+        onTalkStatus!([EventProp.code.rawValue: errorCode])
+    }
+    
+    // MARK: 播放器方法
     /**
      * 初始化SDK
      */
@@ -315,7 +395,14 @@ class HikVideoView: UITextView, EZPlayerDelegate {
      * 初始化播放器
      */
     func initPlayerHatom() {
-        
+        hatomPlayer.setVideoWindow(self)
+        // 默认 PlayConfig
+        let playConfig = PlayConfig()
+        playConfig.hardDecode = true
+        playConfig.privateData = true
+        hatomPlayer.setPlayConfig(playConfig)
+        // 回调
+        hatomPlayer.delegate = self
     }
 
     /**
@@ -328,7 +415,7 @@ class HikVideoView: UITextView, EZPlayerDelegate {
     /// 设置视频播放参数
     /// - Parameter path: 播放url
     func setDataSourceHatom(path: String) {
-        
+        hatomPlayer.setDataSource(path, headers: nil)
     }
 
     /**
@@ -336,7 +423,148 @@ class HikVideoView: UITextView, EZPlayerDelegate {
      * 开启视频预览或回放
      */
     func startHatom() {
-
+        hatomPlayer.start()
+    }
+    
+    /**
+     * 对讲控制
+     * - Parameter isStart  是否开启对讲
+     * - Parameter talkUrl  对讲短链接，通过调用openApi获取
+     */
+    func voiceTalkHatom(isStart: Bool, talkUrl: String) {
+        if isStart {
+            talkHatomPlayer.setVoiceDataSource(talkUrl, headers: nil)
+            talkHatomPlayer.delegate = self
+            talkHatomPlayer.startVoiceTalk()
+        } else {
+            talkHatomPlayer.stopVoiceTalk()
+        }
+    }
+    
+    /**
+     * 声音控制
+     * - Parameter isOpen 是否打开
+     */
+    func enableAudioHatom(isOpen: Bool) {
+        hatomPlayer.enableAudio(isOpen)
+    }
+    
+    /**
+     * 预览码流平滑切换
+     * 必须先调用 setDataSource 接口,设置新的取流url
+     */
+    func changeStreamHatom(quality: QualityType) {
+        var result = hatomPlayer.changeStream(quality)
+        if !result {
+            print(TAG, "changeStreamHatom", result)
+        }
+    }
+    
+    /**
+     * 截图
+     * 通过 Events.onCapturePicture 通知结果
+     */
+    func capturePictureHatom() {
+        // 截图结果
+        let imageData = hatomPlayer.screenshoot()
+        if imageData == nil {
+            print(TAG, "capturePictureHatom", "截图失败")
+            onCapturePicture!([EventProp.success.rawValue: false])
+            return
+        }
+        // 保存到系统相册
+        let image = UIImage(data: imageData!)
+        if image != nil {
+            UIImageWriteToSavedPhotosAlbum(
+                image!,
+                self,
+                #selector(imageSavedToAlbum),
+                nil
+            )
+            
+        } else {
+            // 生成失败
+            print(TAG, "capturePictureHatom", "截图失败")
+            onCapturePicture!([EventProp.success.rawValue: false])
+        }
+    }
+    
+    /**
+     * 开启录像
+     * 通过 Events.onLocalRecord 通知结果。仅失败通知；成功由 stopLocalRecordHatom 调用后通知
+     */
+    func startLocalRecordHatom() {
+        // 文件名
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = FORMAT_FILE_NAME
+        
+        // 文件路径
+        recordPathHatom = String(
+            format: FORMAT_RECORD_PATH,
+            dateFormatter.string(from: Date())
+        )
+        
+        // 开始录制
+        let result = hatomPlayer.startRecordAndConvert(recordPathHatom)
+        if result != SUCCESS_HATOM {
+            print(TAG, "error startLocalRecordHatom", result)
+            recordPathHatom = ""
+            // 失败回调
+            onLocalRecord!([
+                EventProp.success.rawValue: false,
+                EventProp.message.rawValue: result,
+            ])
+        }
+    }
+    
+    /**
+     * 结束本地直播流录像
+     * 与 startLocalRecordHatom 成对使用
+     * 通过 Events.onLocalRecord 通知结果
+     */
+    func stopLocalRecordHatom() {
+        // 路径为空
+        if recordPathHatom == "" {
+            print(TAG, "stopLocalRecordHatom error 未 开始录像")
+            // 失败回调
+            onLocalRecord!([
+                EventProp.success.rawValue: false,
+                EventProp.message.rawValue: -1,
+            ])
+            return
+        }
+        
+        // 录制失败
+        let result = hatomPlayer.stopRecord()
+        if result != SUCCESS_HATOM {
+            print(TAG, "error stopLocalRecordHatom", result)
+            // 失败回调
+            onLocalRecord!([
+                EventProp.success.rawValue: false,
+                EventProp.message.rawValue: result,
+            ])
+            return
+        }
+        
+        // 录制成功，保存到相册，由 videoSavedToAlbum 回调结果
+        UISaveVideoAtPathToSavedPhotosAlbum(
+            recordPathHatom,
+            self,
+            #selector(self.videoSavedToAlbum),
+            nil
+        )
+        
+        // 清理路径
+        recordPathHatom = ""
+    }
+    
+    /**
+     * 获取总流量值
+     *
+     * 通过 Events.onStreamFlow 通知结果
+     */
+    func totalTrafficHatom() {
+        onStreamFlow!([EventProp.data.rawValue: hatomPlayer.getTotalTraffic()])
     }
     
     // MARK: - 原生播放器
@@ -423,14 +651,22 @@ class HikVideoView: UITextView, EZPlayerDelegate {
      */
     @objc func player(_ player: EZPlayer, didPlayFailed error: NSError) {
         print(TAG, "error didPlayFailed", error)
-        onPlayStatus!([
-            // 103 对应 Android MSG_REALPLAY_PLAY_FAIL
-            EventProp.code.rawValue: 103,
-            EventProp.data.rawValue: [
-                EventProp.code.rawValue: error.code,
-                EventProp.message.rawValue: error.userInfo
-            ]
-        ])
+        
+        if player == ezPlayer {
+            // 预览
+            onPlayStatus!([
+                // 103 对应 Android MSG_REALPLAY_PLAY_FAIL
+                EventProp.code.rawValue: 103,
+                EventProp.data.rawValue: [
+                    EventProp.code.rawValue: error.code,
+                    EventProp.message.rawValue: error.userInfo
+                ]
+            ])
+            
+        } else {
+            // 对讲
+            onTalkStatus!([EventProp.code.rawValue: error.code])
+        }
     }
 
     /**
@@ -439,11 +675,20 @@ class HikVideoView: UITextView, EZPlayerDelegate {
     @objc func player(_ player: EZPlayer, didReceivedMessage messageCode: NSInteger) {
         print(TAG, "didReceivedMessage", messageCode)
         var code = messageCode as Int
-        if code == EZMessageCode.PLAYER_REALPLAY_START.rawValue {
-            // 102 对应 Android MSG_REALPLAY_PLAY_SUCCESS
-            code = 102
+        
+        if player == ezPlayer {
+            // 预览
+            // 播放开始重置定义
+//            if code == EZMessageCode.PLAYER_REALPLAY_START.rawValue {
+//                // 102 对应 Android MSG_REALPLAY_PLAY_SUCCESS
+//                code = 102
+//            }
+            onPlayStatus!([EventProp.code.rawValue: code])
+            
+        } else {
+            // 对讲
+            onTalkStatus!([EventProp.code.rawValue: code])
         }
-        onPlayStatus!([EventProp.code.rawValue: code])
     }
     
     // MARK: 播放器方法
@@ -549,6 +794,11 @@ class HikVideoView: UITextView, EZPlayerDelegate {
     func stopLocalRecordEzviz() {
         if recordPathEzviz == "" {
             print(TAG, "stopLocalRecordEzviz error 未 开始录像")
+            // 失败回调
+            onLocalRecord!([
+                EventProp.success.rawValue: false,
+                EventProp.message.rawValue: -1,
+            ])
             return
         }
         
@@ -581,6 +831,7 @@ class HikVideoView: UITextView, EZPlayerDelegate {
      */
     func voiceTalkEzviz(isStart: Bool, isDeviceTalkBack: Bool) {
         if isStart {
+            talkEzPlayer.delegate = self
             talkEzPlayer.startVoiceTalk()
         } else {
             talkEzPlayer.stopVoiceTalk()
@@ -592,5 +843,38 @@ class HikVideoView: UITextView, EZPlayerDelegate {
      */
     func setVerifyCodeEzviz(verifyCode: String) {
         ezPlayer.setPlayVerifyCode(verifyCode)
+    }
+    
+    /**
+     * 声音控制
+     * - Parameter isOpen 是否打开
+     */
+    func soundEzviz(isOpen: Bool) {
+        if isOpen {
+            ezPlayer.openSound()
+        } else {
+            ezPlayer.closeSound()
+        }
+    }
+    
+    /**
+     * 设置视频清晰度
+     *
+     * 此调节可以在视频播放前设置也可以在视频播放成功后设置
+     * 视频播放成功后设置了清晰度需要先停止播放 stopRealPlay 然后重新开启播放 startRealPlay 才能生效
+     */
+    func setVideoLevelEzviz(videoLevel: EZVideoLevelType) {
+        EZOpenSDK.setVideoLevel(
+            deviceSerialEzviz,
+            cameraNo: cameraNoEzviz,
+            videoLevel: videoLevel) {
+                (error: Error?) in
+                
+                if (error != nil) {
+                    print(self.TAG, "setVideoLevelEzviz error", error!)
+                } else {
+                    print(self.TAG, "setVideoLevelEzviz success")
+                }
+            }
     }
 }
