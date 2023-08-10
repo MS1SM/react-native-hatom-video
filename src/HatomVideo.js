@@ -330,6 +330,15 @@ export default class HatomVideo extends Component {
     }
 
     /**
+     * 查询存储录像信息列表
+     * @param {object} config 参考 _searchRecordFile
+     * @return {Promise} promise 参考 _searchRecordFile
+     */
+    static searchRecordFile(config) {
+        return HatomVideo.searchRecordFile(config)
+    }
+
+    /**
      * 设置配置
      * 参数皆可为空，未配置的使用默认配置
      * 
@@ -695,6 +704,27 @@ export default class HatomVideo extends Component {
             config = {}
         }
         return NativeModules.RNHatomVideo.getConstants(config)
+    }
+
+
+    /**
+     * 查询存储录像信息列表
+     * 含 云存储 和 SD卡存储
+     * 请使用 searchRecordFile
+     *
+     * @param  config.sdkVersion     (String)    sdk 版本
+     * @param  config.isSd           (boolean)   查询sd 还是 云存储
+     * @param  promise               (Promise)   使用 Promise 回调结果
+     *
+     ***************************************************
+     * Ezviz
+     * @param  config.deviceSerial   (String)    设备序列号
+     * @param  config.cameraNo       (int)       通道号
+     * @param  config.startTime      (long)      查询时间范围: 开始时间。精确到毫秒的时间戳
+     * @param  config.endTime        (long)      查询时间范围: 结束时间。精确到毫秒的时间戳
+     */
+    static _searchRecordFile(config) {
+        return NativeModules.RNHatomVideo.searchRecordFile(config)
     }
     // #endregion
 

@@ -16,12 +16,14 @@ import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.ReadableMap
 import com.hikvision.hatomplayer.HatomPlayerSDK
 import com.videogo.openapi.EZOpenSDK
+import com.videogo.openapi.bean.EZDeviceRecordFile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 
 class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
@@ -254,6 +256,77 @@ class RNHatomVideoModule(private val reactContext: ReactApplicationContext) : Re
         val propMap = Arguments.createMap()
         propMap.putString(EventProp.recordPath.name, Utils.getRecordFolder(currentActivity!!.application, deviceSerial))
         promise.resolve(propMap)
+    }
+
+    /**
+     * 查询存储录像信息列表
+     * 含 云存储 和 SD卡存储
+     *
+     * @param  configMap.sdkVersion     (String)    sdk 版本
+     * @param  configMap.isSd           (boolean)   查询sd 还是 云存储
+     * @param  promise                  (Promise)   使用 Promise 回调结果
+     *
+     ***************************************************
+     * Ezviz
+     * @param  configMap.deviceSerial   (String)    设备序列号
+     * @param  configMap.cameraNo       (int)       通道号
+     * @param  configMap.startTime      (long)      查询时间范围: 开始时间。精确到毫秒的时间戳
+     * @param  configMap.endTime        (long)      查询时间范围: 结束时间。精确到毫秒的时间戳
+     */
+    @ReactMethod
+    fun searchRecordFile(configMap: ReadableMap, promise: Promise) {
+        // 类型
+        val isSd = configMap.getBoolean("isSd")
+
+        when(getSdkVersion(configMap)) {
+            SdkVersion.HikVideo_V2_1_0 -> {
+            }
+
+            SdkVersion.PrimordialVideo -> {
+            }
+
+            SdkVersion.EzvizVideo -> {
+                // 设备序列号
+                val deviceSerial = configMap.getString("deviceSerial")
+                // 通道号
+                val cameraNo = configMap.getInt("cameraNo")
+                // 开始时间
+                val startTime = configMap.getDouble("startTime")
+                val startCalendar = Calendar.getInstance()
+                startCalendar.timeInMillis = startTime.toLong()
+                // 结束时间
+                val endTime = configMap.getDouble("endTime")
+                val endCalendar = Calendar.getInstance()
+                endCalendar.timeInMillis = endTime.toLong()
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    flow<String> {
+                        if (isSd) {
+                            var result = EZOpenSDK.getInstance().searchRecordFileFromDevice(
+                                deviceSerial,
+                                cameraNo,
+                                startCalendar,
+                                endCalendar
+                            )
+                        } else {
+                            var result = EZOpenSDK.getInstance().searchRecordFileFromCloud(
+                                deviceSerial,
+                                cameraNo,
+                                startCalendar,
+                                endCalendar
+                            )
+                        }
+
+                        // 返回值
+                        val propMap = Arguments.createMap()
+                        promise.resolve(propMap)
+                    }.catch {
+                        Log.e(TAG, "searchRecordFile ${it.message}", it)
+                        promise.reject(Exception("-1"))
+                    }.collect {}
+                }
+            }
+        }
     }
     //endregion
 }
