@@ -6,7 +6,7 @@ import {
     Dimensions
 } from 'react-native';
 import PropTypes from 'prop-types';
-import { SdkVersionEnum } from './common';
+import { EZPlaybackRate, PlaybackCommand, SdkVersionEnum } from './common';
 import { getToken, preview } from './api/HikApi';
 import Log from './utils/Log';
 import Video from "react-native-video";
@@ -24,12 +24,15 @@ import {
     version,
     sound,
     upgradeStatus,
-    upgrade
+    upgrade,
+    searchRecord
 } from './api/EzvizApi';
 
 const TAG = 'HatomVideo';
 
-export const SdkVersion = new SdkVersionEnum()
+const SdkVersion = new SdkVersionEnum()
+const Playback   = new PlaybackCommand()
+const EzRate     = new EZPlaybackRate()
 
 // 全局属性【用于保证that的有效区域】
 let that;
@@ -50,6 +53,9 @@ export default class HatomVideo extends Component {
 
         // 流量监听定时器
         this._streamFlowTimer = null
+
+        // 当前回看倍速，仅萤石需要自行记录
+        this._speedPlayback = EzRate.EZ_PLAYBACK_RATE_1
 
         that = this;
 
@@ -298,6 +304,132 @@ export default class HatomVideo extends Component {
      */
     setVerifyCode(verifyCode) {
         this._setVerifyCode(verifyCode)
+    }
+    
+    /**
+     * 开始回放
+     * @param {object} config 
+     * 
+     * **************************************************
+     * HikVideo
+     * 流程是 setDataSource -> start -> seekPlayback
+     * startPlayback 集成以上三个流程
+     * @param {string} config.path      播放串
+     * @param {number} config.seekTime  定位时间。精确到毫秒的时间戳
+     * 
+     * **************************************************
+     * Ezviz
+     * @param {number} config.startTime  开始时间。精确到毫秒的时间戳
+     * @param {number} config.endTime    结束时间。精确到毫秒的时间戳
+     */
+    startPlayback(config) {
+        switch (this._sdkVersion) {
+            case SdkVersion.HikVideo_2_1_0, SdkVersion.Imou:
+                this.setDataSource(config.path)
+                this.start()
+                this.seekPlayback(config.seekTime)
+            
+            case SdkVersion.EzvizVideo:
+                // 新的播放，倍速为一倍速
+                this._speedPlayback = EzRate.EZ_PLAYBACK_RATE_1
+                // 播放
+                config.command = Playback.Start
+                this._playback(config)
+            
+            default:
+                Log.error(TAG, "startPlayback", "未实现")
+        }
+    }
+
+    /**
+     * 停止回放
+     * 
+     * **************************************************
+     * HikVideo
+     * 用的是 stop
+     * 
+     * **************************************************
+     * Ezviz
+     * 
+     */
+    stopPlayback() {
+        switch (this._sdkVersion) {
+            case SdkVersion.HikVideo_2_1_0, SdkVersion.Imou:
+                this.stop()
+            
+            case SdkVersion.EzvizVideo:
+                config.command = Playback.Stop
+                this._playback(config)
+            
+            default:
+                Log.error(TAG, "startPlayback", "未实现")
+        }
+    }
+
+    // 暂停
+    pausePlayback() {
+        this._playback({
+            command: Playback.Pause
+        })
+    }
+
+    // 恢复
+    resumePlayback() {
+        this._playback({
+            command: Playback.Resume
+        })
+    }
+
+    /**
+     * 设置倍速
+     * 
+     * **************************************************
+     * HikVideo
+     * @param {HikPlaybackRate} rate 
+     * 
+     * **************************************************
+     * Ezviz
+     * @param {EZPlaybackRate} rate 
+     */
+    speedPlayback(rate) {
+        // 萤石需要记录倍速
+        if (this._sdkVersion == SdkVersion.EzvizVideo) {
+            this._speedPlayback = rate
+        }
+        // 设置
+        this._playback({
+            command:    Playback.Speed,
+            speed:      rate
+        })
+    }
+
+    /**
+     * 设置进度
+     * @param {number} seekTime 定位回放时间。精确到毫秒的时间戳
+     * 
+     * **************************************************
+     * HikVideo
+     * 
+     * **************************************************
+     * Ezviz
+     * 拖动进度条时调用此接口。先停止当前播放，再把seekTime作为起始时间按时间回放
+     * 建议使用stopPlayback+startPlayback(seekTime,stopTime)代替此接口
+     */
+    seekPlayback(seekTime) {
+        this._playback({
+            command:    Playback.Seek,
+            seekTime:   seekTime
+        })
+    }
+
+    /**
+     * 获取状态
+     * 通过 onPlayback 回调 {speed, seek}
+     */
+    statusPlayback() {
+        this._playback({
+            command:    Playback.Status
+        })
     }
     //#endregion
 
@@ -615,6 +747,30 @@ export default class HatomVideo extends Component {
             return sound(data)
         }
     }
+
+    /**
+     * 根据时间获取存储文件信息
+     * 
+     * **************************************************
+     * Ezviz
+     * @param {object} data
+     * @param {Number} data.channelNo? 通道号，非必选，默认为1
+     * @param {Number} data.startTime? 起始时间，时间戳（毫秒）。非必选，默认为当天0点
+     * @param {Number} data.endTime?   结束时间，时间戳（毫秒）。非必选，默认为当前时间
+     * @param {Number} data.recType?   回放源，0-系统自动选择，1-云存储，2-本地录像。非必选，默认为0
+     * 
+     * @return {Promise}
+     * @return {Array} resolve 
+     * @return {Number} resolve[x].startTime    起始时间，时间戳（毫秒）
+     * @return {Number} resolve[x].endTime      结束时间，时间戳（毫秒）
+     * 
+     * @return {Object} reject error{code, msg}
+     */
+    static searchRecord(data) {
+        if (HatomVideo.supportEzviz()) {
+            return searchRecord(data)
+        }
+    }
     // #endregion
     
     // #region NativeModules
@@ -904,6 +1060,14 @@ export default class HatomVideo extends Component {
     _setVerifyCode(verifyCode) {
         this.setNativeProps({setVerifyCode: verifyCode})
     }
+
+    /**
+     * 回看控制功能
+     * @param {object} config 
+     */
+    _playback(config) {
+        this.setNativeProps({playback: config})
+    }
     // #endregion
 
     // #region event
@@ -1000,6 +1164,22 @@ export default class HatomVideo extends Component {
             this.props.onTalkStatus(event.nativeEvent)
         }
     }
+
+    /**
+     * 回看状态
+     * speed: (String)      倍速，对应枚举的字符串
+     * seek: (Long)         进度，时间戳，毫秒
+     */
+    _onPlayback = (event) => {
+        if (this.props.onPlayback) {
+            // 萤石需要添加速率
+            if (this._sdkVersion == SdkVersion.EzvizVideo) {
+                event.nativeEvent.speed = this._speedPlayback
+            }
+            // 回调
+            this.props.onPlayback(event.nativeEvent)
+        }
+    }
     //#endregion
 
     render() {
@@ -1019,6 +1199,7 @@ export default class HatomVideo extends Component {
                 onStreamFlow:       this._onStreamFlow,
                 onPlayStatus:       this._onPlayStatus,
                 onTalkStatus:       this._onTalkStatus,
+                onPlayback:         this._onPlayback,
             });
 
             // 获取RN播放器
@@ -1098,6 +1279,8 @@ HatomVideo.propTypes = {
     onPlayStatus: PropTypes.func,
     // 对讲状态回调
     onTalkStatus: PropTypes.func,
+    // 回看状态回调
+    onPlayback: PropTypes.func,
 
     // 继承页面
     scaleX:         PropTypes.number,

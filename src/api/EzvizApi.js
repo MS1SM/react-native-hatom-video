@@ -20,7 +20,9 @@ const modelUrl = {
     // 设备
     device: "/api/lapp/device",
     // otap
-    otap: "/api/v3/otap"
+    otap: "/api/v3/otap",
+    // video
+    video: "/api/lapp/video"
 }
 
 // 请求地址
@@ -109,6 +111,15 @@ const url = {
          * https://open.ys7.com/help/862
          */
         format: modelUrl.otap + "/action/{deviceSerial}/Default/0/HDD/FormatSpecifyHDD"
+    },
+
+    // video
+    video: {
+        /**
+         * 根据时间获取存储文件信息
+         * https://open.ys7.com/help/1600
+         */
+        searchRecord: modelUrl.video + "/by/time"
     }
 }
 
@@ -445,6 +456,21 @@ export function upgradeStatus() {
 export function sound(data) {
     return postEzviz(
         url.device.sound,
+        data
+    )
+}
+
+/**
+ * 根据时间获取存储文件信息
+ * @param {object} data
+ * @param {Number} data.channelNo? 通道号，非必选，默认为1
+ * @param {Number} data.startTime? 起始时间，时间戳（毫秒）。非必选，默认为当天0点
+ * @param {Number} data.endTime?   结束时间，时间戳（毫秒）。非必选，默认为当前时间
+ * @param {Number} data.recType?   回放源，0-系统自动选择，1-云存储，2-本地录像。非必选，默认为0
+ */
+export function searchRecord(data) {
+    return postEzviz(
+        url.video.searchRecord,
         data
     )
 }

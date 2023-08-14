@@ -61,7 +61,14 @@ enum class Events {
      * Ezviz
      * code: (Int)          状态。参考萤石文档，EZConstants.EZRealPlayConstants
      */
-    onTalkStatus
+    onTalkStatus,
+
+    /**
+     * 回看状态
+     * speed: (String)      倍速，对应枚举的字符串
+     * seek: (Long)         进度，时间戳，毫秒
+     */
+    onPlayback
 }
 //endregion
 
@@ -94,7 +101,19 @@ enum class EventProp {
     /**
      * 录像路径
      */
-    recordPath
+    recordPath,
+
+    /**
+     * 速度
+     * String
+     */
+    speed,
+
+    /**
+     * 进度
+     * Long
+     */
+    seek
 }
 //endregion
 
@@ -136,3 +155,22 @@ enum class SdkVersion {
     }
 }
 //endregion
+
+//region 回放功能
+enum class PlaybackCommand {
+    // 开始
+    Start,
+    // 停止
+    Stop,
+    // 暂停
+    Pause,
+    // 恢复
+    Resume,
+    // 设置倍速
+    Speed,
+    // 设置进度
+    Seek,
+    // 获取状态，通过 onPlayback 回调
+    Status
+}
+// endregion

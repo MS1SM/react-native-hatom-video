@@ -3,6 +3,7 @@ package cn.flashtalk.hatom.hik
 import android.util.Log
 import cn.flashtalk.hatom.common.Events
 import cn.flashtalk.hatom.common.EzPtzSpeed
+import cn.flashtalk.hatom.common.PlaybackCommand
 import cn.flashtalk.hatom.common.SdkVersion
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.common.MapBuilder
@@ -10,8 +11,10 @@ import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.hikvision.hatomplayer.PlayConfig
+import com.hikvision.hatomplayer.core.PlaybackSpeed
 import com.hikvision.hatomplayer.core.Quality
 import com.videogo.openapi.EZConstants
+import java.util.Calendar
 
 /**
  * 集成版播放器 manager
@@ -530,6 +533,146 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
 
             SdkVersion.Unknown -> {
                 Log.e(TAG, "未 initSdkVersion")
+            }
+        }
+    }
+
+    /**
+     * 回放功能
+     */
+    @ReactProp(name = "playback")
+    fun playback(hikVideoView: HikVideoView, configMap: ReadableMap) {
+        val command = PlaybackCommand.valueOf(configMap.getString("command")!!)
+
+        when (hikVideoView.getSdkVersion()) {
+            SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
+                playbackHatom(hikVideoView, command, configMap)
+            }
+
+            SdkVersion.PrimordialVideo -> {
+            }
+
+            SdkVersion.EzvizVideo -> {
+                playbackEzviz(hikVideoView, command, configMap)
+            }
+
+            SdkVersion.Unknown -> {
+                Log.e(TAG, "未 initSdkVersion")
+            }
+        }
+    }
+
+    /**
+     * 海康回放功能
+     *
+     ***************************************************
+     * Speed
+     * @param  configMap.speed    (String)    参考 enum PlaybackSpeed
+     *
+     ***************************************************
+     * Seek
+     * @param  configMap.seekTime (Long)    偏移时间。精确到毫秒的时间戳
+     *
+     ***************************************************
+     * Status
+     * 通过 onPlayback 回调 {speed, seek}
+     */
+    fun playbackHatom(hikVideoView: HikVideoView, command: PlaybackCommand, configMap: ReadableMap) {
+        when (command) {
+            PlaybackCommand.Pause -> {
+                hikVideoView.pausePlaybackHatom()
+            }
+
+            PlaybackCommand.Resume -> {
+                hikVideoView.resumePlaybackHatom()
+            }
+
+            PlaybackCommand.Speed -> {
+                val speed = PlaybackSpeed.valueOf(configMap.getString("speed")!!)
+                hikVideoView.setSpeedPlaybackHatom(speed)
+            }
+
+            PlaybackCommand.Seek -> {
+                val seekTime = configMap.getDouble("seekTime")
+                val seekCalendar = Calendar.getInstance()
+                seekCalendar.timeInMillis = seekTime.toLong()
+                hikVideoView.seekPlaybackHatom(seekCalendar)
+            }
+
+            PlaybackCommand.Status -> {
+                hikVideoView.statusPlaybackHatom()
+            }
+
+            else -> {
+                Log.w(TAG, "playbackHatom: 未实现功能")
+            }
+        }
+    }
+
+    /**
+     * 萤石回放功能
+     *
+     ***************************************************
+     * Start
+     * @param configMap.startTime (Long)  开始时间。精确到毫秒的时间戳
+     * @param configMap.endTime   (Long)  结束时间。精确到毫秒的时间戳
+     *
+     ***************************************************
+     * Speed
+     * @param  configMap.speed    (String)    参考 enum EZConstants.EZPlaybackRate
+     *
+     ***************************************************
+     * Seek
+     * @param  configMap.seekTime (Long)    偏移时间。精确到毫秒的时间戳
+     * 根据偏移时间播放
+     * 拖动进度条时调用此接口。先停止当前播放，再把offsetTime作为起始时间按时间回放
+     * 建议使用stopPlayback+startPlayback(offsetTime,stopTime)代替此接口
+     *
+     ***************************************************
+     * Status
+     * 通过 onPlayback 回调 {seek}
+     */
+    fun playbackEzviz(hikVideoView: HikVideoView, command: PlaybackCommand, configMap: ReadableMap) {
+        when (command) {
+            PlaybackCommand.Start -> {
+                // 开始时间
+                val startTime = configMap.getDouble("startTime")
+                val startCalendar = Calendar.getInstance()
+                startCalendar.timeInMillis = startTime.toLong()
+                // 结束时间
+                val endTime = configMap.getDouble("endTime")
+                val endCalendar = Calendar.getInstance()
+                endCalendar.timeInMillis = endTime.toLong()
+                // 开始回放
+                hikVideoView.startPlaybackEzviz(startCalendar, endCalendar)
+            }
+
+            PlaybackCommand.Stop -> {
+                hikVideoView.stopPlaybackEzviz()
+            }
+
+            PlaybackCommand.Pause -> {
+                hikVideoView.pausePlaybackEzviz()
+            }
+
+            PlaybackCommand.Resume -> {
+                hikVideoView.resumePlaybackEzviz()
+            }
+
+            PlaybackCommand.Speed -> {
+                val speed = EZConstants.EZPlaybackRate.valueOf(configMap.getString("speed")!!)
+                hikVideoView.setSpeedPlaybackEzviz(speed)
+            }
+
+            PlaybackCommand.Seek -> {
+                val seekTime = configMap.getDouble("seekTime")
+                val seekCalendar = Calendar.getInstance()
+                seekCalendar.timeInMillis = seekTime.toLong()
+                hikVideoView.seekPlaybackEzviz(seekCalendar)
+            }
+
+            PlaybackCommand.Status -> {
+                hikVideoView.statusPlaybackEzviz()
             }
         }
     }

@@ -22,9 +22,11 @@ import com.hikvision.hatomplayer.HatomPlayer
 import com.hikvision.hatomplayer.PlayCallback
 import com.hikvision.hatomplayer.PlayCallback.Status
 import com.hikvision.hatomplayer.PlayConfig
+import com.hikvision.hatomplayer.core.PlaybackSpeed
 import com.hikvision.hatomplayer.core.Quality
 import com.videogo.errorlayer.ErrorInfo
 import com.videogo.openapi.EZConstants
+import com.videogo.openapi.EZConstants.EZPlaybackRate
 import com.videogo.openapi.EZOpenSDK
 import com.videogo.openapi.EZOpenSDKListener
 import com.videogo.openapi.EZPlayer
@@ -35,6 +37,9 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 /**
  * 集成版 View
@@ -329,6 +334,29 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
         val propMap = Arguments.createMap()
         propMap.putDouble(EventProp.data.name, hatomPlayer.totalTraffic.toDouble())
         eventEmitter.receiveEvent(id, Events.onStreamFlow.name, propMap)
+    }
+
+    fun pausePlaybackHatom() {
+        hatomPlayer.pause()
+    }
+
+    fun resumePlaybackHatom() {
+        hatomPlayer.resume()
+    }
+
+    fun setSpeedPlaybackHatom(speed: PlaybackSpeed) {
+        hatomPlayer.playbackSpeed = speed
+    }
+
+    fun seekPlaybackHatom(offsetTime: Calendar) {
+        hatomPlayer.seekPlayback(SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssSSSZ").format(offsetTime.time))
+    }
+
+    fun statusPlaybackHatom() {
+        val propMap = Arguments.createMap()
+        propMap.putString(EventProp.speed.name, hatomPlayer.playbackSpeed.name)
+        propMap.putDouble(EventProp.seek.name, hatomPlayer.osdTime.toDouble())
+        eventEmitter.receiveEvent(id, Events.onPlayback.name, propMap)
     }
 
     //endregion
@@ -633,6 +661,41 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
      */
     fun setVerifyCodeEzviz(verifyCode: String) {
         ezPlayer.setPlayVerifyCode(verifyCode)
+    }
+
+    fun startPlaybackEzviz(startCalendar: Calendar, stopTime: Calendar) {
+        ezPlayer.startPlayback(startCalendar, stopTime)
+    }
+
+    fun stopPlaybackEzviz() {
+        ezPlayer.stopPlayback()
+    }
+
+    fun pausePlaybackEzviz() {
+        ezPlayer.pausePlayback()
+    }
+
+    fun resumePlaybackEzviz() {
+        ezPlayer.resumePlayback()
+    }
+
+    fun setSpeedPlaybackEzviz(rate: EZPlaybackRate) {
+        ezPlayer.setPlaybackRate(rate)
+    }
+
+    /**
+     * 根据偏移时间播放
+     * 拖动进度条时调用此接口。先停止当前播放，再把offsetTime作为起始时间按时间回放
+     * 建议使用stopPlayback+startPlayback(offsetTime,stopTime)代替此接口
+     */
+    fun seekPlaybackEzviz(offsetTime: Calendar) {
+        ezPlayer.seekPlayback(offsetTime)
+    }
+
+    fun statusPlaybackEzviz() {
+        val propMap = Arguments.createMap()
+        propMap.putDouble(EventProp.seek.name, ezPlayer.osdTime.timeInMillis.toDouble())
+        eventEmitter.receiveEvent(id, Events.onPlayback.name, propMap)
     }
     //endregion
 }

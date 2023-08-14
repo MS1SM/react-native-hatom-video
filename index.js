@@ -10,7 +10,9 @@ import {
     EzAlarm,
     EzSdStatus,
     EzUpgradeStatus,
-    HikVideoLevel
+    HikVideoLevel,
+    EZPlaybackRate,
+    HikPlaybackRate
 } from './src/common';
 
 module.exports.HatomVideo = HatomVideo;
@@ -26,5 +28,7 @@ module.exports.EzAlarm = new EzAlarm();
 module.exports.EzSdStatus = new EzSdStatus();
 module.exports.EzUpgradeStatus = new EzUpgradeStatus();
 module.exports.HikVideoLevel = new HikVideoLevel();
+module.exports.EZPlaybackRate = new EZPlaybackRate();
+module.exports.HikPlaybackRate = new HikPlaybackRate();
 
 module.exports.default = HatomVideo;

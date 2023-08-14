@@ -234,3 +234,113 @@ export function HikVideoLevel() {
         this.STREAM_SUPER_CLEAR
     ]
 }
+
+// 回放功能
+export function PlaybackCommand() {
+    /**
+     * 枚举
+     */
+    this.Start   = "Start"
+    this.Stop    = "Stop"
+    this.Pause   = "Pause"
+    this.Resume  = "Resume"
+    this.Speed   = "Speed"
+    this.Seek    = "Seek"
+    this.Status  = "Status"
+
+    /**
+     * 枚举数组
+     */
+    this.enums = [
+        this.Start,
+        this.Stop,
+        this.Pause,
+        this.Resume,
+        this.Speed,
+        this.Seek,
+        this.Status
+    ]
+}
+
+// 萤石 回放倍速
+export function EZPlaybackRate() {
+    /**
+     * 枚举
+     */
+    // 0.0625
+    this.EZ_PLAYBACK_RATE_16_1  = "EZ_PLAYBACK_RATE_16_1"
+    // 0.125
+    this.EZ_PLAYBACK_RATE_8_1   = "EZ_PLAYBACK_RATE_8_1"
+    // 0.25
+    this.EZ_PLAYBACK_RATE_4_1   = "EZ_PLAYBACK_RATE_4_1"
+    // 0.5
+    this.EZ_PLAYBACK_RATE_2_1   = "EZ_PLAYBACK_RATE_2_1"
+    // 1.0
+    this.EZ_PLAYBACK_RATE_1     = "EZ_PLAYBACK_RATE_1"
+    // 2.0
+    this.EZ_PLAYBACK_RATE_2     = "EZ_PLAYBACK_RATE_2"
+    // 4.0
+    this.EZ_PLAYBACK_RATE_4     = "EZ_PLAYBACK_RATE_4"
+    // 8.0
+    this.EZ_PLAYBACK_RATE_8     = "EZ_PLAYBACK_RATE_8"
+    // 16.0
+    this.EZ_PLAYBACK_RATE_16    = "EZ_PLAYBACK_RATE_16"
+    // 32.0
+    this.EZ_PLAYBACK_RATE_32    = "EZ_PLAYBACK_RATE_32"
+
+    /**
+     * 枚举数组
+     */
+    this.enums = [
+        this.EZ_PLAYBACK_RATE_16_1,
+        this.EZ_PLAYBACK_RATE_8_1,
+        this.EZ_PLAYBACK_RATE_4_1,
+        this.EZ_PLAYBACK_RATE_2_1,
+        this.EZ_PLAYBACK_RATE_1,
+        this.EZ_PLAYBACK_RATE_2,
+        this.EZ_PLAYBACK_RATE_4,
+        this.EZ_PLAYBACK_RATE_8,
+        this.EZ_PLAYBACK_RATE_16,
+        this.EZ_PLAYBACK_RATE_32
+    ]
+}
+
+// 海康 回放倍速
+export function HikPlaybackRate() {
+    /**
+     * 枚举
+     */
+    // 0.125
+    this.ONE_EIGHTH = "ONE_EIGHTH"
+    // 0.25
+    this.QUARTER    = "QUARTER"
+    // 0.5
+    this.HALF       = "HALF"
+    // 1.0
+    this.NORMAL     = "NORMAL"
+    // 2.0
+    this.DOUBLE     = "DOUBLE"
+    // 4.0
+    this.FOUR       = "FOUR"
+    // 8.0
+    this.EIGHT      = "EIGHT"
+    // 16.0
+    this.SIXTEEN    = "SIXTEEN"
+    // 32.0
+    this.THIRTY_TWO = "THIRTY_TWO"
+
+    /**
+     * 枚举数组
+     */
+    this.enums = [
+        this.ONE_EIGHTH,
+        this.QUARTER,
+        this.HALF,
+        this.NORMAL,
+        this.DOUBLE,
+        this.FOUR,
+        this.EIGHT,
+        this.SIXTEEN,
+        this.THIRTY_TWO
+    ]
+}
