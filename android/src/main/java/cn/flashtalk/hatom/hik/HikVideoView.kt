@@ -259,6 +259,8 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
         if (!TextUtils.isEmpty(recordPathHatom)) {
             result = hatomPlayer.stopRecord()
         }
+        // 相册刷新
+        SaveUtils.insertMediaPic(context, recordPathHatom, false)
         // 回调结果
         val propMap = Arguments.createMap()
         propMap.putBoolean(EventProp.success.name, result == SUCCESS_HATOM)
@@ -480,6 +482,8 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
      */
     private val ezLocalRecordCallback = object: EZOpenSDKListener.EZStreamDownloadCallback {
         override fun onSuccess(path: String?) {
+            // 相册刷新
+            SaveUtils.insertMediaPic(context, path, false)
             // 回调结果
             val propMap = Arguments.createMap()
             propMap.putBoolean(EventProp.success.name, true)

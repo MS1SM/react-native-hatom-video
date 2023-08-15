@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 
 //import androidx.annotation.RequiresApi;
@@ -57,7 +58,7 @@ public class SaveUtils {
         }
     }
 
-//    @RequiresApi(api = Build_VERSION_CODES_Q)
+    //    @RequiresApi(api = Build_VERSION_CODES_Q)
     private static boolean saveBitmapToAlbumAfterQ(Context context, Bitmap bitmap) {
         Uri contentUri;
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
@@ -256,6 +257,67 @@ public class SaveUtils {
         return localContentValues;
     }
 
+    public static boolean insertMediaPic(Context context, String filePath, boolean isImg) {
+        if (TextUtils.isEmpty(filePath)) return false;
+        File file = new File(filePath);
+        //判断android Q  (10 ) 版本
+        if (isAdndroidQ()) {
+            if (file == null || !file.exists()) {
+                return false;
+            } else {
+                try {
+                    if (isImg) {
+                        MediaStore.Images.Media.insertImage(context.getContentResolver(), file.getAbsolutePath(), file.getName(), null);
+                    } else {
+                        ContentValues values = new ContentValues();
+                        values.put(MediaStore.Video.Media.DATA, file.getAbsolutePath());
+                        values.put(MediaStore.Video.Media.DISPLAY_NAME, file.getName());
+                        values.put(MediaStore.Video.Media.MIME_TYPE, "video/*");
+                        values.put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis() / 1000);
+                        values.put(MediaStore.Video.Media.DATE_MODIFIED, System.currentTimeMillis() / 1000);
+                        ContentResolver resolver = context.getContentResolver();
+                        Uri uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
+                    }
+                    return true;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+        } else {//老方法
+            if (isImg) {
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.Images.Media.DATA, file.getAbsolutePath());
+                values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+                values.put(MediaStore.Images.ImageColumns.DATE_TAKEN,                     System.currentTimeMillis() + "");
+                context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
+            } else {
+                ContentResolver localContentResolver = context.getContentResolver();
+                ContentValues localContentValues = getVideoContentValues(new File(filePath), System.currentTimeMillis());
+                Uri localUri = localContentResolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, localContentValues);
+                context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, localUri));
+            }
+            return true;
+        }
+
+    }
+    public static boolean isAdndroidQ() {
+        return Build.VERSION.SDK_INT >= 29;
+    }
+
+    public static ContentValues getVideoContentValues(File paramFile, long paramLong) {
+        ContentValues localContentValues = new ContentValues();
+        localContentValues.put(MediaStore.Video.Media.TITLE, paramFile.getName());
+        localContentValues.put(MediaStore.Video.Media.DISPLAY_NAME, paramFile.getName());
+        localContentValues.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
+        localContentValues.put(MediaStore.Video.Media.DATE_TAKEN, Long.valueOf(paramLong));
+        localContentValues.put(MediaStore.Video.Media.DATE_MODIFIED, Long.valueOf(paramLong));
+        localContentValues.put(MediaStore.Video.Media.DATE_ADDED, Long.valueOf(paramLong));
+        localContentValues.put(MediaStore.Video.Media.DATA, paramFile.getAbsolutePath());
+        localContentValues.put(MediaStore.Video.Media.SIZE, Long.valueOf(paramFile.length()));
+        return localContentValues;
+    }
 }
 
 

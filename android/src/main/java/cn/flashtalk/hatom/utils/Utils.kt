@@ -1,9 +1,11 @@
 package cn.flashtalk.hatom.utils
 
 import android.content.Context
+import android.os.Environment
 import android.text.TextUtils
 import android.util.Log
 import java.io.File
+
 
 class Utils {
     companion object {
@@ -29,7 +31,7 @@ class Utils {
          */
         private fun getSaveFolder(context: Context, folder: String, custom: String? = ""): String {
             // 目录
-            var saveFolder = "${context.externalCacheDir}$folder"
+            var saveFolder = "${Environment.getExternalStorageDirectory().path}$folder"
             // 自定义目录
             if (!TextUtils.isEmpty(custom)) {
                 saveFolder = "$saveFolder/$custom"
