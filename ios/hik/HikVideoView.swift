@@ -71,6 +71,7 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
     @objc var onStreamFlow: RCTDirectEventBlock?
     @objc var onPlayStatus: RCTDirectEventBlock?
     @objc var onTalkStatus: RCTDirectEventBlock?
+    @objc var onPlayback: RCTDirectEventBlock?
     
     // MARK: - 属性入口配置
     
@@ -349,7 +350,34 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
                 print(TAG, "PrimordialVideo setVerifyCode")
                 
             case .EzvizVideo:
-                setVerifyCodeEzviz(verifyCode: setVerifyCode as! String)
+                setVerifyCodeEzviz(verifyCode: setVerifyCode! as String)
+            }
+        }
+    }
+    
+    // 回放功能
+    @objc var playback: NSDictionary? {
+        didSet {
+            let configDic = playback as! Dictionary<String, Any>
+            let command = PlaybackCommand.nameToEnum(name: configDic["command"] as! String)
+            
+            if command == nil {
+                return
+            }
+            
+            switch sdkVersion {
+            case .Unknown:
+                print(TAG, "error 未 initSdkVersion")
+                
+            case .HikVideo_V2_1_0, .Imou:
+                playbackHatom(command: command!, configDic: configDic)
+                
+            case .PrimordialVideo:
+                print(TAG, "PrimordialVideo voiceTalk")
+                
+            case .EzvizVideo:
+                playbackEzviz(command: command!, configDic: configDic)
+                
             }
         }
     }
@@ -565,6 +593,51 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
      */
     func totalTrafficHatom() {
         onStreamFlow!([EventProp.data.rawValue: hatomPlayer.getTotalTraffic()])
+    }
+    
+    /**
+     回看控制
+     */
+    func playbackHatom(command: PlaybackCommand, configDic: Dictionary<String, Any>) {
+        switch command {
+        case .Start, .Stop:
+            print(TAG, "playbackHatom", "Strat Stop 未实现功能")
+            
+        case .Pause:
+            hatomPlayer.pause()
+            
+        case .Resume:
+            hatomPlayer.resume()
+            
+        case .Speed:
+            let speed = HikConstants.PlaybackSpeed[configDic["speed"] as! String]!
+            hatomPlayer.setPlaybackSpeed(speed)
+            
+        case .Seek:
+            // 时间
+            let seekTime = configDic["seekTime"] as! Int
+            let seekDate = Date(timeIntervalSince1970: TimeInterval(seekTime / 1000))
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"
+            let seekString = dateFormatter.string(from: seekDate)
+            // 调整
+            hatomPlayer.seekPlayback(seekString)
+            
+        case .Status:
+            // 查询速度对应的枚举名
+            let speed = hatomPlayer.getPlaybackSpeed()
+            var speedStr = ""
+            for (key, value) in HikConstants.PlaybackSpeed {
+                if Int(value) == speed {
+                    speedStr = key
+                }
+            }
+            // 回调
+            onPlayback!([
+                EventProp.speed.rawValue: speedStr,
+                EventProp.seek.rawValue: hatomPlayer.getOSDTime()
+            ])
+        }
     }
     
     // MARK: - 原生播放器
@@ -876,5 +949,50 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
                     print(self.TAG, "setVideoLevelEzviz success")
                 }
             }
+    }
+    
+    /**
+     回看控制
+     */
+    func playbackEzviz(command: PlaybackCommand, configDic: Dictionary<String, Any>) {
+        switch command {
+        case .Start:
+            // 时间
+            let startTime = configDic["startTime"] as! Int
+            let startDate = Date(timeIntervalSince1970: TimeInterval(startTime / 1000))
+            let endTime = configDic["endTime"] as! Int
+            let endDate = Date(timeIntervalSince1970: TimeInterval(endTime / 1000))
+            // 录像文件信息
+            let recordFile = EZDeviceRecordFile()
+            recordFile.startTime = startDate
+            recordFile.stopTime = endDate
+            // 开始回放
+            ezPlayer.startPlayback(fromDevice: recordFile)
+            
+        case .Stop:
+            ezPlayer.stopPlayback()
+            
+        case .Pause:
+            ezPlayer.pausePlayback()
+            
+        case .Resume:
+            ezPlayer.resumePlayback()
+            
+        case .Speed:
+            let speed = EZConstants.PlaybackSpeed[configDic["speed"] as! String]!
+            ezPlayer.setPlaybackRate(speed, mode: 0)
+            
+        case .Seek:
+            // 时间
+            let seekTime = configDic["seekTime"] as! Int
+            let seekDate = Date(timeIntervalSince1970: TimeInterval(seekTime / 1000))
+            // 调整
+            ezPlayer.seekPlayback(seekDate)
+            
+        case .Status:
+            onPlayback!([
+                EventProp.seek.rawValue: ezPlayer.getOSDTime().timeIntervalSince1970 * 1000
+            ])
+        }
     }
 }

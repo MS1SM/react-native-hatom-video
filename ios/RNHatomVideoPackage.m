@@ -248,6 +248,49 @@ RCT_EXPORT_VIEW_PROPERTY(getStreamFlow, NSString)
  */
 RCT_EXPORT_VIEW_PROPERTY(setVerifyCode, NSString)
 
+/**
+ * 回放功能
+ * @param  NSDictionary.command     (String)    参考 enum PlaybackCommand
+ *-----------------------------------------------------------
+ *
+ * 海康回放功能
+ ***************************************************
+ * Speed
+ * @param  NSDictionary.speed    (String)    参考 enum HikConstants.PlaybackSpeed
+ *
+ ***************************************************
+ * Seek
+ * @param  NSDictionary.seekTime (Long)    偏移时间。精确到毫秒的时间戳
+ *
+ ***************************************************
+ * Status
+ * 通过 onPlayback 回调 {speed, seek}
+ *
+ *-----------------------------------------------------------
+ *
+ * 萤石回放功能
+ ***************************************************
+ * Start
+ * @param NSDictionary.startTime (Long)  开始时间。精确到毫秒的时间戳
+ * @param NSDictionary.endTime   (Long)  结束时间。精确到毫秒的时间戳
+ *
+ ***************************************************
+ * Speed
+ * @param  NSDictionary.speed    (String)    参考 enum EZConstants.PlaybackSpeed
+ *
+ ***************************************************
+ * Seek
+ * @param  NSDictionary.seekTime (Long)    偏移时间。精确到毫秒的时间戳
+ * 根据偏移时间播放
+ * 拖动进度条时调用此接口。先停止当前播放，再把offsetTime作为起始时间按时间回放
+ * 建议使用stopPlayback+startPlayback(offsetTime,stopTime)代替此接口
+ *
+ ***************************************************
+ * Status
+ * 通过 onPlayback 回调 {seek}
+ */
+RCT_EXPORT_VIEW_PROPERTY(playback, NSDictionary)
+
 #pragma mark Events
 
 /**
@@ -308,4 +351,11 @@ RCT_EXPORT_VIEW_PROPERTY(onPlayStatus, RCTDirectEventBlock)
  * code: (Int)          状态。参考萤石文档，EZConstants.EZRealPlayConstants
  */
 RCT_EXPORT_VIEW_PROPERTY(onTalkStatus, RCTDirectEventBlock)
+
+/**
+ * 回看状态
+ * speed: (String)      倍速，对应枚举的字符串
+ * seek: (Long)         进度，时间戳，毫秒
+ */
+RCT_EXPORT_VIEW_PROPERTY(onPlayback, RCTDirectEventBlock)
 @end

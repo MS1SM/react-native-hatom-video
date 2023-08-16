@@ -351,7 +351,7 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
     }
 
     fun seekPlaybackHatom(offsetTime: Calendar) {
-        hatomPlayer.seekPlayback(SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssSSSZ").format(offsetTime.time))
+        hatomPlayer.seekPlayback(SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault()).format(offsetTime.time))
     }
 
     fun statusPlaybackHatom() {

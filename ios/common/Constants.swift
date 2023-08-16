@@ -40,6 +40,18 @@ enum EventProp: String {
      * 录像路径
      */
     case recordPath = "recordPath"
+    
+    /**
+     * 速度
+     * String
+     */
+    case speed = "speed"
+    
+    /**
+     * 进度
+     * Long
+     */
+    case seek = "seek"
 }
 
 // MARK: - sdk 版本枚举
@@ -104,6 +116,20 @@ final class EZConstants {
         "VIDEO_LEVEL_HD":           .high,
         "VIDEO_LEVEL_SUPERCLEAR":   .superHigh
     ]
+    
+    // 回看倍速
+    static let PlaybackSpeed: [String: EZPlaybackRate] = [
+        "EZ_PLAYBACK_RATE_16_1":    .EZOPENSDK_PLAY_RATE_1_16,
+        "EZ_PLAYBACK_RATE_8_1":     .EZOPENSDK_PLAY_RATE_1_8,
+        "EZ_PLAYBACK_RATE_4_1":     .EZOPENSDK_PLAY_RATE_1_4,
+        "EZ_PLAYBACK_RATE_2_1":     .EZOPENSDK_PLAY_RATE_1_2,
+        "EZ_PLAYBACK_RATE_1":       .EZOPENSDK_PLAY_RATE_1,
+        "EZ_PLAYBACK_RATE_2":       .EZOPENSDK_PLAY_RATE_2,
+        "EZ_PLAYBACK_RATE_4":       .EZOPENSDK_PLAY_RATE_4,
+        "EZ_PLAYBACK_RATE_8":       .EZOPENSDK_PLAY_RATE_8,
+        "EZ_PLAYBACK_RATE_16":      .EZOPENSDK_PLAY_RATE_16,
+        "EZ_PLAYBACK_RATE_32":      .EZOPENSDK_PLAY_RATE_32
+    ]
 }
 
 // MARK: - 海康常量
@@ -117,4 +143,39 @@ final class HikConstants {
         "SUB_STREAM_LOW":       .FL,
         "STREAM_SUPER_CLEAR":   .HD
     ]
+    
+    // 回看倍速
+    static let PlaybackSpeed: [String: Float] = [
+        "ONE_EIGHTH":   -8,
+        "QUARTER":      -4,
+        "HALF":         -2,
+        "NORMAL":       1,
+        "DOUBLE":       2,
+        "FOUR":         4,
+        "EIGHT":        8,
+        "SIXTEEN":      16,
+        "THIRTY_TWO":   32
+    ]
+}
+
+// MARK: - 回放功能
+enum PlaybackCommand: String {
+    case Start      = "Start"
+    case Stop       = "Stop"
+    case Pause      = "Pause"
+    case Resume     = "Resume"
+    case Speed      = "Speed"
+    case Seek       = "Seek"
+    case Status     = "Status"
+    
+    static func nameToEnum(name: String) -> PlaybackCommand? {
+        let TAG = "PlaybackCommand"
+        
+        var command = PlaybackCommand(rawValue: name)
+        if (command == nil) {
+            print(TAG, "error nameToEnum 回放功能异常")
+        }
+        
+        return command
+    }
 }
