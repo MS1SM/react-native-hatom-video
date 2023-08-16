@@ -358,8 +358,9 @@ export default class HatomVideo extends Component {
                 this.stop()
             
             case SdkVersion.EzvizVideo:
-                config.command = Playback.Stop
-                this._playback(config)
+                this._playback({
+                    command: Playback.Stop
+                })
             
             default:
                 Log.error(TAG, "startPlayback", "未实现")
