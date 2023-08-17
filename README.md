@@ -49,6 +49,17 @@
 
 因为同时支持海康与萤石，即使仅需要使用海康或萤石一个平台，也需要同时配置海康与萤石两个平台的依赖
 
+本库使用了以下依赖，你的项目也应该进行依赖
+
+```
+"dependencies": {
+  "axios-https-proxy-fix": "^0.17.1",
+  "react-native-video": "^5.2.1"
+}
+```
+
+
+
 #### [Android 配置](./docs/android配置.md)
 
 #### [iOS 配置](./docs/ios配置.md)
@@ -57,4 +68,8 @@
 
 #### [接口](./docs/接口.md)
 
-#### [样例-待补充](./example)
+#### 样例
+
+##### [海康-国标 样例](./example/Hik.js)
+
+[萤石 样例](./example/Ezviz.js)
