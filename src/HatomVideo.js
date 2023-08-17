@@ -328,6 +328,7 @@ export default class HatomVideo extends Component {
                 this.setDataSource(config.path)
                 this.start()
                 this.seekPlayback(config.seekTime)
+                break
             
             case SdkVersion.EzvizVideo:
                 // 新的播放，倍速为一倍速
@@ -335,9 +336,11 @@ export default class HatomVideo extends Component {
                 // 播放
                 config.command = Playback.Start
                 this._playback(config)
+                break
             
             default:
                 Log.error(TAG, "startPlayback", "未实现")
+                break
         }
     }
 
@@ -356,14 +359,17 @@ export default class HatomVideo extends Component {
         switch (this._sdkVersion) {
             case SdkVersion.HikVideo_2_1_0, SdkVersion.Imou:
                 this.stop()
+                break
             
             case SdkVersion.EzvizVideo:
                 this._playback({
                     command: Playback.Stop
                 })
+                break
             
             default:
                 Log.error(TAG, "startPlayback", "未实现")
+                break
         }
     }
 
