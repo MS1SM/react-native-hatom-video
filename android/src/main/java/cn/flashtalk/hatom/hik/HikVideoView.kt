@@ -676,11 +676,15 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
     }
 
     fun pausePlaybackEzviz() {
-        ezPlayer.pausePlayback()
+        Utils.getEzvizTaskManager().submit {
+            ezPlayer.pausePlayback()
+        }
     }
 
     fun resumePlaybackEzviz() {
-        ezPlayer.resumePlayback()
+        Utils.getEzvizTaskManager().submit {
+            ezPlayer.resumePlayback()
+        }
     }
 
     fun setSpeedPlaybackEzviz(rate: EZPlaybackRate) {

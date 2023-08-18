@@ -393,7 +393,10 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
 
         when (hikVideoView.getSdkVersion()) {
             SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
-                val talkUrl = configMap.getString("talkUrl")!!
+                var talkUrl = ""
+                if (isStart) {
+                    talkUrl = configMap.getString("talkUrl")!!
+                }
                 hikVideoView.voiceTalkHatom(isStart, talkUrl)
             }
 

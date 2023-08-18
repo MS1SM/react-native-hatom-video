@@ -316,7 +316,10 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
                 print(TAG, "error 未 initSdkVersion")
                 
             case .HikVideo_V2_1_0, .Imou:
-                let talkUrl = configDic["talkUrl"] as! String
+                var talkUrl = ""
+                if isStart {
+                    talkUrl = configDic["talkUrl"] as! String
+                }
                 voiceTalkHatom(isStart: isStart, talkUrl: talkUrl)
                 
             case .PrimordialVideo:

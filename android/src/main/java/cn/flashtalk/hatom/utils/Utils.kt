@@ -81,5 +81,16 @@ class Utils {
         fun generatePicturePath(context: Context, custom: String? = ""): String {
             return generateSaveFolder(context, FOLDER_PICTURE, SUFFIX_PICTURE, custom)
         }
+
+        // 萤石部份操作需要加保护，规避CAS库小概率出现的10S死锁导致的ANR问题
+        private var ezvizTaskManager: TaskManager? = null
+        @Synchronized
+        fun getEzvizTaskManager(): TaskManager {
+            if (ezvizTaskManager == null) {
+                ezvizTaskManager = TaskManager()
+            }
+
+            return ezvizTaskManager!!
+        }
     }
 }
