@@ -17,17 +17,40 @@ const TAG = "HikApi"
  * getHikUrl 已赋予域名地址
  */
 const modelUrl = {
-  artemis: "/artemis/api"
+  video: "/artemis/api/video",
+  device: "/ctm01dt/api/v1/device"
 }
 
-// 请求地址
+/**
+ * 请求地址
+ * 
+ * 注意⚠️
+ * 海康服务需要部署在自己的服务器，不像萤石已经提供了公共服务
+ * 所以请求地址、请求参数、响应结果可能有所不同
+ * 需要根据海康提供的文档自行修改本文件相关配置与代码，再使用 patch-package 记录修改
+ */
 const url = {
-  // artemis 模块
-  artemis: {
-    // token
-    token: modelUrl.artemis + "/v1/oauth/token",
-    // 视频预览
-    preview: modelUrl.artemis + "/ctm01dt/v1/video/preview"
+  video: {
+    // 预览 URL
+    previewUrl: modelUrl.video + "/v2/cameras/previewURLs",
+    // 对讲 URL
+    talkUrl: modelUrl.video + "/v1/cameras/talkURLs",
+    // 回看 URL
+    playbackUrl: modelUrl.video + "/v2/cameras/playbackURLs",
+    // 云台控制
+    ptzControl: modelUrl.video + "/v1/ptzs/controlling",
+  },
+
+  device: {
+    // 全天录像打开
+    recordOpen: modelUrl.device + "/configDeviceRecordPlan",
+    // 全天录像关闭
+    recordClose: modelUrl.device + "/deleteDeviceRecordPlan",
+
+    // 获取SD卡状态
+    sdStatus: modelUrl.device + "/getSDCardStatus",
+    // 格式化SD卡
+    format: modelUrl.device + "/formatSDCardStatus",
   }
 }
 
@@ -49,20 +72,58 @@ function getHeaders() {
 }
 
 /**
+ * 请求体完善，添加 设备序列号 和 摄像头序列号
+ * @param {object} data 
+ * @return {Object} 完善后的数据
+ */
+function getData(data) {
+    if (!data) data = {}
+    return Object.assign(
+        {}, 
+        data, 
+        {
+            cameraIndexCode: GlobalConfig.http.cameraCode
+        }
+    )
+}
+
+/**
+ * 请求体完善，添加 设备序列号
+ * 需要调用前使用 setGlobalConfig 配置相关属性
+ * 
+ * @param {Object} data 
+ * @return {Object} 完善后的数据
+ */
+function getBody(data) {
+    if (!data) data = {}
+    return Object.assign(
+        {}, 
+        data, 
+        {
+            gbDeviceCode: GlobalConfig.http.hikDeviceCode,
+            deviceIndexCode: GlobalConfig.http.hikDeviceCode
+        }
+    )
+}
+
+/**
  * 海康国标平台 post 请求封装
- * 添加 headers.Authorization
+ * 添加 headers.access_token
  * 
  * 仅成功获取数据才resolve
  */
-function postHik (url, data, accessToken) {
+function postHik(url, data, param) {
+  if (data) data = getData(data)
+  if (param) param = getBody(param)
+
   return new Promise((resolve, reject) => {
     HttpService.post(
       getHikUrl(url),
       data,
-      getHeaders()
-
+      getHeaders(),
+      param
     ).then(response => {
-      if (response.code == 200) {
+      if (response.code == 0) {
         resolve(response.data)
       } else {
         reject(response)
@@ -79,17 +140,17 @@ function postHik (url, data, accessToken) {
 
 /**
  * 海康国标平台 get 请求封装
- * 添加 headers.Authorization
+ * 添加 headers.access_token
  */
-function getHik (url, params, accessToken) {
+function getHik (url, params) {
   return new Promise((resolve, reject) => {
     HttpService.get(
       getHikUrl(url),
-      params,
+      getBody(getData(params)),
       getHeaders()
 
     ).then(response => {
-      if (response.code == 200) {
+      if (response.code == 0) {
         resolve(response.data)
       } else {
         reject(response)
@@ -106,52 +167,187 @@ function getHik (url, params, accessToken) {
 
 /**
  * 接口请求
- *
+ * 
  * success：返回格式化处理的data，不含msg，code等无用数据
  * error：
  */
 
 /**
- * 获取token
- * @returns {Promise}
- */
-export function getToken () {
-  return postHik(
-    url.artemis.token
-  ).then(data => {
-    return Promise.resolve(data)
-  })
-}
-
-/**
- * get 测试接口
- * @param abandon 第一个参数
- * @param banana 第二个参数
- * @param country 第三个参数
- * @returns {Promise}
- */
-export function getTest (abandon, banana, country) {
-  return getHik(
-    url.artemis.token,
-    { abandon, banana, country },
-    "8848"
-  ).then(data => {
-    return Promise.resolve(data.data)
-  })
-}
-
-/**
  * 获取预览播放串
  * @param {object} data
  * 
- * @param {string} data.indexCode     "a5a04f5e2c5a4e83a5180545f0cb898f"
- * @param {string} data.protocol      "rtsp" or "hls"
- * @param {number} data.streamType    0
- * @param {string} data.expand        "transcode=1&videtype=h264"
+ * @param {string} data.cameraIndexCode     "a5a04f5e2c5a4e83a5180545f0cb898f"
+ * @param {string} data.protocol?           "rtsp" or "hls" or "rtmp" or "hik"
+ * @param {Number} data.streamType?         0:主码流 1:子码流 2:第三码流
+ * @param {string} data.expand?             "transcode=1&videtype=h264"
+ * @param {Number} data.transmode?          0:UDP 1:TCP
+ * @param {string} data.streamform?         "ps"
+ * 
+ * @return {Promise} resolve
+ *  {
+      "url": "rtsp://10.2.145.66:655/EUrl/CLJ52BW" 
+    }
  */
-export function preview(data) {
+export function previewUrl(data) {
   return postHik(
-    url.artemis.preview,
+    url.video.previewUrl,
+    data
+  )
+}
+
+/**
+ * 查询对讲 URL
+ * @param {object} data
+ * 
+ * @param {string} data.cameraIndexCode     "a5a04f5e2c5a4e83a5180545f0cb898f"
+ * @param {string} data.expand?             "transcode=1&videtype=h264"
+ * @param {Number} data.transmode?          0:UDP 1:TCP
+ * @param {string} data.eurlExpand?         扩展字段
+ * 
+ * @return {Promise} resolve
+ *  {
+      "url": "rtsp://10.2.145.66:655/EUrl/CLJ52BW" 
+    }
+ */
+export function talkUrl(data) {
+  return postHik(
+    url.video.talkUrl,
+    data
+  )
+}
+
+/**
+ * 回放 URL
+ * @param {object} data
+ * 
+ * @param {string} data.cameraIndexCode     "a5a04f5e2c5a4e83a5180545f0cb898f"
+ * @param {Number} data.recordLocation?     0:中心存储 1:设备存储 默认为中心存储
+ * @param {string} data.protocol?           "rtsp" or "hls" or "rtmp" or "hik"
+ * @param {Number} data.transmode?          0:UDP 1:TCP
+ * @param {string} data.beginTime           起始时间，yyyy-MM-dd'T'HH:mm:ss.SSSXXX
+ * @param {string} data.endTime             结束时间，yyyy-MM-dd'T'HH:mm:ss.SSSXXX
+ * @param {string} data.uuid?               分页查询 id，上一次查询 返回的 uuid，用于继续查 询剩余片段
+ * @param {string} data.expand?             "transcode=1&videtype=h264"
+ * @param {string} data.streamform?         "ps"
+ * @param {Number} data.lockType?           0-查询全部录像;1-查询未锁定录像;2-查询已锁定录像.不传默认值为 0
+ * 
+ * @return {Promise} resolve
+ * {
+    "list": [
+      {
+        // 查询录像的锁定类型，0-全部录像;1-未锁定录像; 2-已锁定录像
+        "lockType": 1,
+        "beginTime": "2018-08-07T14:44:04.923+08:00", 
+        "endTime": "2018-08-07T14:54:18.183+08:00", 
+        // 录像片段大小(单位: Byte)
+        "size": 66479332
+      }
+    ],
+    "uuid": "e33421g1109046a79b6280bafb6fa5a7", 
+    // 取流短 url，注:rtsp 的回放 url 后面要指定 ?playBackMode=1 在 vlc 上才能播放
+    "url": "rtsp://10.2.145.66:6304/EUrl/Dib1ErK"
+  }
+ */
+export function playbackUrl(data) {
+  return postHik(
+    url.video.playbackUrl,
+    data
+  )
+}
+
+/**
+ * 云台操作
+ * @param {object} data
+ * 
+ * @param {string} data.cameraIndexCode     "a5a04f5e2c5a4e83a5180545f0cb898f"
+ * @param {Number} data.action              0-开始 ，1-停止
+ * @param {string} data.command             控制指令
+ * @param {Number} data.speed?              云台速度, [1, 100], default = 50
+ * @param {Number} data.presetIndex?        预置点编号，通过查询预置点信息接口获取
+ */
+export function ptzControl(data) {
+  return postHik(
+    url.video.ptzControl,
+    data
+  )
+}
+
+/**
+ * 全天录像打开
+ * @param {object} data
+ * 
+ * @param {string} data.gbDeviceCode     设备国标编码
+ * @param {Number} data.channelNum       通道号
+ */
+export function recordOpen(data) {
+  return postHik(
+    url.device.recordOpen,
+    null,
+    data
+  )
+}
+
+/**
+ * 全天录像关闭
+ * @param {object} data
+ * 
+ * @param {string} data.gbDeviceCode     设备国标编码
+ * @param {Number} data.channelNum       通道号
+ */
+export function recordClose(data) {
+  return postHik(
+    url.device.recordClose,
+    null,
+    data
+  )
+}
+
+/**
+ * 获取SD卡状态
+ * @param {object} data
+ * 
+ * @param {string} data.deviceIndexCode     设备国标编码
+ * 
+ * @return {Promise} resolve
+ * {
+		"SDCardStatusInfo": [
+			{
+        // 存储容量，单位：MB
+				"Capacity": 0,
+        // 格式化进度（可选）0-100，百分比
+				"FormatProgress": 0,
+        // 剩余存储容量，单位：MB
+				"FreeSpace": 0,
+        // SD卡名称
+				"HddName": "",
+        // SD卡编号
+				"ID": 0,
+        // 状态，ok-正常，formatting-格式化，unformatted-未格式化，idle-空闲，error-错误
+				"Status": ""
+			}
+		]
+	}
+ */
+export function sdStatus(data) {
+  return getHik(
+    url.device.sdStatus,
+    data
+  )
+}
+
+/**
+ * 格式化SD卡
+ * @param {object} data
+ * 
+ * @param {string} data.deviceIndexCode     设备国标编码
+ * @param {string} data.sDCardId            SD卡编码，该值为0时，对所有存储卡进行格式化
+ * 
+ * @return {Promise}
+ * @return {boolean} resolve data 操作是否成功
+ */
+export function formatHik(data) {
+  return getHik(
+    url.device.format,
     data
   )
 }

@@ -27,6 +27,10 @@ let GlobalConfig = {
 		hikUrl: 'https://10.26.0.13:1443',
 		// token
 		hikToken: "",
+		// 设备序列号
+		hikDeviceCode: "",
+		// 摄像头序列号，一个设备可能有多个摄像头，此处仅考虑只有一个摄像头的情形
+		cameraCode: "",
 
 		// 萤石地址
 		ezvizUrl: 'https://open.ys7.com',
@@ -59,8 +63,10 @@ export function setGlobalConfig(config) {
 		GlobalConfig.http.baseUrl     = config.http.baseUrl  || GlobalConfig.http.baseUrl
 		GlobalConfig.http.timeout     = config.http.timeout  || GlobalConfig.http.timeout
 
-		GlobalConfig.http.hikUrl      = config.http.hikUrl   || GlobalConfig.http.hikUrl
-		GlobalConfig.http.hikToken    = config.http.hikToken || GlobalConfig.http.hikToken
+		GlobalConfig.http.hikUrl      		= config.http.hikUrl   		|| GlobalConfig.http.hikUrl
+		GlobalConfig.http.hikToken    		= config.http.hikToken 		|| GlobalConfig.http.hikToken
+		GlobalConfig.http.hikDeviceCode    	= config.http.hikDeviceCode || GlobalConfig.http.hikDeviceCode
+		GlobalConfig.http.cameraCode    	= config.http.cameraCode 	|| GlobalConfig.http.cameraCode
 		
 		GlobalConfig.http.ezvizUrl    = config.http.ezvizUrl   || GlobalConfig.http.ezvizUrl
 		GlobalConfig.http.ezvizToken  = config.http.ezvizToken || GlobalConfig.http.ezvizToken

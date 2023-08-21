@@ -7,7 +7,6 @@ import {
 } from 'react-native';
 import PropTypes from 'prop-types';
 import { EZPlaybackRate, PlaybackCommand, SdkVersionEnum } from './common';
-import { getToken, preview } from './api/HikApi';
 import Log from './utils/Log';
 import Video from "react-native-video";
 import GlobalConfig, { setGlobalConfig } from './utils/GlobalConfig';
@@ -27,6 +26,7 @@ import {
     upgrade,
     searchRecord
 } from './api/EzvizApi';
+import { formatHik, playbackUrl, previewUrl, ptzControl, recordClose, recordOpen, sdStatus, talkUrl } from './api/HikApi';
 
 const TAG = 'HatomVideo';
 
@@ -103,23 +103,6 @@ export default class HatomVideo extends Component {
     };
 
     /**
-     * 是否支持国标
-     * @param {String} sdkVersion? 可为空，空使用this._sdkVersion 判断
-     * @return {Boolean} 支持：true
-     */
-    supportGB(sdkVersion) {
-        let sdkParam = sdkVersion ? sdkVersion : this._sdkVersion
-
-        switch (sdkParam) {
-            case SdkVersion.Imou:
-                return true
-            
-            default:
-                return false
-        }
-    }
-
-    /**
      * 是否使用RnVideo
      * @param {String} sdkVersion? 可为空，空使用this._sdkVersion 判断
      * @return {Boolean} 使用RnVideo：true
@@ -147,6 +130,22 @@ export default class HatomVideo extends Component {
             return false
         }
     }
+
+    /**
+     * 是否支持国标 Http
+     * @param {String} sdkVersion? 可为空，空使用GlobalConfig.sdk.version 判断
+     * @return {Boolean} 支持：true
+     */
+    static supportGB(sdkVersion) {
+        let sdkParam = sdkVersion ? sdkVersion : GlobalConfig.sdk.version
+
+        if (sdkParam == SdkVersion.HikVideo_2_1_0 || sdkParam == SdkVersion.Imou) {
+            return true
+        } else {
+            Log.error(TAG, "supportGB 当前非国标环境，未支持此功能", sdkParam)
+            return false
+        }
+    }
     //#endregion
 
     //#region public
@@ -168,14 +167,6 @@ export default class HatomVideo extends Component {
             },
             1000
         )
-    }
-
-    getToken() {
-        if (this.supportGB()) {
-            getToken()
-        } else {
-            Log.debug(TAG, "getToken", "default")
-        }
     }
 
     /**
@@ -209,42 +200,6 @@ export default class HatomVideo extends Component {
     // 释放资源
     release() {
         this._release()
-    }
-
-    /**
-     * 获取预览播放串
-     * 仅国标可用
-     * 
-     * @param {object} data
-     * 
-     * @param {string} data.indexCode     "a5a04f5e2c5a4e83a5180545f0cb898f"
-     * @param {string} data.protocol      "rtsp" or "hls"
-     * @param {number} data.streamType    0
-     * @param {string} data.expand        "transcode=1&videtype=h264"
-     * 
-     * @return {Promise} Promise.resolve: 仅成功获取url才回调；Promise.reject：获取失败，或无法获取
-     * @return {string}  resolve.url        成功获取的url
-     * @return {string}  reject.message     失败信息         
-     */
-    getPreviewUrl(data) {
-        return new Promise((resolve, reject) => {
-            if (this.supportGB()) {
-                preview(data)
-                .then(response => {
-                    resolve(response)
-                }).catch(error => {
-                    reject({
-                        message: error.msg
-                    });
-                })
-
-            }  else {
-                // 不支持国标无法获取播放串
-                reject({
-                    message: "非国标无法获取播放串"
-                })
-            }
-        })
     }
 
     /**
@@ -491,8 +446,10 @@ export default class HatomVideo extends Component {
      * @param {string} config.http.baseUrl?     基础地址，用于测试地址
      * @param {number} config.http.timeout?     超时时间，单位：毫秒
      * 
-     * @param {string} config.http.hikUrl?      海康国标地址
-     * @param {string} config.http.hikToken?    token
+     * @param {string} config.http.hikUrl?          海康国标地址
+     * @param {string} config.http.hikToken?        token
+     * @param {string} config.http.hikDeviceCode?   设备序列号
+     * @param {string} config.http.cameraCode?      摄像头序列号，一个设备可能有多个摄像头，此处仅考虑只有一个摄像头的情形
      * 
      * @param {string} config.http.ezvizUrl?    萤石地址
      * @param {string} config.http.ezvizToken?  token
@@ -538,20 +495,36 @@ export default class HatomVideo extends Component {
     /**
      * 全天录像
      * 
+     * @return {Promise}
+     * @return {null} resolve
+     * @return {Object} reject error{code, msg}
+     * 
+     * **************************************************
+     * 海康国标
+     * @param {boolean} data.enable     开: true; 关: false
+     * @param {Number} data.channelNum  通道号
+     * 
      * **************************************************
      * Ezviz
      * @param {object} data
      * 
      * @param {Number} data.enable     状态，参考 EzSwitch
      * @param {Number} data.channelNo  通道号，不传表示设备本身
-     * 
-     * @return {Promise}
-     * @return {null} resolve
-     * @return {Object} reject error{code, msg}
      */
     static recordSet(data) {
-        if (HatomVideo.supportEzviz()) {
-            return recordSet(data)
+        switch (GlobalConfig.sdk.version) {
+            case SdkVersion.HikVideo_2_1_0, SdkVersion.Imou:
+                if (data.enable) {
+                    return recordOpen(data)
+                } else {
+                    return recordClose(data)
+                }
+            
+            case SdkVersion.EzvizVideo:
+                return recordSet(data)
+            
+            default:
+                Log.error(TAG, "recordSet 当前环境，未支持此功能")
         }
     }
 
@@ -579,6 +552,31 @@ export default class HatomVideo extends Component {
 
     /**
      * 设备状态
+     * 主要是为了获取sd卡的状态
+     * 
+     * **************************************************
+     * 海康国标
+     * 只有sd卡信息
+     * 
+     * @return {Promise} resolve
+     * {
+            "SDCardStatusInfo": [
+                {
+                    // 存储容量，单位：MB
+                    "Capacity": 0,
+                    // 格式化进度（可选）0-100，百分比
+                    "FormatProgress": 0,
+                    // 剩余存储容量，单位：MB
+                    "FreeSpace": 0,
+                    // SD卡名称
+                    "HddName": "",
+                    // SD卡编号
+                    "ID": 0,
+                    // 状态，ok-正常，formatting-格式化，unformatted-未格式化，idle-空闲，error-错误
+                    "Status": ""
+                }
+            ]
+        }
      * 
      * **************************************************
      * Ezviz
@@ -596,8 +594,15 @@ export default class HatomVideo extends Component {
      * @return {Object} reject error{code, msg}
      */
     static status(data) {
-        if (HatomVideo.supportEzviz()) {
-            return status(data)
+        switch (GlobalConfig.sdk.version) {
+            case SdkVersion.HikVideo_2_1_0, SdkVersion.Imou:
+                return sdStatus(data)
+            
+            case SdkVersion.EzvizVideo:
+                return status(data)
+            
+            default:
+                Log.error(TAG, "status 当前环境，未支持此功能")
         }
     }
 
@@ -623,16 +628,27 @@ export default class HatomVideo extends Component {
     /**
      * TF卡格式化
      * 
-     * **************************************************
-     * Ezviz
-     * 
      * @return {Promise}
      * @return {null} resolve
      * @return {Object} reject error{code, msg}
+     * 
+     * **************************************************
+     * 海康国标
+     * @param {string} data.sDCardId SD卡编码，该值为0时，对所有存储卡进行格式化
+     * 
+     * **************************************************
+     * Ezviz
      */
-    static format() {
-        if (HatomVideo.supportEzviz()) {
-            return format()
+    static format(data) {
+        switch (GlobalConfig.sdk.version) {
+            case SdkVersion.HikVideo_2_1_0, SdkVersion.Imou:
+                return formatHik(data)
+            
+            case SdkVersion.EzvizVideo:
+                return format()
+            
+            default:
+                Log.error(TAG, "format 当前环境，未支持此功能")
         }
     }
 
@@ -759,6 +775,38 @@ export default class HatomVideo extends Component {
      * 根据时间获取存储文件信息
      * 
      * **************************************************
+     * 海康国标
+     * @param {object} data
+     * 
+     * @param {Number} data.recordLocation?     0:中心存储 1:设备存储 默认为中心存储
+     * @param {string} data.protocol?           "rtsp" or "hls" or "rtmp" or "hik"
+     * @param {Number} data.transmode?          0:UDP 1:TCP
+     * @param {string} data.beginTime           起始时间，yyyy-MM-dd'T'HH:mm:ss.SSSXXX
+     * @param {string} data.endTime             结束时间，yyyy-MM-dd'T'HH:mm:ss.SSSXXX
+     * @param {string} data.uuid?               分页查询 id，上一次查询 返回的 uuid，用于继续查 询剩余片段
+     * @param {string} data.expand?             "transcode=1&videtype=h264"
+     * @param {string} data.streamform?         "ps"
+     * @param {Number} data.lockType?           0-查询全部录像;1-查询未锁定录像;2-查询已锁定录像.不传默认值为 0
+     * 
+     * @return {Promise} resolve
+     * {
+            "list": [
+                {
+                    // 查询录像的锁定类型，0-全部录像;1-未锁定录像; 2-已锁定录像
+                    "lockType": 1,
+                    "beginTime": "2018-08-07T14:44:04.923+08:00", 
+                    "endTime": "2018-08-07T14:54:18.183+08:00", 
+                    // 录像片段大小(单位: Byte)
+                    "size": 66479332
+                }
+            ],
+            "uuid": "e33421g1109046a79b6280bafb6fa5a7", 
+            // 取流短 url，注:rtsp 的回放 url 后面要指定 ?playBackMode=1 在 vlc 上才能播放
+            "url": "rtsp://10.2.145.66:6304/EUrl/Dib1ErK"
+        }
+     * @return {Promise} reject error{code, msg}
+     * 
+     * **************************************************
      * Ezviz
      * @param {object} data
      * @param {Number} data.channelNo? 通道号，非必选，默认为1
@@ -774,10 +822,78 @@ export default class HatomVideo extends Component {
      * @return {Object} reject error{code, msg}
      */
     static searchRecord(data) {
-        if (HatomVideo.supportEzviz()) {
-            return searchRecord(data)
+        switch (GlobalConfig.sdk.version) {
+            case SdkVersion.HikVideo_2_1_0, SdkVersion.Imou:
+                return playbackUrl(data)
+            
+            case SdkVersion.EzvizVideo:
+                return searchRecord(data)
+            
+            default:
+                Log.error(TAG, "searchRecord 当前环境，未支持此功能")
         }
     }
+
+    /************************* 仅国标支持的Http功能 static *************************/
+    /**
+     * 获取预览播放串
+     * 
+     * @param {string} data.protocol?           "rtsp" or "hls" or "rtmp" or "hik"
+     * @param {Number} data.streamType?         0:主码流 1:子码流 2:第三码流
+     * @param {string} data.expand?             "transcode=1&videtype=h264"
+     * @param {Number} data.transmode?          0:UDP 1:TCP
+     * @param {string} data.streamform?         "ps"
+     * 
+     * @return {Promise} resolve
+     *  {
+         "url": "rtsp://10.2.145.66:655/EUrl/CLJ52BW" 
+        }
+     * @return {Promise} reject error{code, msg}
+     */
+    static previewUrl(data) {
+        if (HatomVideo.supportGB()) {
+            return previewUrl(data)
+        }
+    }
+
+    /**
+     * 查询对讲 URL
+     * @param {object} data
+     * 
+     * @param {string} data.expand?             "transcode=1&videtype=h264"
+     * @param {Number} data.transmode?          0:UDP 1:TCP
+     * @param {string} data.eurlExpand?         扩展字段
+     * 
+     * @return {Promise} resolve
+     *  {
+         "url": "rtsp://10.2.145.66:655/EUrl/CLJ52BW" 
+        }
+     * @return {Promise} reject error{code, msg}
+     */
+    static talkUrl(data) {
+        if (HatomVideo.supportGB()) {
+            return talkUrl(data)
+        }
+    }
+
+    /**
+     * 云台操作
+     * @param {object} data
+     * 
+     * @param {Number} data.action              0-开始 ，1-停止
+     * @param {string} data.command             控制指令
+     * @param {Number} data.speed?              云台速度, [1, 100], default = 50
+     * @param {Number} data.presetIndex?        预置点编号，通过查询预置点信息接口获取
+     * 
+     * @return {Promise} resolve null
+     * @return {Promise} reject error{code, msg}
+     */
+    static ptzControl(data) {
+        if (HatomVideo.supportGB()) {
+            return ptzControl(data)
+        }
+    }
+
     // #endregion
     
     // #region NativeModules
