@@ -172,8 +172,9 @@ export default class HatomVideo extends Component {
     /**
      * 设置播放参数
      * @param {String} path 播放地址
+     * @param {object} config? 参考 _setDataSource
      */
-    setDataSource(path) {
+    setDataSource(path, config) {
         if (this.isUseRnVideo()) {
             that.setState({
                 datasource: path,
@@ -183,7 +184,7 @@ export default class HatomVideo extends Component {
             })
 
         } else {
-            this._setDataSource(path)
+            this._setDataSource(path, config)
         }
     }
 
@@ -271,6 +272,10 @@ export default class HatomVideo extends Component {
      * startPlayback 集成以上三个流程
      * @param {string} config.path      播放串
      * @param {number} config.seekTime  定位时间。精确到毫秒的时间戳
+     * 通过api获取播放串时用到的参数即为这里的 开始时间与结束时间。
+     * 时间格式：yyyy-MM-dd'T'HH:mm:ss.SSSXXX  (2018-08-07T14:44:04.923+08:00)
+     * @param {string} config.startTime    开始时间
+     * @param {string} config.endTime      结束时间
      * 
      * **************************************************
      * Ezviz
@@ -280,7 +285,13 @@ export default class HatomVideo extends Component {
     startPlayback(config) {
         switch (this._sdkVersion) {
             case SdkVersion.HikVideo_2_1_0, SdkVersion.Imou:
-                this.setDataSource(config.path)
+                this.setDataSource(
+                    config.path,
+                    {
+                        startTime: config.startTime,
+                        endTime: config.endTime
+                    }
+                )
                 this.start()
                 this.seekPlayback(config.seekTime)
                 break
@@ -1036,11 +1047,24 @@ export default class HatomVideo extends Component {
      * 请使用 setDataSource
      * 
      * @param {String} path 播放地址
+     * 
+     * **************************************************
+     * HikVideo 
+     * @param {object} config? 
+     * @param {string} config.token?        用于headers中传递 token
+     * 开始时间与结束时间，回看时不得为空，否则无法设置进度与倍速。
+     * 时间格式：yyyy-MM-dd'T'HH:mm:ss.SSSXXX  (2018-08-07T14:44:04.923+08:00)
+     * @param {string} config.startTime?    用于headers中传递 开始时间
+     * @param {string} config.endTime?      用于headers中传递 结束时间
      */
-    _setDataSource(path) {
-        this.setNativeProps({setDataSource: {
+    _setDataSource(path, config) {
+        let params = {
             path: path
-        }})
+        }
+        if (config) {
+            params.headers = config
+        }
+        this.setNativeProps({setDataSource: params})
     }
 
     /**

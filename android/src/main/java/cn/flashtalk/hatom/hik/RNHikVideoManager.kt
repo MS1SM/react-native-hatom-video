@@ -11,6 +11,7 @@ import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.hikvision.hatomplayer.PlayConfig
+import com.hikvision.hatomplayer.core.HeaderParams
 import com.hikvision.hatomplayer.core.PlaybackSpeed
 import com.hikvision.hatomplayer.core.Quality
 import com.videogo.openapi.EZConstants
@@ -144,9 +145,11 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
      * @param configMap.path    (String)                播放url
      * @param configMap.headers (ReadableNativeMap)     其他请求参数
      *
-     * headers.TOKEN      (String)  用于headers中传递token的key
-     * headers.START_TIME (String)  用于headers中传递回放开始时间的key
-     * headers.END_TIME   (String)  用于headers中传递回放结束时间的key
+     * headers.token     (String)  用于headers中传递 token
+     * 开始时间与结束时间，回看时不得为空，否则无法设置进度与倍速。
+     * 时间格式：yyyy-MM-dd'T'HH:mm:ss.SSSXXX  (2018-08-07T14:44:04.923+08:00)
+     * headers.startTime (String)  用于headers中传递 开始时间
+     * headers.endTime   (String)  用于headers中传递 结束时间
      *
      ***************************************************
      * Primordial
@@ -159,11 +162,11 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
                 // 数据转换
                 var headerMap: HashMap<String, String>? = null
                 if (configMap.hasKey("headers")) {
-                    headerMap = HashMap<String, String>()
-                    val headers = configMap.getMap("headers")
-                    headers!!.getString("TOKEN")?.       let { headerMap.put("TOKEN", it) }
-                    headers.getString("START_TIME")?.    let { headerMap.put("START_TIME", it) }
-                    headers.getString("END_TIME")?.      let { headerMap.put("END_TIME", it) }
+                    headerMap = HashMap()
+                    val headers = configMap.getMap("headers")!!
+                    if (headers.hasKey("token"))        headerMap[HeaderParams.TOKEN]      = headers.getString("token").toString()
+                    if (headers.hasKey("startTime"))    headerMap[HeaderParams.START_TIME] = headers.getString("startTime").toString()
+                    if (headers.hasKey("endTime"))      headerMap[HeaderParams.END_TIME]   = headers.getString("endTime").toString()
                 }
 
                 // 设置

@@ -347,11 +347,29 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
     }
 
     fun setSpeedPlaybackHatom(speed: PlaybackSpeed) {
-        hatomPlayer.playbackSpeed = speed
+        CoroutineScope(Dispatchers.IO).launch {
+            flow<String> {
+                hatomPlayer.playbackSpeed = speed
+            }.catch {
+                Log.e(TAG, "setSpeedPlaybackHatom: 操作异常", it)
+            }.collect {
+            }
+        }
     }
 
     fun seekPlaybackHatom(offsetTime: Calendar) {
-        hatomPlayer.seekPlayback(SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault()).format(offsetTime.time))
+        CoroutineScope(Dispatchers.IO).launch {
+            flow<String> {
+                val seek = StringBuilder(
+                                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault())
+                                    .format(offsetTime.time)
+                ).insert(26, ":").toString()
+                hatomPlayer.seekPlayback(seek)
+            }.catch {
+                Log.e(TAG, "seekPlaybackHatom: 操作异常", it)
+            }.collect {
+            }
+        }
     }
 
     fun statusPlaybackHatom() {

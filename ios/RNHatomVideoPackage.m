@@ -139,11 +139,13 @@ RCT_EXPORT_VIEW_PROPERTY(setPlayConfig, NSDictionary)
  ***************************************************
  * HikVideo
  * @param NSDictionary.path             (String)                            播放url
- * @param NSDictionary.headers      (ReadableNativeMap)     其他请求参数
+ * @param NSDictionary.headers      (ReadableNativeMap?)    其他请求参数
  *
- * headers.TOKEN                (String)  用于headers中传递token的key
- * headers.START_TIME       (String)  用于headers中传递回放开始时间的key
- * headers.END_TIME          (String)  用于headers中传递回放结束时间的key
+ * headers.token     (String?)          用于headers中传递 token
+ * 开始时间与结束时间，回看时不得为空，否则无法设置进度与倍速。
+ * 时间格式：yyyy-MM-dd'T'HH:mm:ss.SSSXXX  (2018-08-07T14:44:04.923+08:00)
+ * headers.startTime (String?)        用于headers中传递 开始时间
+ * headers.endTime   (String?)       用于headers中传递 结束时间
  *
  ***************************************************
  * Primordial

@@ -117,17 +117,20 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
     // 设置视频播放参数
     @objc var setDataSource: NSDictionary? {
         didSet {
+            let configDic = setDataSource as! Dictionary<String, Any>
             switch sdkVersion {
             case .Unknown:
                 print(TAG, "error 未 initSdkVersion")
                 
             case .HikVideo_V2_1_0, .Imou:
-                let sourceDic = setDataSource as! Dictionary<String, Any>
-                setDataSourceHatom(path: sourceDic["path"] as! String)
+                var headers: Dictionary<String, String>? = nil
+                if configDic.keys.contains("headers") {
+                    headers = configDic["headers"] as! Dictionary<String, String>
+                }
+                setDataSourceHatom(path: configDic["path"] as! String, headers: headers)
                 
             case .PrimordialVideo:
-                let sourceDic = setDataSource as! Dictionary<String, Any>
-                setDataSourcePrimordial(path: (sourceDic["path"] as! String))
+                setDataSourcePrimordial(path: (configDic["path"] as! String))
                 
             case .EzvizVideo:
                 print(TAG, "EzvizVideo setDataSource")
@@ -251,7 +254,7 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
             case .HikVideo_V2_1_0, .Imou:
                 // setDataSource
                 if configDic.keys.contains("path") {
-                    setDataSourceHatom(path: configDic["path"] as! String)
+                    setDataSourceHatom(path: configDic["path"] as! String, headers: nil)
                 }
                 // changeStream
                 let videoLevel = HikConstants.QualityType[configDic["videoLevel"] as! String]!
@@ -445,8 +448,8 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
     
     /// 设置视频播放参数
     /// - Parameter path: 播放url
-    func setDataSourceHatom(path: String) {
-        hatomPlayer.setDataSource(path, headers: nil)
+    func setDataSourceHatom(path: String, headers: [String : String]?) {
+        hatomPlayer.setDataSource(path, headers: headers)
     }
 
     /**
@@ -638,7 +641,7 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
             // 回调
             onPlayback!([
                 EventProp.speed.rawValue: speedStr,
-                EventProp.seek.rawValue: hatomPlayer.getOSDTime()
+                EventProp.seek.rawValue: hatomPlayer.getOSDTime() * 1000
             ])
         }
     }
