@@ -206,8 +206,10 @@ export default class HatomVideo extends Component {
     /**
      * 截图
      * 通过 onCapturePicture 回调结果
+     * 
+     * @param {object} config? 参考 _capturePicture
      */
-    capturePicture() {
+    capturePicture(config) {
         this._capturePicture()
     }
 
@@ -225,9 +227,11 @@ export default class HatomVideo extends Component {
      * 与 startLocalRecord 成对使用
      * 
      * 通过 onLocalRecord 回调结果
+     * 
+     * @param {*} config 参考 _stopLocalRecord
      */
-    stopLocalRecord() {
-        this._stopLocalRecord()
+    stopLocalRecord(config) {
+        this._stopLocalRecord(config)
     }
 
     /**
@@ -1097,7 +1101,9 @@ export default class HatomVideo extends Component {
      * config 可为空对象{}
      * 
      * @param {object} config
-     * @param {string} config.deviceSerial?  设备序列号，用于细分存储目录。仅安卓有效，ios直接存放到系统相册
+     * @param {string} config.deviceSerial?  设备序列号，用于细分存储目录
+     * 可作为 自定义目录 进行存储管理。例：deviceSerial = aaa/ccc
+     * 使用 getConstants 获取到的图片目录（recordPath）拼接 自定义目录（aaa/ccc） 即为实际存储目录(recordPath + "/aaa/ccc")
      */
     _startLocalRecord(config) {
         if (!config) {
@@ -1113,9 +1119,21 @@ export default class HatomVideo extends Component {
      * 通过 _onLocalRecord 回调结果
      * 
      * 请使用 stopLocalRecord
+     * 
+     * @param config.deviceSerial? (String) 设备序列号，用于细分存储目录。请和 startLocalRecord 的 deviceSerial 保持一致
+     *
+     ***************************************************
+     * ios
+     * ios 是沙箱机制，保存到文件夹中的图片无法出现在系统相册中。
+     * 因此，ios提供两种保存方式。
+     * @param config.saveAlbum?     (Boolean) 是否保存到相册, default = true
+     * @param config.saveFolder?    (Boolean) 是否保存到文件夹, default = true
      */
-    _stopLocalRecord() {
-        this.setNativeProps({stopLocalRecord: "phString"})
+    _stopLocalRecord(config) {
+        if (!config) {
+            config = {}
+        }
+        this.setNativeProps({stopLocalRecord: config})
     }
 
     /**
@@ -1167,9 +1185,23 @@ export default class HatomVideo extends Component {
      * 截图
      * 请使用 capturePicture
      * 通过 _onCapturePicture 回调结果
+     * 
+     * @param config.deviceSerial? (String) 设备序列号，用于细分存储目录
+     * 可作为 自定义目录 进行存储管理。例：deviceSerial = aaa/ccc
+     * 使用 getConstants 获取到的图片目录（picturePath）拼接 自定义目录（aaa/ccc） 即为实际存储目录(picturePath + "/aaa/ccc")
+     *
+     ***************************************************
+     * ios
+     * ios 是沙箱机制，保存到文件夹中的图片无法出现在系统相册中。
+     * 因此，ios提供两种保存方式。
+     * @param config.saveAlbum?     (Boolean) 是否保存到相册, default = true
+     * @param config.saveFolder?    (Boolean) 是否保存到文件夹, default = true
      */
-    _capturePicture() {
-        this.setNativeProps({capturePicture: "phString"})
+    _capturePicture(config) {
+        if (!config) {
+            config = {}
+        }
+        this.setNativeProps({capturePicture: config})
     }
 
     /**
@@ -1222,7 +1254,12 @@ export default class HatomVideo extends Component {
 
     /**
      * 截图回调
-     * nativeEvent.success： (Boolean)   是否成功，只有保存到系统相册才算成功
+     * ios 保存到相册与文件夹同时使能的情况下，将回调两次，一次是保存到相册的结果；一次是保存到文件夹的结果。通过message判断
+     * android 只有保存到系统相册才回调成功
+     * 
+     * nativeEvent.success： (Boolean)   是否成功
+     * nativeEvent.message?: (String)    saveAlbum or saveFolder：本次回调所属操作；[other]：截图失败信息，两个保存操作都将失败
+     * nativeEvent.data?:    (String)    保存到文件夹时的文件地址
      */
     _onCapturePicture = (event) => {
         if (this.props.onCapturePicture) {
@@ -1232,9 +1269,13 @@ export default class HatomVideo extends Component {
 
     /**
      * 录像结果回调
+     * ios 保存到相册与文件夹同时使能的情况下，将回调两次，一次是保存到相册的结果；一次是保存到文件夹的结果。通过message判断
+     * android 只有保存到系统相册才回调成功
+     * 
      * nativeEvent.success： (Boolean)   是否成功
-     * nativeEvent.message： (String?)   信息，失败时的信息
-     * nativeEvent.data      (String?)   文件路径，成功时
+     * nativeEvent.message： (String?)   saveAlbum or saveFolder：本次回调所属操作；[other]：截图失败信息，两个保存操作都将失败
+     * nativeEvent.data      (String?)   保存到文件夹时的文件地址
+     * nativeEvent.code：     String?)   操作失败错误码，仅海康国标有实际意义
      */
     _onLocalRecord = (event) => {
         if (this.props.onLocalRecord) {

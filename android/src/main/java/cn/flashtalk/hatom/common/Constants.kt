@@ -7,6 +7,7 @@ enum class Events {
     /**
      * 截图回调
      * success： (Boolean)   是否成功，只有保存到系统相册才算成功
+     * data?:    (String)    文件路径，成功时
      */
     onCapturePicture,
 
@@ -15,6 +16,7 @@ enum class Events {
      * success： (Boolean)   是否成功，不保存到系统相册
      * message： (String?)   信息，失败时的信息
      * data：    (String?)   文件路径，成功时
+     * code?：   (String)    操作失败错误码，仅海康国标有实际意义
      */
     onLocalRecord,
 

@@ -293,7 +293,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
      * 通过 Events.onLocalRecord 通知结果
      */
     @ReactProp(name = "stopLocalRecord")
-    fun stopLocalRecord(hikVideoView: HikVideoView, phString: String?) {
+    fun stopLocalRecord(hikVideoView: HikVideoView, configMap: ReadableMap) {
         when (hikVideoView.getSdkVersion()) {
             SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
                 hikVideoView.stopLocalRecordHatom()
@@ -424,12 +424,18 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     /**
      * 截图
      * 通过 Events.onCapturePicture 通知结果
+     *
+     * @param  configMap.deviceSerial     (String？) 设备序列号，用于细分存储目录
      */
     @ReactProp(name = "capturePicture")
-    fun capturePicture(hikVideoView: HikVideoView, phString: String?) {
+    fun capturePicture(hikVideoView: HikVideoView, configMap: ReadableMap) {
+        var deviceSerial = ""
+        if (configMap.hasKey("deviceSerial")) {
+            deviceSerial = configMap.getString("deviceSerial").toString()
+        }
         when (hikVideoView.getSdkVersion()) {
             SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {
-                hikVideoView.capturePictureHatom()
+                hikVideoView.capturePictureHatom(deviceSerial)
             }
 
 
@@ -437,7 +443,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
             }
 
             SdkVersion.EzvizVideo -> {
-                hikVideoView.capturePictureEzviz()
+                hikVideoView.capturePictureEzviz(deviceSerial)
             }
 
             SdkVersion.Unknown -> {

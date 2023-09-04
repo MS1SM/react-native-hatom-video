@@ -210,14 +210,14 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
      * 截图
      * 通过 Events.onCapturePicture 通知结果
      */
-    fun capturePictureHatom() {
+    fun capturePictureHatom(deviceSerial: String?) {
         // 截图
-        val filePath    = Utils.generatePicturePath(context)
+        val filePath    = Utils.generatePicturePath(context, deviceSerial)
         val shotResult  = hatomPlayer.screenshot(filePath, null)
         // 保存到相册
         var saveResult = false
         if (shotResult == SUCCESS_HATOM) {
-            saveResult = SaveUtils.saveImgFileToAlbum(context, filePath)
+            saveResult = SaveUtils.insertMediaPic(context, filePath, true)
         } else {
             Log.e(TAG, "capturePictureHatom: $shotResult")
         }
@@ -225,6 +225,8 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
         // 回调截图保存结果
         val propMap = Arguments.createMap()
         propMap.putBoolean(EventProp.success.name, saveResult)
+        propMap.putString(EventProp.data.name, filePath)
+        propMap.putInt(EventProp.code.name, shotResult)
         eventEmitter.receiveEvent(id, Events.onCapturePicture.name, propMap)
     }
 
@@ -242,7 +244,7 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
             // 失败回调
             val propMap = Arguments.createMap()
             propMap.putBoolean(EventProp.success.name, false)
-            propMap.putString(EventProp.message.name, result.toString())
+            propMap.putString(EventProp.code.name, result.toString())
             eventEmitter.receiveEvent(id, Events.onLocalRecord.name, propMap)
         }
     }
@@ -264,7 +266,7 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
         // 回调结果
         val propMap = Arguments.createMap()
         propMap.putBoolean(EventProp.success.name, result == SUCCESS_HATOM)
-        propMap.putString(EventProp.message.name, result.toString())
+        propMap.putString(EventProp.code.name, result.toString())
         propMap.putString(EventProp.data.name, recordPathHatom)
         eventEmitter.receiveEvent(id, Events.onLocalRecord.name, propMap)
         // 清理路径
@@ -578,10 +580,17 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
      * 截图
      * 通过 Events.onCapturePicture 通知结果
      */
-    fun capturePictureEzviz() {
+    fun capturePictureEzviz(deviceSerial: String?) {
+        // 截图
+        val filePath = Utils.generatePicturePath(context, deviceSerial)
+        ezPlayer.capturePicture(filePath)
+        // 保存到相册
+        var saveResult = SaveUtils.insertMediaPic(context, filePath, true)
+
         // 回调截图保存结果
         val propMap = Arguments.createMap()
-        propMap.putBoolean(EventProp.success.name, SaveUtils.saveBitmapToAlbum(context, ezPlayer.capturePicture()))
+        propMap.putBoolean(EventProp.success.name, saveResult)
+        propMap.putString(EventProp.data.name, filePath)
         eventEmitter.receiveEvent(id, Events.onCapturePicture.name, propMap)
     }
 

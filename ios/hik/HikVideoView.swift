@@ -42,26 +42,20 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
      图片保存到手机相册的回调
      */
     @objc func imageSavedToAlbum(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
-        onCapturePicture!([EventProp.success.rawValue: error == nil])
+        onCapturePicture!([
+            EventProp.success.rawValue: error == nil,
+            EventProp.message.rawValue: "saveAlbum"
+        ])
     }
     
     /**
      视频保存到手机相册的回调
      */
     @objc func videoSavedToAlbum(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
-        if error != nil {
-            // 保存失败
-            onLocalRecord!([
-                EventProp.success.rawValue: false,
-                EventProp.message.rawValue: error!.localizedDescription,
-            ])
-        } else {
-            // 保存成功
-            onLocalRecord!([
-                EventProp.success.rawValue: true,
-                EventProp.data.rawValue:    "save to phone album",
-            ])
-        }
+        onLocalRecord!([
+            EventProp.success.rawValue: error == nil,
+            EventProp.message.rawValue: "saveAlbum"
+        ])
     }
     
     // MARK: - Events
@@ -225,20 +219,34 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
     }
     
     // 截图
-    @objc var capturePicture: NSString? {
+    @objc var capturePicture: NSDictionary? {
         didSet {
+            let configDic = capturePicture as! Dictionary<String, Any>
+            var saveAlbum = true
+            if configDic.keys.contains("saveAlbum") {
+                saveAlbum = configDic["saveAlbum"] as! Bool
+            }
+            let saveFolder = true
+            if configDic.keys.contains("saveFolder") {
+                saveFolder = configDic["saveFolder"] as! Bool
+            }
+            let deviceSerial = nil
+            if configDic.keys.contains("deviceSerial") {
+                deviceSerial = configDic["deviceSerial"] as! String
+            }
+            
             switch sdkVersion {
             case .Unknown:
                 print(TAG, "error 未 initSdkVersion")
                 
             case .HikVideo_V2_1_0, .Imou:
-                capturePictureHatom()
+                capturePictureHatom(saveAlbum: saveAlbum, saveFolder: saveFolder, deviceSerial: deviceSerial)
                 
             case .PrimordialVideo:
                 print(TAG, "PrimordialVideo capturePicture")
                 
             case .EzvizVideo:
-                capturePictureEzviz()
+                capturePictureEzviz(saveAlbum: saveAlbum, saveFolder: saveFolder, deviceSerial: deviceSerial)
             }
         }
     }
@@ -290,20 +298,34 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
     }
     
     // 结束录像
-    @objc var stopLocalRecord: NSString? {
+    @objc var stopLocalRecord: NSDictionary? {
         didSet {
+            let configDic = stopLocalRecord as! Dictionary<String, Any>
+            var saveAlbum = true
+            if configDic.keys.contains("saveAlbum") {
+                saveAlbum = configDic["saveAlbum"] as! Bool
+            }
+            let saveFolder = true
+            if configDic.keys.contains("saveFolder") {
+                saveFolder = configDic["saveFolder"] as! Bool
+            }
+            let deviceSerial = nil
+            if configDic.keys.contains("deviceSerial") {
+                deviceSerial = configDic["deviceSerial"] as! String
+            }
+            
             switch sdkVersion {
             case .Unknown:
                 print(TAG, "error 未 initSdkVersion")
                 
             case .HikVideo_V2_1_0, .Imou:
-                stopLocalRecordHatom()
+                stopLocalRecordHatom(saveAlbum: saveAlbum, saveFolder: saveFolder, deviceSerial: deviceSerial)
                 
             case .PrimordialVideo:
                 print(TAG, "PrimordialVideo stopLocalRecord")
                 
             case .EzvizVideo:
-                stopLocalRecordEzviz()
+                stopLocalRecordEzviz(saveAlbum: saveAlbum, saveFolder: saveFolder, deviceSerial: deviceSerial)
             }
         }
     }
@@ -498,28 +520,48 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
      * 截图
      * 通过 Events.onCapturePicture 通知结果
      */
-    func capturePictureHatom() {
+    func capturePictureHatom(saveAlbum: Bool, saveFolder: Bool, deviceSerial: String?) {
         // 截图结果
         let imageData = hatomPlayer.screenshoot()
         if imageData == nil {
             print(TAG, "capturePictureHatom", "截图失败")
-            onCapturePicture!([EventProp.success.rawValue: false])
+            onCapturePicture!([
+                EventProp.success.rawValue: false,
+                EventProp.message.rawValue: "截图失败"
+            ])
             return
         }
-        // 保存到系统相册
+        // 保存
         let image = UIImage(data: imageData!)
         if image != nil {
-            UIImageWriteToSavedPhotosAlbum(
-                image!,
-                self,
-                #selector(imageSavedToAlbum),
-                nil
-            )
+            // 保存到系统相册
+            if saveAlbum {
+                UIImageWriteToSavedPhotosAlbum(
+                    image!,
+                    self,
+                    #selector(imageSavedToAlbum),
+                    nil
+                )
+            }
+            
+            // 保存到文件夹
+            if saveFolder {
+                let filePath = Utils.generatePicturePath(custom: deviceSerial)
+                let result = UIImagePNGRepresentation(image!).writeToFile(filePath, tomically: true)
+                onCapturePicture!([
+                    EventProp.success.rawValue: result,
+                    EventProp.message.rawValue: "saveFolder",
+                    EventProp.data.rawValue:    filePath
+                ])
+            }
             
         } else {
             // 生成失败
             print(TAG, "capturePictureHatom", "截图失败")
-            onCapturePicture!([EventProp.success.rawValue: false])
+            onCapturePicture!([
+                EventProp.success.rawValue: false,
+                EventProp.message.rawValue: "截图失败"
+            ])
         }
     }
     
@@ -546,7 +588,8 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
             // 失败回调
             onLocalRecord!([
                 EventProp.success.rawValue: false,
-                EventProp.message.rawValue: result,
+                EventProp.code.rawValue: result,
+                EventProp.message.rawValue: "开始录像失败"
             ])
         }
     }
@@ -556,14 +599,15 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
      * 与 startLocalRecordHatom 成对使用
      * 通过 Events.onLocalRecord 通知结果
      */
-    func stopLocalRecordHatom() {
+    func stopLocalRecordHatom(saveAlbum: Bool, saveFolder: Bool, deviceSerial: String?) {
         // 路径为空
         if recordPathHatom == "" {
             print(TAG, "stopLocalRecordHatom error 未 开始录像")
             // 失败回调
             onLocalRecord!([
                 EventProp.success.rawValue: false,
-                EventProp.message.rawValue: -1,
+                EventProp.code.rawValue:    -1,
+                EventProp.message.rawValue: "未开始录像"
             ])
             return
         }
@@ -575,18 +619,33 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
             // 失败回调
             onLocalRecord!([
                 EventProp.success.rawValue: false,
-                EventProp.message.rawValue: result,
+                EventProp.code.rawValue:    result,
+                EventProp.message.rawValue: "录制失败"
             ])
             return
         }
         
-        // 录制成功，保存到相册，由 videoSavedToAlbum 回调结果
-        UISaveVideoAtPathToSavedPhotosAlbum(
-            recordPathHatom,
-            self,
-            #selector(self.videoSavedToAlbum),
-            nil
-        )
+        // 录制成功
+        // 保存到相册，由 videoSavedToAlbum 回调结果
+        if saveAlbum {
+            UISaveVideoAtPathToSavedPhotosAlbum(
+                recordPathHatom,
+                self,
+                #selector(self.videoSavedToAlbum),
+                nil
+            )
+        }
+        
+        // 保存到文件夹
+        if saveFolder {
+            let filePath    = Utils.generateRecordPath(custom: deviceSerial)
+            let result      = FileManager.default.copyItem(at: recordPathHatom, to: filePath)
+            onLocalRecord!([
+                EventProp.success.rawValue: result,
+                EventProp.message.rawValue: "saveFolder",
+                EventProp.data.rawValue:    filePath
+            ])
+        }
         
         // 清理路径
         recordPathHatom = ""
@@ -835,14 +894,28 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
      * 截图
      * 通过 Events.onCapturePicture 通知结果
      */
-    func capturePictureEzviz() {
+    func capturePictureEzviz(saveAlbum: Bool, saveFolder: Bool, deviceSerial: String?) {
         let image = ezPlayer.capturePicture(100)
-        UIImageWriteToSavedPhotosAlbum(
-            image!,
-            self,
-            #selector(imageSavedToAlbum),
-            nil
-        )
+        // 保存到系统相册
+        if saveAlbum {
+            UIImageWriteToSavedPhotosAlbum(
+                image!,
+                self,
+                #selector(imageSavedToAlbum),
+                nil
+            )
+        }
+        
+        // 保存到文件夹
+        if saveFolder {
+            let filePath = Utils.generatePicturePath(custom: deviceSerial)
+            let result = UIImagePNGRepresentation(image!).writeToFile(filePath, tomically: true)
+            onCapturePicture!([
+                EventProp.success.rawValue: result,
+                EventProp.message.rawValue: "saveFolder",
+                EventProp.data.rawValue: filePath
+            ])
+        }
     }
     
     /**
@@ -870,13 +943,14 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
      *
      * videoSavedToAlbum 回调结果
      */
-    func stopLocalRecordEzviz() {
+    func stopLocalRecordEzviz(saveAlbum: Bool, saveFolder: Bool, deviceSerial: String?) {
         if recordPathEzviz == "" {
             print(TAG, "stopLocalRecordEzviz error 未 开始录像")
             // 失败回调
             onLocalRecord!([
                 EventProp.success.rawValue: false,
-                EventProp.message.rawValue: -1,
+                EventProp.code.rawValue:    -1,
+                EventProp.message.rawValue: "未开始录像"
             ])
             return
         }
@@ -885,18 +959,33 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
             (ret: Bool) in
             
             if ret {
-                // 录制成功，保存到相册，由 videoSavedToAlbum 回调结果
-                UISaveVideoAtPathToSavedPhotosAlbum(
-                    self.recordPathEzviz,
-                    self,
-                    #selector(self.videoSavedToAlbum),
-                    nil
-                )
+                // 录制成功
+                // 保存到相册，由 videoSavedToAlbum 回调结果
+                if saveAlbum {
+                    UISaveVideoAtPathToSavedPhotosAlbum(
+                        self.recordPathEzviz,
+                        self,
+                        #selector(self.videoSavedToAlbum),
+                        nil
+                    )
+                }
+                
+                // 保存到文件夹
+                if saveFolder {
+                    let filePath    = Utils.generateRecordPath(custom: deviceSerial)
+                    let result      = FileManager.default.copyItem(at: self.recordPathEzviz, to: filePath)
+                    onLocalRecord!([
+                        EventProp.success.rawValue: result,
+                        EventProp.message.rawValue: "saveFolder",
+                        EventProp.data.rawValue:    filePath
+                    ])
+                }
             } else {
                 // 录制失败，回调失败信息
                 self.onLocalRecord!([
                     EventProp.success.rawValue: false,
-                    EventProp.message.rawValue: "record error",
+                    EventProp.code.rawValue:    -1,
+                    EventProp.message.rawValue: "录制失败"
                 ])
             }
             self.recordPathEzviz = ""

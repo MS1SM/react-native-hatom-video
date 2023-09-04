@@ -184,11 +184,14 @@ RCT_EXPORT_VIEW_PROPERTY(startLocalRecord, NSDictionary)
 /**
  * 结束本地直播流录像
  * 与 startLocalRecord 成对使用
- * NSString 占位，无实际意义
  *
  * 通过 Events.onLocalRecord 通知结果
+ *
+ * @param  NSDictionary.saveAlbum?                       (Boolean)    是否保存到相册, default = true
+ * @param  NSDictionary.saveFolder?                     (Boolean)    是否保存到文件夹, default = true
+ * @param  NSDictionary.deviceSerial?                 (String)       设备序列号，用于细分存储目录
  */
-RCT_EXPORT_VIEW_PROPERTY(stopLocalRecord, NSString)
+RCT_EXPORT_VIEW_PROPERTY(stopLocalRecord, NSDictionary)
 
 /**
  * 声音控制
@@ -223,8 +226,12 @@ RCT_EXPORT_VIEW_PROPERTY(voiceTalk, NSDictionary)
 /**
  * 截图
  * 通过 Events.onCapturePicture 通知结果
+ *
+ * @param  NSDictionary.saveAlbum?                       (Boolean)    是否保存到相册, default = true
+ * @param  NSDictionary.saveFolder?                     (Boolean)    是否保存到文件夹, default = true
+ * @param  NSDictionary.deviceSerial?                 (String)        设备序列号，用于细分存储目录
  */
-RCT_EXPORT_VIEW_PROPERTY(capturePicture, NSString)
+RCT_EXPORT_VIEW_PROPERTY(capturePicture, NSDictionary)
 
 /**
  * 设置视频清晰度
@@ -297,15 +304,20 @@ RCT_EXPORT_VIEW_PROPERTY(playback, NSDictionary)
 
 /**
  * 截图回调
- * success： (Boolean)   是否成功，只有保存到系统相册才算成功
+ * 保存到相册与保存到文件夹同时使能的情况下，将回调两次
+ * success： (Boolean)   是否成功
+ * message:  (String)       saveAlbum or saveFolder：本次回调所属操作；[other]：截图失败信息，两个保存操作都将失败
+ * data?:        (String)       saveFolder 成功时对应的地址
  */
 RCT_EXPORT_VIEW_PROPERTY(onCapturePicture, RCTDirectEventBlock)
 
 /**
  * 录像结果回调
- * success： (Boolean)   是否成功
- * message： (String?)   信息，失败时的信息
- * data：    (String?)   文件路径，成功时
+ * 保存到相册与保存到文件夹同时使能的情况下，将回调两次 
+ * success：     (Boolean)   是否成功
+ * message:      (String)       saveAlbum or saveFolder：本次回调所属操作；[other]：录像失败信息，两个保存操作都将失败
+ * data?：         (String)       saveFolder 成功时对应的地址
+ * code?：        (String)       操作失败错误码，仅海康国标有实际意义
  */
 RCT_EXPORT_VIEW_PROPERTY(onLocalRecord, RCTDirectEventBlock)
 
