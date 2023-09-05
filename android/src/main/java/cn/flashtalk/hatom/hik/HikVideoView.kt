@@ -214,10 +214,10 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
         // 截图
         val filePath    = Utils.generatePicturePath(context, deviceSerial)
         val shotResult  = hatomPlayer.screenshot(filePath, null)
-        // 保存到相册
+        // 刷新相册
         var saveResult = false
         if (shotResult == SUCCESS_HATOM) {
-            saveResult = SaveUtils.insertMediaPic(context, filePath, true)
+            saveResult = SaveUtils.refreshAlbum(context, filePath)
         } else {
             Log.e(TAG, "capturePictureHatom: $shotResult")
         }
@@ -363,8 +363,8 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
         CoroutineScope(Dispatchers.IO).launch {
             flow<String> {
                 val seek = StringBuilder(
-                                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault())
-                                    .format(offsetTime.time)
+                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault())
+                        .format(offsetTime.time)
                 ).insert(26, ":").toString()
                 hatomPlayer.seekPlayback(seek)
             }.catch {
@@ -584,8 +584,8 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
         // 截图
         val filePath = Utils.generatePicturePath(context, deviceSerial)
         ezPlayer.capturePicture(filePath)
-        // 保存到相册
-        var saveResult = SaveUtils.insertMediaPic(context, filePath, true)
+        // 刷新相册
+        var saveResult = SaveUtils.refreshAlbum(context, filePath)
 
         // 回调截图保存结果
         val propMap = Arguments.createMap()

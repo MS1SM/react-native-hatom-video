@@ -318,6 +318,19 @@ public class SaveUtils {
         localContentValues.put(MediaStore.Video.Media.SIZE, Long.valueOf(paramFile.length()));
         return localContentValues;
     }
+
+    public static boolean refreshAlbum(Context context, String filePath) {
+        File file = new File(filePath);
+        if (!file.exists()) {
+            return false;
+        }
+
+        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        Uri uri = Uri.fromFile(file);
+        intent.setData(uri);
+        context.sendBroadcast(intent);
+        return true;
+    }
 }
 
 
