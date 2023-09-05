@@ -30,16 +30,16 @@ class Utils {
         saveFolder += folder
         
         // 自定义目录
-        if custom.isEmpty {
+        if !custom.isEmpty {
             saveFolder += "/" + custom
         }
         
         // 创建目录
         let fileManager = FileManager.default
-        if !fileManager.fileExists(atPath: saveFolder) {
-            if !fileManager.createDirectory(at: saveFolder, withIntermediateDirectories: true) {
-                print(TAG, "getSaveFolder", "文件夹创建失败")
-            }
+        do {
+            try fileManager.createDirectory(atPath: saveFolder, withIntermediateDirectories: true, attributes: nil)
+        } catch {
+            print(TAG, "getSaveFolder", "文件夹创建失败")
         }
         
         return saveFolder
@@ -68,15 +68,15 @@ class Utils {
      * @param suffix 文件后缀类型，使用本类定义常量
      * @param custom 自定义目录，folder 下级目录
      */
-    class func generateSaveFolder(folder: String, suffix: String, custom: String = "") -> {
-        return getSaveFolder(folder: folder, custom: custom) + "/" +  Date().timeIntervalSince1970 * 1000 + suffix
+    class func generateSaveFolder(folder: String, suffix: String, custom: String = "") -> String {
+        return getSaveFolder(folder: folder, custom: custom) + "/" + String(Int(Date().timeIntervalSince1970 * 1000)) + suffix
     }
     
     /**
      * 生成视频文件存储路径
      * @param custom 自定义目录，视频文件夹 下级目录
      */
-    class func generateRecordPath(custom: String = "") -> {
+    class func generateRecordPath(custom: String = "") -> String {
         return generateSaveFolder(folder: FOLDER_RECORD, suffix: SUFFIX_VIDEO, custom: custom)
     }
     
@@ -84,7 +84,36 @@ class Utils {
      * 生成图片文件存储路径
      * @param custom 自定义目录，图片文件夹 下级目录
      */
-    class func generatePicturePath(custom: String = "") -> {
-        return generateSaveFolder(folder: FOLDER_PICTURE, suffix: FOLDER_PICTURE, custom: custom)
+    class func generatePicturePath(custom: String = "") -> String {
+        return generateSaveFolder(folder: FOLDER_PICTURE, suffix: SUFFIX_PICTURE, custom: custom)
+    }
+    
+    /*
+     图片文件保存到文件夹
+     png 格式
+     @return bool 保存结果
+     */
+    class func saveFolder(image: UIImage, path: String) -> Bool {
+        do {
+            try image.pngData()!.write(to: URL.init(fileURLWithPath: path))
+            return true
+        } catch {
+            print(TAG, "saveFolder error", error)
+            return false
+        }
+    }
+    
+    /**
+     拷贝文件
+     @return bool 拷贝结果
+     */
+    class func copyItem(at: String, to: String) -> Bool {
+        do {
+            try FileManager.default.copyItem(atPath: at, toPath: to)
+            return true
+        } catch {
+            print(TAG, "copyItem error", error)
+            return false
+        }
     }
 }

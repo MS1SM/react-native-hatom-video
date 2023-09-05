@@ -210,7 +210,7 @@ export default class HatomVideo extends Component {
      * @param {object} config? 参考 _capturePicture
      */
     capturePicture(config) {
-        this._capturePicture()
+        this._capturePicture(config)
     }
 
     /**
@@ -987,11 +987,11 @@ export default class HatomVideo extends Component {
      * 请使用 getConstants
      * 
      * @param {object | null} config
-     * @param  config.deviceSerial     (String？) 设备序列号，用于获取细分存储目录的地址。仅安卓有效，ios已存储到系统相册
      *
      * @param  promise              (Promise)       使用 Promise 回调结果
      * @return promise.resolve      (Object)        操作结果
-     *         resolve.recordPath   (String)        录像存储路径
+     *         resolve.recordPath   (String)        录像存储根路径
+     *         resolve.picturePath  (String)        图片存储根路径
      */
     static _getConstants(config) {
         if (!config) {

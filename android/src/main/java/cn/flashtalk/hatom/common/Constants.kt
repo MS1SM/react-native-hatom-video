@@ -106,6 +106,11 @@ enum class EventProp {
     recordPath,
 
     /**
+     * 图片路径
+     */
+    picturePath,
+
+    /**
      * 速度
      * String
      */

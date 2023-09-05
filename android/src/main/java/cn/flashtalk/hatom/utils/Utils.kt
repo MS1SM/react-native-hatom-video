@@ -56,6 +56,14 @@ class Utils {
         }
 
         /**
+         * 获取图片文件存储文件夹
+         * @param custom 自定义目录，图片文件夹下级目录
+         */
+        fun getPictureFolder(context: Context, custom: String? = ""): String {
+            return getSaveFolder(context, FOLDER_PICTURE, custom)
+        }
+
+        /**
          * 生成文件存储目录
          *
          * @param folder 分类目录，使用本类定义常量

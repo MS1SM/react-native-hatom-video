@@ -140,6 +140,9 @@ class RNHatomVideoModule: NSObject {
         reject: @escaping RCTPromiseRejectBlock
     ) {
         let configDic = config as! Dictionary<String, Any>
-        resolve([])
+        resolve([
+            EventProp.recordPath.rawValue: Utils.getRecordFolder(),
+            EventProp.picturePath.rawValue: Utils.getPictureFolder()
+        ])
     }
 }

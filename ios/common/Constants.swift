@@ -42,6 +42,11 @@ enum EventProp: String {
     case recordPath = "recordPath"
     
     /**
+     * 图片路径
+     */
+    case picturePath = "picturePath"
+    
+    /**
      * 速度
      * String
      */

@@ -73,7 +73,7 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
     @objc var initSdkVersion: NSString? {
         didSet {
             print(TAG, "initSdkVersion", initSdkVersion!)
-            self.sdkVersion = SdkVersion.nameToEnum(name: initSdkVersion as! String)
+            self.sdkVersion = SdkVersion.nameToEnum(name: initSdkVersion! as String)
         }
     }
     
@@ -119,7 +119,7 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
             case .HikVideo_V2_1_0, .Imou:
                 var headers: Dictionary<String, String>? = nil
                 if configDic.keys.contains("headers") {
-                    headers = configDic["headers"] as! Dictionary<String, String>
+                    headers = configDic["headers"] as? Dictionary<String, String>
                 }
                 setDataSourceHatom(path: configDic["path"] as! String, headers: headers)
                 
@@ -226,11 +226,11 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
             if configDic.keys.contains("saveAlbum") {
                 saveAlbum = configDic["saveAlbum"] as! Bool
             }
-            let saveFolder = true
+            var saveFolder = true
             if configDic.keys.contains("saveFolder") {
                 saveFolder = configDic["saveFolder"] as! Bool
             }
-            let deviceSerial = nil
+            var deviceSerial = ""
             if configDic.keys.contains("deviceSerial") {
                 deviceSerial = configDic["deviceSerial"] as! String
             }
@@ -254,7 +254,7 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
     // 设置视频清晰度
     @objc var setVideoLevel: NSDictionary? {
         didSet {
-            let configDic = controlPtz as! Dictionary<String, Any>
+            let configDic = setVideoLevel as! Dictionary<String, Any>
             switch sdkVersion {
             case .Unknown:
                 print(TAG, "error 未 initSdkVersion")
@@ -265,8 +265,12 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
                     setDataSourceHatom(path: configDic["path"] as! String, headers: nil)
                 }
                 // changeStream
-                let videoLevel = HikConstants.QualityType[configDic["videoLevel"] as! String]!
-                changeStreamHatom(quality: videoLevel)
+                let videoLevel = HikConstants.QualityType[configDic["videoLevel"] as! String]
+                if videoLevel != nil {
+                    changeStreamHatom(quality: videoLevel!)
+                } else {
+                    print(TAG, "error setVideoLevel", "参数配置异常，请核对")
+                }
                 
             case .PrimordialVideo:
                 print(TAG, "PrimordialVideo setVideoLevel")
@@ -305,11 +309,11 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
             if configDic.keys.contains("saveAlbum") {
                 saveAlbum = configDic["saveAlbum"] as! Bool
             }
-            let saveFolder = true
+            var saveFolder = true
             if configDic.keys.contains("saveFolder") {
                 saveFolder = configDic["saveFolder"] as! Bool
             }
-            let deviceSerial = nil
+            var deviceSerial = ""
             if configDic.keys.contains("deviceSerial") {
                 deviceSerial = configDic["deviceSerial"] as! String
             }
@@ -510,7 +514,7 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
      * 必须先调用 setDataSource 接口,设置新的取流url
      */
     func changeStreamHatom(quality: QualityType) {
-        var result = hatomPlayer.changeStream(quality)
+        let result = hatomPlayer.changeStream(quality)
         if !result {
             print(TAG, "changeStreamHatom", result)
         }
@@ -520,7 +524,7 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
      * 截图
      * 通过 Events.onCapturePicture 通知结果
      */
-    func capturePictureHatom(saveAlbum: Bool, saveFolder: Bool, deviceSerial: String?) {
+    func capturePictureHatom(saveAlbum: Bool, saveFolder: Bool, deviceSerial: String) {
         // 截图结果
         let imageData = hatomPlayer.screenshoot()
         if imageData == nil {
@@ -547,7 +551,8 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
             // 保存到文件夹
             if saveFolder {
                 let filePath = Utils.generatePicturePath(custom: deviceSerial)
-                let result = UIImagePNGRepresentation(image!).writeToFile(filePath, tomically: true)
+                let result   = Utils.saveFolder(image: image!, path: filePath)
+                
                 onCapturePicture!([
                     EventProp.success.rawValue: result,
                     EventProp.message.rawValue: "saveFolder",
@@ -599,7 +604,7 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
      * 与 startLocalRecordHatom 成对使用
      * 通过 Events.onLocalRecord 通知结果
      */
-    func stopLocalRecordHatom(saveAlbum: Bool, saveFolder: Bool, deviceSerial: String?) {
+    func stopLocalRecordHatom(saveAlbum: Bool, saveFolder: Bool, deviceSerial: String) {
         // 路径为空
         if recordPathHatom == "" {
             print(TAG, "stopLocalRecordHatom error 未 开始录像")
@@ -639,7 +644,7 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
         // 保存到文件夹
         if saveFolder {
             let filePath    = Utils.generateRecordPath(custom: deviceSerial)
-            let result      = FileManager.default.copyItem(at: recordPathHatom, to: filePath)
+            let result      = Utils.copyItem(at: recordPathHatom, to: filePath)
             onLocalRecord!([
                 EventProp.success.rawValue: result,
                 EventProp.message.rawValue: "saveFolder",
@@ -812,7 +817,7 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
      */
     @objc func player(_ player: EZPlayer, didReceivedMessage messageCode: NSInteger) {
         print(TAG, "didReceivedMessage", messageCode)
-        var code = messageCode as Int
+        let code = messageCode as Int
         
         if player == ezPlayer {
             // 预览
@@ -894,7 +899,7 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
      * 截图
      * 通过 Events.onCapturePicture 通知结果
      */
-    func capturePictureEzviz(saveAlbum: Bool, saveFolder: Bool, deviceSerial: String?) {
+    func capturePictureEzviz(saveAlbum: Bool, saveFolder: Bool, deviceSerial: String) {
         let image = ezPlayer.capturePicture(100)
         // 保存到系统相册
         if saveAlbum {
@@ -908,8 +913,8 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
         
         // 保存到文件夹
         if saveFolder {
-            let filePath = Utils.generatePicturePath(custom: deviceSerial)
-            let result = UIImagePNGRepresentation(image!).writeToFile(filePath, tomically: true)
+            let filePath    = Utils.generatePicturePath(custom: deviceSerial)
+            let result      = Utils.saveFolder(image: image!, path: filePath)
             onCapturePicture!([
                 EventProp.success.rawValue: result,
                 EventProp.message.rawValue: "saveFolder",
@@ -943,7 +948,7 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
      *
      * videoSavedToAlbum 回调结果
      */
-    func stopLocalRecordEzviz(saveAlbum: Bool, saveFolder: Bool, deviceSerial: String?) {
+    func stopLocalRecordEzviz(saveAlbum: Bool, saveFolder: Bool, deviceSerial: String) {
         if recordPathEzviz == "" {
             print(TAG, "stopLocalRecordEzviz error 未 开始录像")
             // 失败回调
@@ -973,8 +978,8 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
                 // 保存到文件夹
                 if saveFolder {
                     let filePath    = Utils.generateRecordPath(custom: deviceSerial)
-                    let result      = FileManager.default.copyItem(at: self.recordPathEzviz, to: filePath)
-                    onLocalRecord!([
+                    let result      = Utils.copyItem(at: self.recordPathEzviz, to: filePath)
+                    self.onLocalRecord!([
                         EventProp.success.rawValue: result,
                         EventProp.message.rawValue: "saveFolder",
                         EventProp.data.rawValue:    filePath
