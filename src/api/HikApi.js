@@ -31,14 +31,52 @@ const modelUrl = {
  */
 const url = {
   video: {
-    // 预览 URL
+    /**
+     * 预览 URL
+     * https://open.hikvision.com/docs/docId?productId=5c67f1e2f05948198c909700&version=%2F60df74fdc6f24041ac3d2d7f81c32325&tagPath=API列表-视频业务-视频功能
+     */
     previewUrl: modelUrl.video + "/v2/cameras/previewURLs",
-    // 对讲 URL
+
+    /**
+     * 对讲 URL
+     * https://open.hikvision.com/docs/docId?productId=5c67f1e2f05948198c909700&version=%2F60df74fdc6f24041ac3d2d7f81c32325&tagPath=API列表-视频业务-视频功能#d614fc5f
+     */
     talkUrl: modelUrl.video + "/v1/cameras/talkURLs",
-    // 回看 URL
+
+    /**
+     * 回看 URL
+     * https://open.hikvision.com/docs/docId?productId=5c67f1e2f05948198c909700&version=%2F60df74fdc6f24041ac3d2d7f81c32325&tagPath=API列表-视频业务-视频功能#eb47ca72
+     */
     playbackUrl: modelUrl.video + "/v2/cameras/playbackURLs",
-    // 云台控制
+
+    /**
+     * 云台控制
+     * https://open.hikvision.com/docs/docId?productId=5c67f1e2f05948198c909700&version=%2F60df74fdc6f24041ac3d2d7f81c32325&tagPath=API列表-视频业务-视频功能#e30b9484
+     */
     ptzControl: modelUrl.video + "/v1/ptzs/controlling",
+
+    /**
+     * 设置预置点信息
+     * https://open.hikvision.com/docs/docId?productId=5c67f1e2f05948198c909700&version=%2F60df74fdc6f24041ac3d2d7f81c32325&tagPath=API列表-视频业务-视频功能#f0cf5c24
+     */
+    presetsAddition: modelUrl.video + "/v1/presets/addition",
+
+    /**
+     * 查询预置点信息
+     * https://open.hikvision.com/docs/docId?productId=5c67f1e2f05948198c909700&version=%2F60df74fdc6f24041ac3d2d7f81c32325&tagPath=API列表-视频业务-视频功能#e4a7676f
+     */
+    presetsSearches: modelUrl.video + "/v1/presets/searches",
+
+    /**
+     * 删除预置点信息
+     * https://open.hikvision.com/docs/docId?productId=5c67f1e2f05948198c909700&version=%2F60df74fdc6f24041ac3d2d7f81c32325&tagPath=API列表-视频业务-视频功能#c4281e8b
+     */
+    presetsDeletion: modelUrl.video + "/v1/presets/deletion",
+
+    /**
+     * 批量获取监控点的预置点信息
+     */
+    presetsGet: modelUrl.video + "/v1/presets/get"
   },
 
   device: {
@@ -113,6 +151,8 @@ function getBody(data) {
  * 仅成功获取数据才resolve
  */
 function postHik(url, data, param) {
+  // 尽量避免无意义参数加入
+  // 需要注意，data 或 param 需要追加公共参数的话，他们就不得为null
   if (data) data = getData(data)
   if (param) param = getBody(param)
 
@@ -191,7 +231,7 @@ function getHik (url, params) {
 export function previewUrl(data) {
   return postHik(
     url.video.previewUrl,
-    data
+    data || {}
   )
 }
 
@@ -212,7 +252,7 @@ export function previewUrl(data) {
 export function talkUrl(data) {
   return postHik(
     url.video.talkUrl,
-    data
+    data || {}
   )
 }
 
@@ -251,7 +291,7 @@ export function talkUrl(data) {
 export function playbackUrl(data) {
   return postHik(
     url.video.playbackUrl,
-    data
+    data || {}
   )
 }
 
@@ -268,7 +308,60 @@ export function playbackUrl(data) {
 export function ptzControl(data) {
   return postHik(
     url.video.ptzControl,
-    data
+    data || {}
+  )
+}
+
+/**
+ * 设置预置点信息
+ * @param {object} data
+ * 
+ * @param {string} data.cameraIndexCode     "a5a04f5e2c5a4e83a5180545f0cb898f"
+ * @param {string} data.presetName          预置点名称
+ * @param {number} data.presetIndex         预置点编号
+ */
+export function presetsAddition(data) {
+  return postHik(
+    url.video.presetsAddition,
+    data || {}
+  )
+}
+
+/**
+ * 查询预置点信息
+ * @param {object} data
+ * @param {string} data.cameraIndexCode     "a5a04f5e2c5a4e83a5180545f0cb898f"
+ */
+export function presetsSearches(data) {
+  return postHik(
+    url.video.presetsSearches,
+    data || {}
+  )
+}
+
+/**
+ * 删除预置点信息
+ * @param {object} data
+ * @param {string} data.cameraIndexCode  "a5a04f5e2c5a4e83a5180545f0cb898f"
+ * @param {number} data.presetIndex      预置点编号
+ */
+export function presetsDeletion(data) {
+  return postHik(
+    url.video.presetsDeletion,
+    data || {}
+  )
+}
+
+/**
+ * 批量获取监控点的预置点信息
+ * 暂时用不上，不封装到 HatomVideo
+ * @param {object} data
+ * @param {Array} data.cameraIndexCodes  ["a5a04f5e2c5a4e83a5180545f0cb898f"]
+ */
+export function presetsGet(data) {
+  return postHik(
+    url.video.presetsGet,
+    data || {}
   )
 }
 
@@ -283,7 +376,7 @@ export function recordOpen(data) {
   return postHik(
     url.device.recordOpen,
     null,
-    data
+    data || {}
   )
 }
 
@@ -298,7 +391,7 @@ export function recordClose(data) {
   return postHik(
     url.device.recordClose,
     null,
-    data
+    data || {}
   )
 }
 
@@ -331,7 +424,7 @@ export function recordClose(data) {
 export function sdStatus(data) {
   return getHik(
     url.device.sdStatus,
-    data
+    data || {}
   )
 }
 
@@ -348,6 +441,6 @@ export function sdStatus(data) {
 export function formatHik(data) {
   return getHik(
     url.device.format,
-    data
+    data || {}
   )
 }

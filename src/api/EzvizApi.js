@@ -101,7 +101,25 @@ const url = {
          * 告警音
          * https://open.ys7.com/help/717
          */
-        sound: modelUrl.device + "/alarm/sound/set"
+        sound: modelUrl.device + "/alarm/sound/set",
+
+        /**
+         * 添加预置点
+         * https://open.ys7.com/help/682
+         */
+        presetAdd: modelUrl.device + "/preset/add",
+
+        /**
+         * 调用预置点
+         * https://open.ys7.com/help/683
+         */
+        presetMove: modelUrl.device + "/preset/move",
+
+        /**
+         * 清除预置点
+         * https://open.ys7.com/help/684
+         */
+        presetClear: modelUrl.device + "/preset/clear",
     },
 
     // otap 模块
@@ -471,6 +489,44 @@ export function sound(data) {
 export function searchRecord(data) {
     return postEzviz(
         url.video.searchRecord,
+        data
+    )
+}
+
+/**
+ * 添加预置点
+ * @param {object} data
+ * @param {Number} data.channelNo 通道号
+ */
+export function presetAdd(data) {
+    return postEzviz(
+        url.device.presetAdd,
+        data
+    )
+}
+
+/**
+ * 调用预置点
+ * @param {object} data
+ * @param {Number} data.channelNo   通道号
+ * @param {Number} data.index       预置点，C6设备预置点是1-12
+ */
+export function presetMove(data) {
+    return postEzviz(
+        url.device.presetMove,
+        data
+    )
+}
+
+/**
+ * 清除预置点
+ * @param {object} data
+ * @param {Number} data.channelNo   通道号
+ * @param {Number} data.index       预置点，C6设备预置点是1-12
+ */
+export function presetClear(data) {
+    return postEzviz(
+        url.device.presetClear,
         data
     )
 }

@@ -24,9 +24,12 @@ import {
     sound,
     upgradeStatus,
     upgrade,
-    searchRecord
+    searchRecord,
+    presetAdd,
+    presetMove,
+    presetClear
 } from './api/EzvizApi';
-import { formatHik, playbackUrl, previewUrl, ptzControl, recordClose, recordOpen, sdStatus, talkUrl } from './api/HikApi';
+import { formatHik, playbackUrl, presetsAddition, presetsDeletion, presetsSearches, previewUrl, ptzControl, recordClose, recordOpen, sdStatus, talkUrl } from './api/HikApi';
 
 const TAG = 'HatomVideo';
 
@@ -849,6 +852,138 @@ export default class HatomVideo extends Component {
         }
     }
 
+    /**
+     * 添加预置点
+     * 
+     * **************************************************
+     * 海康国标
+     * @param {object} data
+     * @param {string} data.presetName          预置点名称
+     * @param {number} data.presetIndex         预置点编号
+     * 
+     * @return {Promise}
+     * @return {null} resolve data
+     * @return {Object} reject error{code, msg}
+     * 
+     * **************************************************
+     * Ezviz
+     * @param {object} data
+     * @param {Number} data.channelNo 通道号
+     * 
+     * @return {Promise}
+     * @return {Object} resolve data
+     * @return {Number} data.index 预置点序号，C6设备是1-12，该参数需要开发者自行保存
+     * @return {Object} reject error{code, msg}
+     */
+    static presetAdd(data) {
+        switch (GlobalConfig.sdk.version) {
+            case SdkVersion.HikVideo_2_1_0, SdkVersion.Imou:
+                return presetsAddition(data)
+            
+            case SdkVersion.EzvizVideo:
+                return presetAdd(data)
+            
+            default:
+                Log.error(TAG, "presetAdd 当前环境，未支持此功能")
+        }
+    }
+
+    /**
+     * 调用预置点
+     * 
+     * **************************************************
+     * 海康国标
+     * @param {object} data 参考 HatomVideo.ptzControl
+     * @return {Promise} 参考 HatomVideo.ptzControl
+     * 
+     * **************************************************
+     * Ezviz
+     * @param {object} data
+     * @param {Number} data.channelNo 通道号
+     * @param {Number} data.index     预置点，C6设备预置点是1-12
+     * 
+     * @return {Promise}
+     * @return {null} resolve data
+     * @return {Object} reject error{code, msg}
+     */
+    static presetMove(data) {
+        switch (GlobalConfig.sdk.version) {
+            case SdkVersion.HikVideo_2_1_0, SdkVersion.Imou:
+                return HatomVideo.ptzControl(data)
+            
+            case SdkVersion.EzvizVideo:
+                return presetMove(data)
+            
+            default:
+                Log.error(TAG, "presetMove 当前环境，未支持此功能")
+        }
+    }
+
+    /**
+     * 清除预置点
+     * 
+     * **************************************************
+     * 海康国标
+     * @param {object} data
+     * @param {number} data.presetIndex         预置点编号
+     * 
+     * @return {Promise}
+     * @return {null} resolve data
+     * @return {Object} reject error{code, msg}
+     * 
+     * **************************************************
+     * Ezviz
+     * @param {object} data
+     * @param {Number} data.channelNo 通道号
+     * @param {Number} data.index     预置点，C6设备预置点是1-12
+     * 
+     * @return {Promise}
+     * @return {null} resolve data
+     * @return {Object} reject error{code, msg}
+     */
+    static presetClear(data) {
+        switch (GlobalConfig.sdk.version) {
+            case SdkVersion.HikVideo_2_1_0, SdkVersion.Imou:
+                return presetsDeletion(data)
+            
+            case SdkVersion.EzvizVideo:
+                return presetClear(data)
+            
+            default:
+                Log.error(TAG, "presetClear 当前环境，未支持此功能")
+        }
+    }
+
+    /**
+     * 查询预置点信息
+     * 
+     * **************************************************
+     * 海康国标
+     * 
+     * @return {Promise} resolve
+     * {
+            "total": 1,
+            "list": [
+                {
+                    "presetPointName": "预置点1",
+                    "presetPointIndex": 1,
+                    "cameraIndexCode": "9b388a28080c448a873b711aafda144c"
+                }
+            ]
+        }
+
+     * @return {Promise} reject error{code, msg}
+     * 
+     * **************************************************
+     * Ezviz
+     * 萤石没有查询预置点信息的功能，需要在 presetAdd 时自行维护预置点信息
+     */
+    static presetsSearches() {
+        if (HatomVideo.supportGB()) {
+            return presetsSearches()
+        }
+    }
+
     /************************* 仅国标支持的Http功能 static *************************/
     /**
      * 获取预览播放串
@@ -1255,7 +1390,7 @@ export default class HatomVideo extends Component {
     /**
      * 截图回调
      * ios 保存到相册与文件夹同时使能的情况下，将回调两次，一次是保存到相册的结果；一次是保存到文件夹的结果。通过message判断
-     * android 只有保存到系统相册才回调成功
+     * android 只有刷新到系统相册才回调成功
      * 
      * nativeEvent.success： (Boolean)   是否成功
      * nativeEvent.message?: (String)    saveAlbum or saveFolder：本次回调所属操作；[other]：截图失败信息，两个保存操作都将失败
@@ -1270,12 +1405,12 @@ export default class HatomVideo extends Component {
     /**
      * 录像结果回调
      * ios 保存到相册与文件夹同时使能的情况下，将回调两次，一次是保存到相册的结果；一次是保存到文件夹的结果。通过message判断
-     * android 只有保存到系统相册才回调成功
+     * android 只有刷新到系统相册才回调成功
      * 
      * nativeEvent.success： (Boolean)   是否成功
      * nativeEvent.message： (String?)   saveAlbum or saveFolder：本次回调所属操作；[other]：截图失败信息，两个保存操作都将失败
      * nativeEvent.data      (String?)   保存到文件夹时的文件地址
-     * nativeEvent.code：     String?)   操作失败错误码，仅海康国标有实际意义
+     * nativeEvent.code：    (String?)   操作失败错误码，仅海康国标有实际意义
      */
     _onLocalRecord = (event) => {
         if (this.props.onLocalRecord) {
