@@ -149,6 +149,17 @@ export default class HatomVideo extends Component {
             return false
         }
     }
+
+    /**
+     * 获取当前环境不支持此功能的 Promise.reject
+     */
+    static unsupportReject() {
+        return Promise.reject({
+            code: -1,
+            msg: "当前环境未支持此功能。请确认 sdkVersion or GlobalConfig.sdk.version"
+        })
+    }
+
     //#endregion
 
     //#region public
@@ -341,7 +352,7 @@ export default class HatomVideo extends Component {
                 break
             
             default:
-                Log.error(TAG, "startPlayback", "未实现")
+                Log.error(TAG, "stopPlayback", "未实现")
                 break
         }
     }
@@ -508,6 +519,8 @@ export default class HatomVideo extends Component {
         if (HatomVideo.supportEzviz()) {
             return recordStatus()
         }
+
+        return HatomVideo.unsupportReject()
     }
 
     /**
@@ -543,6 +556,7 @@ export default class HatomVideo extends Component {
             
             default:
                 Log.error(TAG, "recordSet 当前环境，未支持此功能")
+                return HatomVideo.unsupportReject()
         }
     }
 
@@ -566,6 +580,8 @@ export default class HatomVideo extends Component {
         if (HatomVideo.supportEzviz()) {
             return info()
         }
+
+        return HatomVideo.unsupportReject()
     }
 
     /**
@@ -621,6 +637,7 @@ export default class HatomVideo extends Component {
             
             default:
                 Log.error(TAG, "status 当前环境，未支持此功能")
+                return HatomVideo.unsupportReject()
         }
     }
 
@@ -641,6 +658,8 @@ export default class HatomVideo extends Component {
         if (HatomVideo.supportEzviz()) {
             return mirror(data)
         }
+
+        return HatomVideo.unsupportReject()
     }
 
     /**
@@ -667,6 +686,7 @@ export default class HatomVideo extends Component {
             
             default:
                 Log.error(TAG, "format 当前环境，未支持此功能")
+                return HatomVideo.unsupportReject()
         }
     }
 
@@ -686,6 +706,8 @@ export default class HatomVideo extends Component {
         if (HatomVideo.supportEzviz()) {
             return defence(data)
         }
+
+        return HatomVideo.unsupportReject()
     }
 
     /**
@@ -702,6 +724,8 @@ export default class HatomVideo extends Component {
         if (HatomVideo.supportEzviz()) {
             return encryptOn()
         }
+
+        return HatomVideo.unsupportReject()
     }
 
     /**
@@ -718,6 +742,8 @@ export default class HatomVideo extends Component {
         if (HatomVideo.supportEzviz()) {
             return encryptOff()
         }
+
+        return HatomVideo.unsupportReject()
     }
 
     /**
@@ -735,6 +761,8 @@ export default class HatomVideo extends Component {
         if (HatomVideo.supportEzviz()) {
             return version()
         }
+
+        return HatomVideo.unsupportReject()
     }
 
     /**
@@ -751,6 +779,8 @@ export default class HatomVideo extends Component {
         if (HatomVideo.supportEzviz()) {
             return upgrade()
         }
+
+        return HatomVideo.unsupportReject()
     }
 
     /**
@@ -769,6 +799,8 @@ export default class HatomVideo extends Component {
         if (HatomVideo.supportEzviz()) {
             return upgradeStatus()
         }
+
+        return HatomVideo.unsupportReject()
     }
 
     /**
@@ -787,6 +819,8 @@ export default class HatomVideo extends Component {
         if (HatomVideo.supportEzviz()) {
             return sound(data)
         }
+
+        return HatomVideo.unsupportReject()
     }
 
     /**
@@ -849,6 +883,7 @@ export default class HatomVideo extends Component {
             
             default:
                 Log.error(TAG, "searchRecord 当前环境，未支持此功能")
+                return HatomVideo.unsupportReject()
         }
     }
 
@@ -885,6 +920,7 @@ export default class HatomVideo extends Component {
             
             default:
                 Log.error(TAG, "presetAdd 当前环境，未支持此功能")
+                return HatomVideo.unsupportReject()
         }
     }
 
@@ -916,6 +952,7 @@ export default class HatomVideo extends Component {
             
             default:
                 Log.error(TAG, "presetMove 当前环境，未支持此功能")
+                return HatomVideo.unsupportReject()
         }
     }
 
@@ -951,6 +988,7 @@ export default class HatomVideo extends Component {
             
             default:
                 Log.error(TAG, "presetClear 当前环境，未支持此功能")
+                return HatomVideo.unsupportReject()
         }
     }
 
@@ -982,6 +1020,8 @@ export default class HatomVideo extends Component {
         if (HatomVideo.supportGB()) {
             return presetsSearches()
         }
+
+        return HatomVideo.unsupportReject()
     }
 
     /************************* 仅国标支持的Http功能 static *************************/
@@ -1004,6 +1044,8 @@ export default class HatomVideo extends Component {
         if (HatomVideo.supportGB()) {
             return previewUrl(data)
         }
+
+        return HatomVideo.unsupportReject()
     }
 
     /**
@@ -1024,6 +1066,8 @@ export default class HatomVideo extends Component {
         if (HatomVideo.supportGB()) {
             return talkUrl(data)
         }
+
+        return HatomVideo.unsupportReject()
     }
 
     /**
@@ -1042,6 +1086,8 @@ export default class HatomVideo extends Component {
         if (HatomVideo.supportGB()) {
             return ptzControl(data)
         }
+
+        return HatomVideo.unsupportReject()
     }
 
     // #endregion
