@@ -235,7 +235,7 @@ class RNHikVideoManager : SimpleViewManager<HikVideoView>() {
     /**
      * 释放资源
      */
-    @ReactProp(name = "release")
+    @ReactProp(name = "releasePlay")
     fun release(hikVideoView: HikVideoView, phString: String?) {
         when (hikVideoView.getSdkVersion()) {
             SdkVersion.HikVideo_V2_1_0, SdkVersion.Imou -> {

@@ -171,7 +171,7 @@ RCT_EXPORT_VIEW_PROPERTY(stopPlay, NSString)
  释放资源
  NSString 占位，无实际意义
  */
-RCT_EXPORT_VIEW_PROPERTY(release, NSString)
+RCT_EXPORT_VIEW_PROPERTY(releasePlay, NSString)
 
 /**
  * 开启录像
@@ -313,7 +313,7 @@ RCT_EXPORT_VIEW_PROPERTY(onCapturePicture, RCTDirectEventBlock)
 
 /**
  * 录像结果回调
- * 保存到相册与保存到文件夹同时使能的情况下，将回调两次 
+ * 保存到相册与保存到文件夹同时使能的情况下，将回调两次
  * success：     (Boolean)   是否成功
  * message:      (String)       saveAlbum or saveFolder：本次回调所属操作；[other]：录像失败信息，两个保存操作都将失败
  * data?：         (String)       saveFolder 成功时对应的地址

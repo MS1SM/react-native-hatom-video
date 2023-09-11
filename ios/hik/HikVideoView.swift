@@ -151,6 +151,44 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
         }
     }
     
+    // 停止播放
+    @objc var stopPlay: NSString? {
+        didSet {
+            switch sdkVersion {
+            case .Unknown:
+                print(TAG, "error 未 initSdkVersion")
+                
+            case .HikVideo_V2_1_0, .Imou:
+                stopHatom()
+                
+            case .PrimordialVideo:
+                print(TAG, "stopPlay", "未实现功能")
+                
+            case .EzvizVideo:
+                stopRealEzviz()
+            }
+        }
+    }
+    
+    // 释放资源
+    @objc var releasePlay: NSString? {
+        didSet {
+            switch sdkVersion {
+            case .Unknown:
+                print(TAG, "error 未 initSdkVersion")
+
+            case .HikVideo_V2_1_0, .Imou:
+                print(TAG, "release", "未实现功能")
+
+            case .PrimordialVideo:
+                print(TAG, "release", "未实现功能")
+
+            case .EzvizVideo:
+                print(TAG, "release", "未实现功能")
+            }
+        }
+    }
+    
     // 流量获取
     @objc var getStreamFlow: NSString? {
         didSet {
@@ -484,6 +522,13 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
      */
     func startHatom() {
         hatomPlayer.start()
+    }
+    
+    /**
+     * 停止播放
+     */
+    func stopHatom() {
+        hatomPlayer.stop()
     }
     
     /**
@@ -853,6 +898,13 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
      */
     func startRealEzviz() {
         ezPlayer.startRealPlay()
+    }
+    
+    /**
+     * 停止直播
+     */
+    func stopRealEzviz() {
+        ezPlayer.stopRealPlay()
     }
     
     /**

@@ -1273,7 +1273,7 @@ export default class HatomVideo extends Component {
      * 请使用 release
      */
     _release() {
-        this.setNativeProps({release: "phString"})
+        this.setNativeProps({releasePlay: "phString"})
     }
 
     /**
