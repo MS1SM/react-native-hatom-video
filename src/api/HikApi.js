@@ -18,7 +18,7 @@ const TAG = "HikApi"
  */
 const modelUrl = {
   video: "/artemis/api/video",
-  device: "/ctm01dt/api/v1/device"
+  device: "/artemis/api/ctm01dt/v1/device"
 }
 
 /**
@@ -89,6 +89,9 @@ const url = {
     sdStatus: modelUrl.device + "/getSDCardStatus",
     // 格式化SD卡
     format: modelUrl.device + "/formatSDCardStatus",
+
+    // 获取设备版本信息
+    getVersionParam: modelUrl.device + "/getVersionParam"
   }
 }
 
@@ -436,11 +439,34 @@ export function sdStatus(data) {
  * @param {string} data.sDCardId            SD卡编码，该值为0时，对所有存储卡进行格式化
  * 
  * @return {Promise}
- * @return {boolean} resolve data 操作是否成功
+ * @return {boolean} resolve 
+ * {
+	"code": "",
+	"data": {
+		"softwareVer": "2.800.174I000.0.T 2023-08-30"
+	},
+	"msg": ""
+}
  */
 export function formatHik(data) {
   return getHik(
     url.device.format,
+    data || {}
+  )
+}
+
+/**
+ * 获取设备版本信息
+ * @param {object} data
+ * 
+ * @param {string} data.deviceIndexCode     设备国标编码
+ * 
+ * @return {Promise}
+ * @return {boolean} resolve data 操作是否成功
+ */
+export function getVersionParam(data) {
+  return getHik(
+    url.device.getVersionParam,
     data || {}
   )
 }

@@ -29,7 +29,7 @@ import {
     presetMove,
     presetClear
 } from './api/EzvizApi';
-import { formatHik, playbackUrl, presetsAddition, presetsDeletion, presetsSearches, previewUrl, ptzControl, recordClose, recordOpen, sdStatus, talkUrl } from './api/HikApi';
+import { formatHik, getVersionParam, playbackUrl, presetsAddition, presetsDeletion, presetsSearches, previewUrl, ptzControl, recordClose, recordOpen, sdStatus, talkUrl } from './api/HikApi';
 
 const TAG = 'HatomVideo';
 
@@ -750,6 +750,14 @@ export default class HatomVideo extends Component {
      * 获取设备版本信息
      * 
      * **************************************************
+     * 海康国标
+     * @return {Promise} resolve
+     * {
+		"softwareVer": "2.800.174I000.0.T 2023-08-30"
+	   }
+     * @return {Promise} reject error{code, msg}
+     * 
+     * **************************************************
      * Ezviz
      * 
      * @return {Promise}
@@ -758,11 +766,17 @@ export default class HatomVideo extends Component {
      * @return {Object} reject error{code, msg}
      */
     static version() {
-        if (HatomVideo.supportEzviz()) {
-            return version()
+        switch (GlobalConfig.sdk.version) {
+            case SdkVersion.HikVideo_2_1_0, SdkVersion.Imou:
+                return getVersionParam()
+            
+            case SdkVersion.EzvizVideo:
+                return version()
+            
+            default:
+                Log.error(TAG, "version 当前环境，未支持此功能")
+                return HatomVideo.unsupportReject()
         }
-
-        return HatomVideo.unsupportReject()
     }
 
     /**
