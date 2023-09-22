@@ -58,6 +58,30 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
         ])
     }
     
+    /**
+     16进制转10进制
+     */
+    func hexStringToInt(from:String) -> Int {
+        // 去除前缀 0x
+        var hex = from
+        if hex.hasPrefix("0x") {
+            let start = hex.index(hex.startIndex, offsetBy: 2);
+            hex = String(hex[start...])
+        }
+        // 转为10进制
+        let str = hex.uppercased()
+        var sum = 0
+        for i in str.utf8 {
+            // 0-9 从48开始
+            sum = sum * 16 + Int(i) - 48
+            // A-Z 从65开始，但有初始值10，所以应该是减去55
+            if i >= 65 {
+                sum -= 7
+            }
+        }
+        return sum
+    }
+    
     // MARK: - Events
     @objc var onCapturePicture: RCTDirectEventBlock?
     @objc var onLocalRecord: RCTDirectEventBlock?
@@ -472,7 +496,8 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
     // 播放状态回调
     @objc func onPlayerStatus(_ status: PlayStatus, errorCode: String) {
         print(TAG, "onPlayerStatus", status, errorCode)
-        onPlayStatus!([EventProp.code.rawValue: errorCode])
+        // 与安卓保持一致为10进制
+        onPlayStatus!([EventProp.code.rawValue: self.hexStringToInt(from: errorCode)])
     }
     
     // 对讲状态回调

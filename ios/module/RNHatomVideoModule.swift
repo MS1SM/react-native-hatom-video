@@ -9,6 +9,7 @@ import Foundation
 import hatomplayer_core
 import EZOpenSDKFramework
 
+@available(iOS 8.0, *)
 @objc(RNHatomVideo)
 class RNHatomVideoModule: NSObject {
     let TAG = "RNHatomVideoModule"

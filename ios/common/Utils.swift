@@ -8,6 +8,7 @@
 
 import Foundation
 
+@available(iOS 8.0, *)
 class Utils {
     static let TAG = "Utils"
     // 存储文件夹
