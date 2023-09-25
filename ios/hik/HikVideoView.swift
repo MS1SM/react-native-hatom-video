@@ -496,14 +496,25 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
     // 播放状态回调
     @objc func onPlayerStatus(_ status: PlayStatus, errorCode: String) {
         print(TAG, "onPlayerStatus", status, errorCode)
-        // 与安卓保持一致为10进制
-        onPlayStatus!([EventProp.code.rawValue: self.hexStringToInt(from: errorCode)])
+        // 与安卓保持一致，-1为正常播放。ios端的0为正常播放，需要调整
+        var code = -1
+        // 不是正常播放 需要与安卓保持一致为10进制
+        if errorCode != "0" {
+            code = self.hexStringToInt(from: errorCode)
+        }
+        onPlayStatus!([EventProp.code.rawValue: code])
     }
     
     // 对讲状态回调
     @objc func onTalk(_ status: PlayStatus, errorCode: String) {
         print(TAG, "onTalkStatus", status, errorCode)
-        onTalkStatus!([EventProp.code.rawValue: errorCode])
+        // 与安卓保持一致，-1为正常播放。ios端的0为正常播放，需要调整
+        var code = -1
+        // 不是正常播放 需要与安卓保持一致为10进制
+        if errorCode != "0" {
+            code = self.hexStringToInt(from: errorCode)
+        }
+        onTalkStatus!([EventProp.code.rawValue: code])
     }
     
     // MARK: 播放器方法
