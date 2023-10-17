@@ -102,7 +102,7 @@ export default class HatomVideo extends Component {
     }
     // 调用这个组件的setNativeProps方法
     setNativeProps(nativeProps) {
-        this._root.setNativeProps(nativeProps);
+        this._root?.setNativeProps(nativeProps);
     };
 
     /**
