@@ -29,7 +29,7 @@ import {
     presetMove,
     presetClear
 } from './api/EzvizApi';
-import { formatHik, getVersionParam, playbackUrl, presetsAddition, presetsDeletion, presetsSearches, previewUrl, ptzControl, recordClose, recordOpen, sdStatus, talkUrl } from './api/HikApi';
+import { formatHik, getMotionTrigger, getPictureFlip, getVersionParam, playbackUrl, presetsAddition, presetsDeletion, presetsSearches, previewUrl, ptzControl, recordClose, recordOpen, sdStatus, setMotionTrigger, setPictureFlip, talkUrl } from './api/HikApi';
 
 const TAG = 'HatomVideo';
 
@@ -650,13 +650,43 @@ export default class HatomVideo extends Component {
      * @param {Number} data.channelNo   通道号
      * @param {Number} data.command     镜像方向，参考 EzMirror
      * 
+     * **************************************************
+     * 海康国标
+     * @param {Number} data.flipType 翻转类型：0-不启用，1-水平镜像（左右翻转），2-上下镜像（上下翻转），3-中心镜像（上下左右都翻转）
+     * 
      * @return {Promise}
      * @return {null} resolve
      * @return {Object} reject error{code, msg}
      */
     static mirror(data) {
-        if (HatomVideo.supportEzviz()) {
-            return mirror(data)
+        switch (GlobalConfig.sdk.version) {
+            case SdkVersion.HikVideo_2_1_0, SdkVersion.Imou:
+                return setPictureFlip(data)
+            
+            case SdkVersion.EzvizVideo:
+                return mirror(data)
+            
+            default:
+                Log.error(TAG, "mirror 当前环境，未支持此功能")
+                return HatomVideo.unsupportReject()
+        }
+    }
+
+    /**
+     * 获取镜像翻转配置
+     * 
+     * **************************************************
+     * 海康国标
+     * @return {Promise}
+     * @return {Object} resolve 
+     * {
+            "flipType": 0 // flipType 翻转类型：0-不启用，1-水平镜像（左右翻转），2-上下镜像（上下翻转），3-中心镜像（上下左右都翻转）
+        }
+     * @return {Object} reject error{code, msg}
+     */
+    static getMirror(data) {
+        if (HatomVideo.supportGB()) {
+            return getPictureFlip(data)
         }
 
         return HatomVideo.unsupportReject()
@@ -825,13 +855,44 @@ export default class HatomVideo extends Component {
      * @param {object} data
      * @param {Number} data.type   声音类型，参考 EzAlarm
      * 
+     * **************************************************
+     * 海康国标
+     * @param {object} data
+     * @param {Number} data.sound   声音警告，0：不启用，1：启用
+     * 
      * @return {Promise}
      * @return {null} resolve
      * @return {Object} reject error{code, msg}
      */
     static sound(data) {
-        if (HatomVideo.supportEzviz()) {
-            return sound(data)
+        switch (GlobalConfig.sdk.version) {
+            case SdkVersion.HikVideo_2_1_0, SdkVersion.Imou:
+                return setMotionTrigger(data)
+            
+            case SdkVersion.EzvizVideo:
+                return sound(data)
+            
+            default:
+                Log.error(TAG, "sound 当前环境，未支持此功能")
+                return HatomVideo.unsupportReject()
+        }
+    }
+
+    /**
+     * 获取镜像翻转配置
+     * 
+     * **************************************************
+     * 海康国标
+     * @return {Promise}
+     * @return {Object} resolve 
+     * {
+            "sound": 0 // 声音警告，0：不启用，1：启用
+        }
+     * @return {Object} reject error{code, msg}
+     */
+    static getSound(data) {
+        if (HatomVideo.supportGB()) {
+            return getMotionTrigger(data)
         }
 
         return HatomVideo.unsupportReject()
@@ -1496,6 +1557,10 @@ export default class HatomVideo extends Component {
     _onStreamFlow = (event) => {
         // 最新总流量
         let data = event.nativeEvent.data
+        // 总流量发生重新统计
+        if (data < this._streamFlow) {
+            this._streamFlow = 0
+        }
 
         // 回调
         if (this.props.onStreamFlow) {

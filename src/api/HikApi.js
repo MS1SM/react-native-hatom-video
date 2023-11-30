@@ -91,7 +91,15 @@ const url = {
     format: modelUrl.device + "/formatSDCardStatus",
 
     // 获取设备版本信息
-    getVersionParam: modelUrl.device + "/getVersionParam"
+    getVersionParam: modelUrl.device + "/getVersionParam",
+
+    // 视频画面翻转
+    getPictureFlip: modelUrl.device + "/getPictureFlip",
+    setPictureFlip: modelUrl.device + "/setPictureFlip",
+
+    // 移动侦测告警音
+    getMotionTrigger: modelUrl.device + "/getMotionTrigger",
+    setMotionTrigger: modelUrl.device + "/setMotionTrigger",
   }
 }
 
@@ -467,6 +475,78 @@ export function formatHik(data) {
 export function getVersionParam(data) {
   return getHik(
     url.device.getVersionParam,
+    data || {}
+  )
+}
+
+/**
+ * 获取画面翻转配置
+ * @param {object} data
+ * 
+ * @param {string} data.deviceIndexCode     设备国标编码
+ * @param {string} data.channelIndexCode    设备通道号
+ * 
+ * @return {Promise}
+ * {
+    "flipType": 0 // 翻转类型：0-不启用，1-水平镜像（左右翻转），2-上下镜像（上下翻转），3-中心镜像（上下左右都翻转）
+  }
+ */
+export function getPictureFlip(data) {
+  return getHik(
+    url.device.getPictureFlip,
+    data || {}
+  )
+}
+
+/**
+ * 视频画面翻转配置
+ * @param {object} data
+ * 
+ * @param {string} data.deviceIndexCode     设备国标编码
+ * @param {string} data.channelIndexCode    设备通道号
+ * @param {number} data.flipType            翻转类型：0-不启用，1-水平镜像（左右翻转），2-上下镜像（上下翻转），3-中心镜像（上下左右都翻转）
+ * 
+ * @return {Promise}
+ */
+export function setPictureFlip(data) {
+  return getHik(
+    url.device.setPictureFlip,
+    data || {}
+  )
+}
+
+/**
+ * 视频移动侦测联动方式获取
+ * @param {object} data
+ * 
+ * @param {string} data.deviceIndexCode     设备国标编码
+ * @param {string} data.channelIndexCode    设备通道号
+ * 
+ * @return {Promise}
+ * {
+    "sound": 0 // 声音警告，0：不启用，1：启用
+  }
+ */
+export function getMotionTrigger(data) {
+  return getHik(
+    url.device.getMotionTrigger,
+    data || {}
+  )
+}
+
+/**
+ * 视频移动侦测联动方式设置
+ * @param {object} data
+ * 
+ * @param {string} data.deviceIndexCode     设备国标编码
+ * @param {string} data.channelIndexCode    设备通道号
+ * @param {number} data.sound               声音警告，0：不启用，1：启用
+ * 
+ * @return {Promise}
+ */
+export function setMotionTrigger(data) {
+  return getHik(
+    url.device.setMotionTrigger,
     data || {}
   )
 }
