@@ -29,7 +29,7 @@ import {
     presetMove,
     presetClear
 } from './api/EzvizApi';
-import { formatHik, getMotionTrigger, getPictureFlip, getVersionParam, playbackUrl, presetsAddition, presetsDeletion, presetsSearches, previewUrl, ptzControl, recordClose, recordOpen, sdStatus, setMotionTrigger, setPictureFlip, talkUrl } from './api/HikApi';
+import { formatHik, getAudioType, getPictureFlip, getVersionParam, playbackUrl, presetsAddition, presetsDeletion, presetsSearches, previewUrl, ptzControl, recordClose, recordOpen, sdStatus, setAudioType, setPictureFlip, talkUrl } from './api/HikApi';
 
 const TAG = 'HatomVideo';
 
@@ -858,7 +858,7 @@ export default class HatomVideo extends Component {
      * **************************************************
      * 海康国标
      * @param {object} data
-     * @param {Number} data.sound   声音警告，0：不启用，1：启用
+     * @param {Number} data.audioType   声音警告，0：不启用，1：简单提示, 2:强烈提示
      * 
      * @return {Promise}
      * @return {null} resolve
@@ -867,7 +867,7 @@ export default class HatomVideo extends Component {
     static sound(data) {
         switch (GlobalConfig.sdk.version) {
             case SdkVersion.HikVideo_2_1_0, SdkVersion.Imou:
-                return setMotionTrigger(data)
+                return setAudioType(data)
             
             case SdkVersion.EzvizVideo:
                 return sound(data)
@@ -879,20 +879,20 @@ export default class HatomVideo extends Component {
     }
 
     /**
-     * 获取镜像翻转配置
+     * 获取告警声音模式
      * 
      * **************************************************
      * 海康国标
      * @return {Promise}
      * @return {Object} resolve 
      * {
-            "sound": 0 // 声音警告，0：不启用，1：启用
+            "audioType": 0 // 声音警告，0：不启用，1：简单提示, 2:强烈提示
         }
      * @return {Object} reject error{code, msg}
      */
     static getSound(data) {
         if (HatomVideo.supportGB()) {
-            return getMotionTrigger(data)
+            return getAudioType(data)
         }
 
         return HatomVideo.unsupportReject()

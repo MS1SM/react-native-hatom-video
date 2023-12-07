@@ -97,9 +97,13 @@ const url = {
     getPictureFlip: modelUrl.device + "/getPictureFlip",
     setPictureFlip: modelUrl.device + "/setPictureFlip",
 
-    // 移动侦测告警音
+    // 移动侦测告警音 废弃
     getMotionTrigger: modelUrl.device + "/getMotionTrigger",
     setMotionTrigger: modelUrl.device + "/setMotionTrigger",
+
+    // 移动侦测语音包
+    getAudioType: modelUrl.device + "/getAudioType",
+    setAudioType: modelUrl.device + "/setAudioType",
   }
 }
 
@@ -433,8 +437,9 @@ export function recordClose(data) {
 	}
  */
 export function sdStatus(data) {
-  return getHik(
+  return postHik(
     url.device.sdStatus,
+    null,
     data || {}
   )
 }
@@ -457,8 +462,9 @@ export function sdStatus(data) {
 }
  */
 export function formatHik(data) {
-  return getHik(
+  return postHik(
     url.device.format,
+    null,
     data || {}
   )
 }
@@ -473,8 +479,9 @@ export function formatHik(data) {
  * @return {boolean} resolve data 操作是否成功
  */
 export function getVersionParam(data) {
-  return getHik(
+  return postHik(
     url.device.getVersionParam,
+    null,
     data || {}
   )
 }
@@ -492,8 +499,9 @@ export function getVersionParam(data) {
   }
  */
 export function getPictureFlip(data) {
-  return getHik(
+  return postHik(
     url.device.getPictureFlip,
+    null,
     data || {}
   )
 }
@@ -509,8 +517,9 @@ export function getPictureFlip(data) {
  * @return {Promise}
  */
 export function setPictureFlip(data) {
-  return getHik(
+  return postHik(
     url.device.setPictureFlip,
+    null,
     data || {}
   )
 }
@@ -528,8 +537,9 @@ export function setPictureFlip(data) {
   }
  */
 export function getMotionTrigger(data) {
-  return getHik(
+  return postHik(
     url.device.getMotionTrigger,
+    null,
     data || {}
   )
 }
@@ -545,8 +555,45 @@ export function getMotionTrigger(data) {
  * @return {Promise}
  */
 export function setMotionTrigger(data) {
-  return getHik(
+  return postHik(
     url.device.setMotionTrigger,
+    null,
+    data || {}
+  )
+}
+
+/**
+ * 查询移动侦测联动语音包设置
+ * @param {object} data
+ * 
+ * @param {string} data.deviceIndexCode     设备国标编码
+ * 
+ * @return {Promise}
+ * {
+    "audioType": 0 // 声音警告，0：不启用，1：简单提示, 2:强烈提示
+  }
+ */
+export function getAudioType(data) {
+  return postHik(
+    url.device.getAudioType,
+    null,
+    data || {}
+  )
+}
+
+/**
+ * 配置移动侦测联动语音包
+ * @param {object} data
+ * 
+ * @param {string} data.deviceIndexCode     设备国标编码
+ * @param {number} data.audioType           声音警告，0：不启用，1：简单提示, 2:强烈提示
+ * 
+ * @return {Promise}
+ */
+export function setAudioType(data) {
+  return postHik(
+    url.device.setAudioType,
+    null,
     data || {}
   )
 }
