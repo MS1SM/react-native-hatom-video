@@ -18,7 +18,8 @@ const TAG = "HikApi"
  */
 const modelUrl = {
   video: "/artemis/api/video",
-  device: "/artemis/api/ctm01dt/v1/device"
+  device: "/artemis/api/ctm01dt/v1/device",
+  device_2: "/artemis/api/ctm01dt/device/v1"
 }
 
 /**
@@ -94,16 +95,16 @@ const url = {
     getVersionParam: modelUrl.device + "/getVersionParam",
 
     // 视频画面翻转
-    getPictureFlip: modelUrl.device + "/getPictureFlip",
-    setPictureFlip: modelUrl.device + "/setPictureFlip",
+    getPictureFlip: modelUrl.device_2 + "/getPictureFlip",
+    setPictureFlip: modelUrl.device_2 + "/setPictureFlip",
 
     // 移动侦测告警音 废弃
     getMotionTrigger: modelUrl.device + "/getMotionTrigger",
     setMotionTrigger: modelUrl.device + "/setMotionTrigger",
 
     // 移动侦测语音包
-    getAudioType: modelUrl.device + "/getAudioType",
-    setAudioType: modelUrl.device + "/setAudioType",
+    getAudioType: modelUrl.device_2 + "/getAudioType",
+    setAudioType: modelUrl.device_2 + "/setAudioType",
   }
 }
 
