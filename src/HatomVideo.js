@@ -858,7 +858,7 @@ export default class HatomVideo extends Component {
      * **************************************************
      * 海康国标
      * @param {object} data
-     * @param {Number} data.audioType   声音警告，0：不启用，1：简单提示, 2:强烈提示
+     * @param {Number} data.audioType   声音警告，1：不启用，2：简单提示, 3:强烈提示
      * 
      * @return {Promise}
      * @return {null} resolve
@@ -886,7 +886,7 @@ export default class HatomVideo extends Component {
      * @return {Promise}
      * @return {Object} resolve 
      * {
-            "audioType": 0 // 声音警告，0：不启用，1：简单提示, 2:强烈提示
+            "audioType": 0 // 声音警告，1：不启用，2：简单提示, 3:强烈提示
         }
      * @return {Object} reject error{code, msg}
      */

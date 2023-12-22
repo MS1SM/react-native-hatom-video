@@ -571,7 +571,7 @@ export function setMotionTrigger(data) {
  * 
  * @return {Promise}
  * {
-    "audioType": 0 // 声音警告，0：不启用，1：简单提示, 2:强烈提示
+    "audioType": 0 // 声音警告，1：不启用，2：简单提示, 3:强烈提示
   }
  */
 export function getAudioType(data) {
@@ -587,7 +587,7 @@ export function getAudioType(data) {
  * @param {object} data
  * 
  * @param {string} data.deviceIndexCode     设备国标编码
- * @param {number} data.audioType           声音警告，0：不启用，1：简单提示, 2:强烈提示
+ * @param {number} data.audioType           声音警告，1：不启用，2：简单提示, 3:强烈提示
  * 
  * @return {Promise}
  */
