@@ -182,14 +182,17 @@ function postHik(url, data, param) {
       if (response.code == 0) {
         resolve(response.data)
       } else {
+        GlobalConfig.callback.hikApiError(response)
         reject(response)
       }
 
     }).catch(error => {
-      reject({
+      let res = {
         code: -10000,
-        msg:  "请求异常"
-      });
+        msg: "请求异常"
+      }
+      GlobalConfig.callback.hikApiError(res)
+      reject(res)
     })
   })
 }
@@ -209,14 +212,17 @@ function getHik (url, params) {
       if (response.code == 0) {
         resolve(response.data)
       } else {
+        GlobalConfig.callback.hikApiError(response)
         reject(response)
       }
 
     }).catch(error => {
-      reject({
+      let res = {
         code: -10000,
-        msg:  "请求异常"
-      });
+        msg: "请求异常"
+      }
+      GlobalConfig.callback.hikApiError(res)
+      reject(res)
     })
   })
 }

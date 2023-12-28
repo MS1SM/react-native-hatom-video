@@ -43,6 +43,19 @@ let GlobalConfig = {
 	// sdk 配置
 	sdk: {
 		version: "EzvizVideo"
+	},
+
+	// 回调配置
+	callback: {
+		/**
+		 * 海康 api 请求错误回调
+		 * hikApiError({
+		 * 	code: 1,
+		 * 	msg: "xxx",
+		 * 	<other>
+		 * })
+		 */
+		hikApiError: (() => {})
 	}
 };
 
@@ -83,5 +96,10 @@ export function setGlobalConfig(config) {
 	// sdk
 	if (config.sdk) {
 		GlobalConfig.sdk.version = config.sdk.version  || GlobalConfig.sdk.version
+	}
+
+	// callback
+	if (config.callback) {
+		GlobalConfig.callback.hikApiError = config.callback.hikApiError || GlobalConfig.callback.hikApiError
 	}
 }
