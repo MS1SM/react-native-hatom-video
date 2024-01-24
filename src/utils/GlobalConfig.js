@@ -31,6 +31,8 @@ let GlobalConfig = {
 		hikDeviceCode: "",
 		// 摄像头序列号，一个设备可能有多个摄像头，此处仅考虑只有一个摄像头的情形
 		cameraCode: "",
+		// 报警通道ID
+		channelCode: "",
 
 		// 萤石地址
 		ezvizUrl: 'https://open.ys7.com',
@@ -80,6 +82,7 @@ export function setGlobalConfig(config) {
 		GlobalConfig.http.hikToken    		= config.http.hikToken 		|| GlobalConfig.http.hikToken
 		GlobalConfig.http.hikDeviceCode    	= config.http.hikDeviceCode || GlobalConfig.http.hikDeviceCode
 		GlobalConfig.http.cameraCode    	= config.http.cameraCode 	|| GlobalConfig.http.cameraCode
+		GlobalConfig.http.channelCode    	= config.http.channelCode 	|| GlobalConfig.http.channelCode
 		
 		GlobalConfig.http.ezvizUrl    = config.http.ezvizUrl   || GlobalConfig.http.ezvizUrl
 		GlobalConfig.http.ezvizToken  = config.http.ezvizToken || GlobalConfig.http.ezvizToken

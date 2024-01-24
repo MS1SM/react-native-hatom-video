@@ -18,8 +18,7 @@ const TAG = "HikApi"
  */
 const modelUrl = {
   video: "/artemis/api/video",
-  device: "/artemis/api/ctm01dt/v1/device",
-  device_2: "/artemis/api/ctm01dt/device/v1"
+  device: "/artemis/api/ctm01dt/v1/device"
 }
 
 /**
@@ -85,6 +84,8 @@ const url = {
     recordOpen: modelUrl.device + "/configDeviceRecordPlan",
     // 全天录像关闭
     recordClose: modelUrl.device + "/deleteDeviceRecordPlan",
+    // 查询是否启用全天录像
+    recordStatus: modelUrl.device + "/queryRecordPlanStatus",
 
     // 获取SD卡状态
     sdStatus: modelUrl.device + "/getSDCardStatus",
@@ -95,16 +96,26 @@ const url = {
     getVersionParam: modelUrl.device + "/getVersionParam",
 
     // 视频画面翻转
-    getPictureFlip: modelUrl.device_2 + "/getPictureFlip",
-    setPictureFlip: modelUrl.device_2 + "/setPictureFlip",
+    getPictureFlip: modelUrl.device + "/getPictureFlip",
+    setPictureFlip: modelUrl.device + "/setPictureFlip",
 
     // 移动侦测告警音 废弃
     getMotionTrigger: modelUrl.device + "/getMotionTrigger",
     setMotionTrigger: modelUrl.device + "/setMotionTrigger",
 
     // 移动侦测语音包
-    getAudioType: modelUrl.device_2 + "/getAudioType",
-    setAudioType: modelUrl.device_2 + "/setAudioType",
+    getAudioType: modelUrl.device + "/getAudioType",
+    setAudioType: modelUrl.device + "/setAudioType",
+
+    // 获取布防时间计划 入侵检测的时间范围
+    getArmingSchedule: modelUrl.device + "/getArmingSchedule",
+    // 设置布防时间计划
+    setArmingSchedule: modelUrl.device + "/setArmingSchedule",
+
+    // 获取事件检测状态 入侵检测是否开启
+    getEventDetect: modelUrl.device + "/event/getConfig",
+    // 配置事件检测状态
+    setEventDetect: modelUrl.device + "/event/setConfig",
   }
 }
 
@@ -136,7 +147,8 @@ function getData(data) {
         {}, 
         data, 
         {
-            cameraIndexCode: GlobalConfig.http.cameraCode
+            cameraIndexCode: data.cameraIndexCode || GlobalConfig.http.cameraCode,
+            channelIndexCode: data.channelIndexCode || GlobalConfig.http.channelCode,
         }
     )
 }
@@ -154,8 +166,10 @@ function getBody(data) {
         {}, 
         data, 
         {
-            gbDeviceCode: GlobalConfig.http.hikDeviceCode,
-            deviceIndexCode: GlobalConfig.http.hikDeviceCode
+            gbDeviceCode: data.gbDeviceCode || GlobalConfig.http.hikDeviceCode,
+            deviceIndexCode: data.deviceIndexCode || GlobalConfig.http.hikDeviceCode,
+            cameraIndexCode: data.cameraIndexCode || GlobalConfig.http.cameraCode,
+            channelIndexCode: data.channelIndexCode || GlobalConfig.http.channelCode,
         }
     )
 }
@@ -418,6 +432,22 @@ export function recordClose(data) {
 }
 
 /**
+ * 查询是否启用全天录像
+ * @param {object} data
+ * 
+ * @param {string} data.cameraIndexCode   通道号 "a5a04f5e2c5a4e83a5180545f0cb898f"
+ * 
+ * @return {Promise} resolve true or false
+ */
+export function recordStatusHik(data) {
+  return postHik(
+    url.device.recordClose,
+    null,
+    data || {}
+  )
+}
+
+/**
  * 获取SD卡状态
  * @param {object} data
  * 
@@ -602,5 +632,170 @@ export function setAudioType(data) {
     url.device.setAudioType,
     null,
     data || {}
+  )
+}
+
+/**
+ * 获取布防时间计划
+ * @param {object} data
+ * 
+ * @param {string} data.channelIndexCode     通道号 报警通道ID
+ * @param {number} data.eventType            事件类型。移动侦测是：131331。默认移动侦测
+ * 
+ * @return {Promise}
+ * {
+		"TimeBlockList": [
+			{
+				"dayOfWeek": 1,
+				"endTime": "00:00:00",
+				"startTime": "23:59:59"
+			},
+			{
+				"dayOfWeek": 2,
+				"endTime": "00:00:00",
+				"startTime": "23:59:59"
+			},
+			{
+				"dayOfWeek": 3,
+				"endTime": "00:00:00",
+				"startTime": "23:59:59"
+			},
+			{
+				"dayOfWeek": 4,
+				"endTime": "00:00:00",
+				"startTime": "23:59:59"
+			},
+			{
+				"dayOfWeek": 5,
+				"endTime": "00:00:00",
+				"startTime": "23:59:59"
+			},
+			{
+				"dayOfWeek": 6,
+				"endTime": "00:00:00",
+				"startTime": "23:59:59"
+			},
+			{
+				"dayOfWeek": 7,
+				"endTime": "00:00:00",
+				"startTime": "23:59:59"
+			}
+		]
+	}
+ */
+export function getArmingSchedule(data) {
+  if (!data) data = {}
+  data.eventType = data.eventType || 131331
+
+  return postHik(
+    url.device.getArmingSchedule,
+    null,
+    data || {}
+  )
+}
+
+/**
+ * 设置布防时间计划
+ * @param {object} data
+ * 
+ * @param {Array}  data.TimeBlockList        参考 getArmingSchedule TimeBlockList。默认全天布防护
+ * @param {string} data.channelIndexCode     通道号 报警通道ID
+ * @param {number} data.eventType            事件类型。移动侦测是：131331。默认移动侦测
+ * 
+ * @return {Promise}
+ */
+export function setArmingSchedule(data) {
+  if (!data) data = {}
+  let timeDefault = [
+			{
+				"dayOfWeek": 1,
+				"endTime": "00:00:00",
+				"startTime": "23:59:59"
+			},
+			{
+				"dayOfWeek": 2,
+				"endTime": "00:00:00",
+				"startTime": "23:59:59"
+			},
+			{
+				"dayOfWeek": 3,
+				"endTime": "00:00:00",
+				"startTime": "23:59:59"
+			},
+			{
+				"dayOfWeek": 4,
+				"endTime": "00:00:00",
+				"startTime": "23:59:59"
+			},
+			{
+				"dayOfWeek": 5,
+				"endTime": "00:00:00",
+				"startTime": "23:59:59"
+			},
+			{
+				"dayOfWeek": 6,
+				"endTime": "00:00:00",
+				"startTime": "23:59:59"
+			},
+			{
+				"dayOfWeek": 7,
+				"endTime": "00:00:00",
+				"startTime": "23:59:59"
+			}
+		]
+  data.TimeBlockList = data.TimeBlockList || timeDefault
+  data.eventType = data.eventType || 131331
+
+  return postHik(
+    url.device.setArmingSchedule,
+    data || {},
+    null
+  )
+}
+
+/**
+ * 获取事件检测状态 入侵检测是否开启
+ * @param {object} data
+ * 
+ * @param {string} data.channelIndexCode     通道号 报警通道ID
+ * @param {number} data.eventType            事件类型。移动侦测是：131331。默认移动侦测
+ * 
+ * @return {Promise}
+ * {
+		"channelIndexCode": " bae2f5d2796545a79790868dd685c768",
+		"eventType": 131331,
+    // status 是否启用。0关闭，1开启。
+		"status": 0
+	}
+ */
+export function getEventDetect(data) {
+  if (!data) data = {}
+  data.eventType = data.eventType || 131331
+
+  return postHik(
+    url.device.getEventDetect,
+    null,
+    data || {}
+  )
+}
+
+/**
+ * 配置事件检测状态
+ * @param {object} data
+ * 
+ * @param {string} data.channelIndexCode     通道号 报警通道ID
+ * @param {number} data.eventType            事件类型。移动侦测是：131331。默认移动侦测
+ * @param {number} data.enabled              是否启用。0关闭，1开启
+ * 
+ * @return {Promise}
+ */
+export function setEventDetect(data) {
+  if (!data) data = {}
+  data.eventType = data.eventType || 131331
+
+  return postHik(
+    url.device.setEventDetect,
+    data || {},
+    null
   )
 }

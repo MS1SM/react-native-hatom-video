@@ -29,7 +29,7 @@ import {
     presetMove,
     presetClear
 } from './api/EzvizApi';
-import { formatHik, getAudioType, getPictureFlip, getVersionParam, playbackUrl, presetsAddition, presetsDeletion, presetsSearches, previewUrl, ptzControl, recordClose, recordOpen, sdStatus, setAudioType, setPictureFlip, talkUrl } from './api/HikApi';
+import { formatHik, getArmingSchedule, getAudioType, getEventDetect, getPictureFlip, getVersionParam, playbackUrl, presetsAddition, presetsDeletion, presetsSearches, previewUrl, ptzControl, recordClose, recordOpen, recordStatusHik, sdStatus, setArmingSchedule, setAudioType, setEventDetect, setPictureFlip, talkUrl } from './api/HikApi';
 
 const TAG = 'HatomVideo';
 
@@ -504,6 +504,13 @@ export default class HatomVideo extends Component {
      * 全天录像开关状态
      * 
      * **************************************************
+     * 海康国标
+     * 
+     * @return {Promise}
+     * @return {boolean} resolve true or false
+     * @return {Object} reject error{code, msg}
+     * 
+     * **************************************************
      * Ezviz
      * 
      * @return {Promise}
@@ -515,12 +522,18 @@ export default class HatomVideo extends Component {
      * 
      * @return {Object} reject error{code, msg}
      */
-    static recordStatus() {
-        if (HatomVideo.supportEzviz()) {
-            return recordStatus()
+    static recordStatus(data) {
+        switch (GlobalConfig.sdk.version) {
+            case SdkVersion.HikVideo_2_1_0, SdkVersion.Imou:
+                return recordStatusHik(data)
+            
+            case SdkVersion.EzvizVideo:
+                return recordStatus()
+            
+            default:
+                Log.error(TAG, "recordStatus 当前环境，未支持此功能")
+                return HatomVideo.unsupportReject()
         }
-
-        return HatomVideo.unsupportReject()
     }
 
     /**
@@ -722,19 +735,127 @@ export default class HatomVideo extends Component {
 
     /**
      * 设备撤/布防
+     * @return {Promise}
+     * @return {null} resolve
+     * @return {Object} reject error{code, msg}
+     * 
+     * **************************************************
+     * 海康国标
+     * @param {object} data
+     * @param {number} data.eventType            事件类型。移动侦测是：131331。默认移动侦测
+     * @param {number} data.enabled              是否启用。0关闭，1开启
      * 
      * **************************************************
      * Ezviz
      * @param {object} data
      * @param {Number} data.isDefence   设备布撤防状态，参考 EzSwitch
-     * 
-     * @return {Promise}
-     * @return {null} resolve
-     * @return {Object} reject error{code, msg}
      */
     static defence(data) {
-        if (HatomVideo.supportEzviz()) {
-            return defence(data)
+        switch (GlobalConfig.sdk.version) {
+            case SdkVersion.HikVideo_2_1_0, SdkVersion.Imou:
+                return setEventDetect(data)
+            
+            case SdkVersion.EzvizVideo:
+                return defence(data)
+            
+            default:
+                Log.error(TAG, "defence 当前环境，未支持此功能")
+                return HatomVideo.unsupportReject()
+        }
+    }
+
+    /**
+     * 获取事件检测状态 入侵检测是否开启
+     * @param {object} data
+     * @param {number} data.eventType            事件类型。移动侦测是：131331。默认移动侦测
+     * 
+     * @return {Promise}
+     * {
+            "channelIndexCode": " bae2f5d2796545a79790868dd685c768",
+            "eventType": 131331,
+            // status 是否启用。0关闭，1开启。
+            "status": 0
+        }
+    */
+    static getEventDetect(data) {
+        if (HatomVideo.supportGB()) {
+            return getEventDetect(data)
+        }
+
+        return HatomVideo.unsupportReject()
+    }
+
+    /**
+     * 获取布防时间计划
+     * 
+     * **************************************************
+     * 海康国标
+     * @param {object} data
+     * @param {number} data.eventType            事件类型。移动侦测是：131331。默认移动侦测
+     * 
+     * @return {Promise}
+     * @return {Object} reject error{code, msg}
+     * @return {Object} resolve
+     * {
+            "TimeBlockList": [
+                {
+                    "dayOfWeek": 1,
+                    "endTime": "00:00:00",
+                    "startTime": "23:59:59"
+                },
+                {
+                    "dayOfWeek": 2,
+                    "endTime": "00:00:00",
+                    "startTime": "23:59:59"
+                },
+                {
+                    "dayOfWeek": 3,
+                    "endTime": "00:00:00",
+                    "startTime": "23:59:59"
+                },
+                {
+                    "dayOfWeek": 4,
+                    "endTime": "00:00:00",
+                    "startTime": "23:59:59"
+                },
+                {
+                    "dayOfWeek": 5,
+                    "endTime": "00:00:00",
+                    "startTime": "23:59:59"
+                },
+                {
+                    "dayOfWeek": 6,
+                    "endTime": "00:00:00",
+                    "startTime": "23:59:59"
+                },
+                {
+                    "dayOfWeek": 7,
+                    "endTime": "00:00:00",
+                    "startTime": "23:59:59"
+                }
+            ]
+        }
+    */
+    static getArmingSchedule(data) {
+        if (HatomVideo.supportGB()) {
+            return getArmingSchedule(data)
+        }
+
+        return HatomVideo.unsupportReject()
+    }
+
+    /**
+     * 设置布防时间计划
+     * @param {object} data
+     * 
+     * @param {Array}  data.TimeBlockList        参考 getArmingSchedule TimeBlockList。默认全天布防护
+     * @param {number} data.eventType            事件类型。移动侦测是：131331。默认移动侦测
+     * 
+     * @return {Promise}
+     */
+    static setArmingSchedule(data) {
+        if (HatomVideo.supportGB()) {
+            return setArmingSchedule(data)
         }
 
         return HatomVideo.unsupportReject()
