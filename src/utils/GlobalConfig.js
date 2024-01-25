@@ -24,7 +24,7 @@ let GlobalConfig = {
 		timeout: 5 * 1000,
 
 		// 海康国标地址
-		hikUrl: 'https://10.26.0.13:1443',
+		hikUrl: 'https://112.5.158.190:1443',
 		// token
 		hikToken: "",
 		// 设备序列号
