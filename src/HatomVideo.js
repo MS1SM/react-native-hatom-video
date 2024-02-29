@@ -458,7 +458,7 @@ export default class HatomVideo extends Component {
      * @return {Promise} promise 参考 _searchRecordFile
      */
     static searchRecordFile(config) {
-        return HatomVideo.searchRecordFile(config)
+        return HatomVideo._searchRecordFile(config)
     }
 
     /**

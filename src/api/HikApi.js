@@ -441,7 +441,7 @@ export function recordClose(data) {
  */
 export function recordStatusHik(data) {
   return postHik(
-    url.device.recordClose,
+    url.device.recordStatus,
     null,
     data || {}
   )
