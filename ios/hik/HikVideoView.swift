@@ -495,7 +495,7 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
     // MARK: HatomPlayerDelegate
     // 播放状态回调
     @objc func onPlayerStatus(_ status: PlayStatus, errorCode: String) {
-        print(TAG, "onPlayerStatus", status, errorCode)
+        print(TAG, "onPlayerStatus", status.rawValue, errorCode)
         // 与安卓保持一致，-1为正常播放。ios端的0为正常播放，需要调整
         var code = -1
         // 不是正常播放 需要与安卓保持一致为10进制
@@ -507,7 +507,7 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
     
     // 对讲状态回调
     @objc func onTalk(_ status: PlayStatus, errorCode: String) {
-        print(TAG, "onTalkStatus", status, errorCode)
+        print(TAG, "onTalkStatus", status.rawValue, errorCode)
         // 与安卓保持一致，-1为正常播放。ios端的0为正常播放，需要调整
         var code = -1
         // 不是正常播放 需要与安卓保持一致为10进制
@@ -574,8 +574,9 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
      */
     func voiceTalkHatom(isStart: Bool, talkUrl: String) {
         if isStart {
-            talkHatomPlayer.setVoiceDataSource(talkUrl, headers: nil)
             talkHatomPlayer.delegate = self
+            // headers 不能为 nil；["s":"s"]无实际意义
+            talkHatomPlayer.setVoiceDataSource(talkUrl, headers: ["s":"s"])
             talkHatomPlayer.startVoiceTalk()
         } else {
             talkHatomPlayer.stopVoiceTalk()
@@ -773,6 +774,8 @@ class HikVideoView: UITextView, EZPlayerDelegate, HatomPlayerDelegate {
             let seekString = dateFormatter.string(from: seekDate)
             // 调整
             hatomPlayer.seekPlayback(seekString)
+            // iOS Seek 后不会走播放成功的回调，而安卓有该回调，js层需要依赖该回调，故此添加
+            onPlayStatus!([EventProp.code.rawValue: -1])
             
         case .Status:
             // 查询速度对应的枚举名

@@ -238,7 +238,7 @@ class HikVideoView(private val reactContext: ThemedReactContext) : SurfaceView(r
         recordPathHatom = Utils.generateRecordPath(context, deviceSerial)
         val result = hatomPlayer.startRecordAndConvert(recordPathHatom)
         if (result != SUCCESS_HATOM) {
-            Log.e(TAG, "startLocalRecordHatom: result")
+            Log.e(TAG, "startLocalRecordHatom: $result")
             recordPathHatom = ""
 
             // 失败回调
